@@ -1,0 +1,9 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+## Dev Environment
+
+I am always running the app in dev mode, so you dont need to build or run the app.

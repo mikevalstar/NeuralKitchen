@@ -1,12 +1,14 @@
 import { Link } from "@tanstack/react-router";
 import { Button } from "./ui/button";
+import { ThemeToggle } from "./ThemeToggle";
+import { BookOpen, FolderOpen, Tags, HelpCircle } from "lucide-react";
 
 export function Navigation() {
   const navItems = [
-    { href: "/recipes", label: "Recipes" },
-    { href: "/projects", label: "Projects" },
-    { href: "/tags", label: "Tags" },
-    { href: "/help", label: "Help" },
+    { href: "/recipes", label: "Recipes", icon: BookOpen },
+    { href: "/projects", label: "Projects", icon: FolderOpen },
+    { href: "/tags", label: "Tags", icon: Tags },
+    { href: "/help", label: "Help", icon: HelpCircle },
   ];
 
   return (
@@ -28,33 +30,40 @@ export function Navigation() {
               <Link
                 key={item.href}
                 to={item.href}
-                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center space-x-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 activeProps={{
-                  className: "text-foreground",
+                  className:
+                    "flex items-center space-x-2 text-sm font-medium text-foreground",
                 }}
               >
-                {item.label}
+                <item.icon className="h-4 w-4" />
+                <span>{item.label}</span>
               </Link>
             ))}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <Button variant="ghost" size="sm" className="p-2">
-              <svg
-                className="h-5 w-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </Button>
+          {/* Right side - Theme Toggle and Mobile Menu */}
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+
+            {/* Mobile Menu Button */}
+            <div className="md:hidden">
+              <Button variant="ghost" size="sm" className="p-2">
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </Button>
+            </div>
           </div>
         </div>
       </div>

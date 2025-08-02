@@ -25,6 +25,22 @@ export const Route = createRootRoute({
         title: "Neural Kitchen",
       },
     ],
+    scripts: [
+      {
+        id: "theme-script",
+        children: `
+          (function() {
+            try {
+              const theme = localStorage.getItem('theme') || 'system';
+              const resolvedTheme = theme === 'system' 
+                ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+                : theme;
+              document.documentElement.classList.toggle('dark', resolvedTheme === 'dark');
+            } catch (e) {}
+          })();
+        `,
+      },
+    ],
   }),
   component: RootComponent,
   errorComponent: DefaultCatchBoundary,
