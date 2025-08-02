@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import { Button } from "./ui/button";
+import { BookOpen, FolderOpen, HelpCircle, Tags } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
-import { BookOpen, FolderOpen, Tags, HelpCircle } from "lucide-react";
+import { Button } from "./ui/button";
 
 export function Navigation() {
   const navItems = [

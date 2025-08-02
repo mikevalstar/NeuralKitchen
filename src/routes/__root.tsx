@@ -1,11 +1,11 @@
-import type { ReactNode } from "react";
 import {
-  Outlet,
   createRootRoute,
   HeadContent,
+  Outlet,
   Scripts,
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
+import type { ReactNode } from "react";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
 import { Layout } from "~/components/Layout";
 import appCss from "~/styles/app.css?url";

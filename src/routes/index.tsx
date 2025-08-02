@@ -1,7 +1,7 @@
-import prisma from "../lib/prisma";
-import { createServerFn } from "@tanstack/react-start";
 import { createFileRoute } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { Button } from "@/components/ui/button";
+import prisma from "../lib/prisma";
 
 const getTags = createServerFn({ method: "GET" }).handler(async () => {
   return prisma.tag.findMany({});
