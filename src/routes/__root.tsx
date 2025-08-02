@@ -7,6 +7,7 @@ import {
 } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import { DefaultCatchBoundary } from "~/components/DefaultCatchBoundary";
+import { Layout } from "~/components/Layout";
 import appCss from "~/styles/app.css?url";
 
 export const Route = createRootRoute({
@@ -21,7 +22,7 @@ export const Route = createRootRoute({
         content: "width=device-width, initial-scale=1",
       },
       {
-        title: "Prisma TanStack Start Demo",
+        title: "Neural Kitchen",
       },
     ],
   }),
@@ -32,7 +33,9 @@ export const Route = createRootRoute({
 function RootComponent() {
   return (
     <RootDocument>
-      <Outlet />
+      <Layout>
+        <Outlet />
+      </Layout>
     </RootDocument>
   );
 }
