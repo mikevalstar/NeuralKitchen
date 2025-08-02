@@ -15,8 +15,65 @@ datasource db {
 }
 
 model Tag {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  
+  // Many-to-many relationship with RecipeVersion
+  recipeVersions RecipeVersion[] @relation("RecipeVersionTags")
+}
+
+model Project {
+  id          String    @id @default(uuid())
+  title       String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  
+  // Many-to-many relationship with RecipeVersion
+  recipeVersions RecipeVersion[] @relation("RecipeVersionProjects")
+}
+
+model Recipe {
+  id        String    @id @default(uuid())
+  title     String
+  shortId   String    @unique // Short identifier for the recipe
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  
+  // One-to-many relationship with RecipeVersion
+  versions RecipeVersion[]
+  
+  // Reference to current version
+  currentVersionId String?
+  currentVersion   RecipeVersion? @relation("CurrentRecipeVersion", fields: [currentVersionId], references: [id])
+}
+
+model RecipeVersion {
+  id        String    @id @default(uuid())
+  title     String
+  shortId   String    // Short identifier for the version
+  content   String    @db.Text // The actual recipe content
+  versionId String    // Version identifier (e.g., "v1.0", "v2.1")
+  isCurrent Boolean   @default(false)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  
+  // Many-to-many relationship with Tags
+  tags Tag[] @relation("RecipeVersionTags")
+  
+  // Many-to-many relationship with Projects
+  projects Project[] @relation("RecipeVersionProjects")
+  
+  // Many-to-one relationship with Recipe
+  recipeId String
+  recipe   Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  
+  // One-to-many relationship with Recipe (as current version)
+  currentForRecipes Recipe[] @relation("CurrentRecipeVersion")
 }

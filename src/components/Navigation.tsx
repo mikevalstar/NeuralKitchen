@@ -18,9 +18,7 @@ export function Navigation() {
           {/* Logo/Title */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <span className="text-xl font-bold text-foreground">
-                Neural Kitchen
-              </span>
+              <span className="text-xl font-bold text-foreground">Neural Kitchen</span>
             </Link>
           </div>
 
@@ -32,10 +30,8 @@ export function Navigation() {
                 to={item.href}
                 className="flex items-center space-x-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 activeProps={{
-                  className:
-                    "flex items-center space-x-2 text-sm font-medium text-foreground",
-                }}
-              >
+                  className: "flex items-center space-x-2 text-sm font-medium text-foreground",
+                }}>
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
               </Link>
@@ -49,18 +45,8 @@ export function Navigation() {
             {/* Mobile Menu Button */}
             <div className="md:hidden">
               <Button variant="ghost" size="sm" className="p-2">
-                <svg
-                  className="h-5 w-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               </Button>
             </div>

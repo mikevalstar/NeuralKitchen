@@ -1,10 +1,4 @@
-import {
-  createContext,
-  type ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useState } from "react";
 
 type Theme = "light" | "dark" | "system";
 
@@ -37,9 +31,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       let newTheme: "light" | "dark";
 
       if (theme === "system") {
-        newTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
+        newTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
       } else {
         newTheme = theme;
       }
@@ -68,11 +60,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme]);
 
-  return (
-    <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={{ theme, setTheme, resolvedTheme }}>{children}</ThemeContext.Provider>;
 }
 
 export function useTheme() {

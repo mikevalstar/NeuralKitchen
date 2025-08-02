@@ -3,15 +3,17 @@
   "vcs": {
     "enabled": false,
     "clientKind": "git",
-    "useIgnoreFile": false
+    "useIgnoreFile": true
   },
   "files": {
-    "ignoreUnknown": false
+    "ignoreUnknown": false,
+    "includes": ["**/*.tsx", "**/*.ts", "**/*.js", "**/*.jsx", "!**/routeTree.gen.ts", "!**/generated/**"]
   },
   "formatter": {
     "enabled": true,
     "indentStyle": "space",
-    "indentWidth": 2
+    "indentWidth": 2,
+    "lineWidth": 120
   },
   "linter": {
     "enabled": true,
@@ -21,6 +23,7 @@
   },
   "javascript": {
     "formatter": {
+      "bracketSameLine": true,
       "quoteStyle": "double"
     }
   },
