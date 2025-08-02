@@ -1,0 +1,5 @@
+node_modules
+.env
+app/generated
+.tanstack
+/src/generated/prisma
