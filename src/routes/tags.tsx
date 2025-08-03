@@ -1,9 +1,19 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { Tag } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
+import { Badge } from "~/components/ui/badge";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
 import prisma from "../lib/prisma";
+
+const tagSchema = z.object({
+  name: z.string().min(1, "Tag name is required").max(50, "Tag name must be less than 50 characters"),
+});
 
 const getTags = createServerFn({ method: "GET" }).handler(async () => {
   return prisma.tag.findMany({
@@ -16,37 +26,32 @@ const getTags = createServerFn({ method: "GET" }).handler(async () => {
   });
 });
 
-const createTag = createServerFn({ method: "POST" }).handler(async (ctx) => {
-  const data = ctx.data as { name: string } | undefined;
-  if (!data?.name) {
-    throw new Error("Name is required");
-  }
+const createTag = createServerFn({ method: "POST" })
+  .validator((data: unknown) => tagSchema.parse(data))
+  .handler(async (ctx) => {
+    const data = ctx.data;
 
-  // Check if tag already exists (case-insensitive)
-  const existingTag = await prisma.tag.findFirst({
-    where: {
-      name: {
-        equals: data.name,
-        mode: "insensitive",
+    // Check if tag already exists (case-insensitive)
+    const existingTag = await prisma.tag.findFirst({
+      where: {
+        name: {
+          equals: data.name,
+          mode: "insensitive",
+        },
+        deletedAt: null,
       },
-      deletedAt: null,
-    },
+    });
+
+    if (existingTag) {
+      throw new Error("Tag already exists");
+    }
+
+    return prisma.tag.create({
+      data: {
+        name: data.name.trim(),
+      },
+    });
   });
-
-  if (existingTag) {
-    throw new Error("Tag already exists");
-  }
-
-  return prisma.tag.create({
-    data: {
-      name: data.name.trim(),
-    },
-  });
-});
-
-const tagSchema = z.object({
-  name: z.string().min(1, "Tag name is required").max(50, "Tag name must be less than 50 characters"),
-});
 
 export const Route = createFileRoute("/tags")({
   component: Tags,
@@ -56,6 +61,7 @@ export const Route = createFileRoute("/tags")({
 });
 
 function Tags() {
+  const router = useRouter();
   const tags = Route.useLoaderData();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -63,15 +69,21 @@ function Tags() {
     defaultValues: {
       name: "",
     },
+    validators: {
+      onChange: tagSchema,
+    },
     onSubmit: async ({ value }) => {
       setIsSubmitting(true);
       try {
         await createTag({ data: { name: value.name } });
-        // Refresh the page to show the new tag
-        window.location.reload();
+        // Clear the form
+        form.reset();
+        // Refresh the data to show the new tag
+        router.invalidate();
+        toast.success("Tag created successfully!");
       } catch (error) {
         console.error("Failed to create tag:", error);
-        // You could add toast notification here
+        toast.error("Failed to create tag. Please try again.");
       } finally {
         setIsSubmitting(false);
       }
@@ -79,77 +91,84 @@ function Tags() {
   });
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Tags</h1>
-        <p className="text-muted-foreground">Organize content with custom tags</p>
+    <div className="max-w-4xl mx-auto space-y-8">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <h1 className="text-4xl font-bold tracking-tight">Tags</h1>
+        <p className="text-muted-foreground text-lg">Organize your content with custom tags</p>
       </div>
 
       {/* Add Tag Form */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">Add New Tag</h2>
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            form.handleSubmit();
-          }}
-          className="space-y-4">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <form.Field
-                name="name"
-                validators={{
-                  onChange: ({ value }) => {
-                    const result = tagSchema.shape.name.safeParse(value);
-                    return result.success ? undefined : result.error.issues[0]?.message;
-                  },
-                }}>
-                {(field) => (
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      placeholder="Enter tag name..."
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-input bg-background rounded-md text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      disabled={isSubmitting}
-                    />
-                    {field.state.meta.errors ? (
-                      <div className="text-sm text-destructive">{field.state.meta.errors.join(", ")}</div>
-                    ) : null}
+      <Card>
+        <CardHeader>
+          <CardTitle>Add New Tag</CardTitle>
+          <CardDescription>Create a new tag to organize your content</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              form.handleSubmit();
+            }}
+            className="space-y-4">
+            <form.Field name="name">
+              {(field) => (
+                <div className="space-y-2">
+                  <div className="flex gap-3">
+                    <div className="flex-1">
+                      <Input
+                        type="text"
+                        placeholder="Enter tag name..."
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        disabled={isSubmitting}
+                        className={field.state.meta.errors?.length ? "border-destructive" : ""}
+                      />
+                    </div>
+                    <Button type="submit" disabled={isSubmitting || !form.state.canSubmit} className="min-w-[100px]">
+                      {isSubmitting ? "Adding..." : "Add Tag"}
+                    </Button>
                   </div>
-                )}
-              </form.Field>
-            </div>
-            <button
-              type="submit"
-              disabled={isSubmitting || !form.state.canSubmit}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
-              {isSubmitting ? "Adding..." : "Add Tag"}
-            </button>
-          </div>
-        </form>
-      </div>
+                  {field.state.meta.errors?.length ? (
+                    <div className="text-sm text-destructive">
+                      {field.state.meta.errors.map((error) => error?.message).join(", ")}
+                    </div>
+                  ) : null}
+                </div>
+              )}
+            </form.Field>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Tags List */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold">All Tags</h2>
-        {tags.length > 0 ? (
-          <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
-              <span key={tag.id} className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm">
-                {tag.name}
-              </span>
-            ))}
-          </div>
-        ) : (
-          <div className="p-8 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center">
-            <p className="text-muted-foreground">No tags found</p>
-          </div>
-        )}
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>All Tags ({tags.length})</CardTitle>
+          <CardDescription>Manage and view all your tags</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {tags.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <Badge key={tag.id} variant="secondary" className="text-sm px-3 py-1">
+                  {tag.name}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="rounded-full bg-muted p-3 mb-4">
+                <Tag className="h-6 w-6 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-medium">No tags yet</h3>
+              <p className="text-muted-foreground">Create your first tag to get started organizing your content.</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
