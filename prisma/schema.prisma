@@ -28,7 +28,8 @@ model Tag {
 model Project {
   id          String    @id @default(uuid())
   title       String
-  description String?
+  shortId     String    @unique // Short identifier for the project
+  description String?   @db.VarChar(300) // Limited to 300 characters
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?

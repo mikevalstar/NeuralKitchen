@@ -3,3 +3,4 @@ node_modules
 app/generated
 .tanstack
 /src/generated/prisma
+.claude
