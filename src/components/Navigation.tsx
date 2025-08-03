@@ -1,9 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, FolderOpen, HelpCircle, Tags } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
+import { WidthToggle } from "./WidthToggle";
 import { Button } from "./ui/button";
 
-export function Navigation() {
+interface NavigationProps {
+  isWide: boolean;
+  onToggleWidth: () => void;
+}
+
+export function Navigation({ isWide, onToggleWidth }: NavigationProps) {
   const navItems = [
     { href: "/recipes", label: "Recipes", icon: BookOpen },
     { href: "/projects", label: "Projects", icon: FolderOpen },
@@ -13,7 +19,7 @@ export function Navigation() {
 
   return (
     <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${isWide ? "" : "container"}`}>
         <div className="flex h-16 items-center justify-between">
           {/* Logo/Title */}
           <div className="flex items-center">
@@ -38,8 +44,9 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Right side - Theme Toggle and Mobile Menu */}
+          {/* Right side - Width Toggle, Theme Toggle and Mobile Menu */}
           <div className="flex items-center space-x-2">
+            <WidthToggle isWide={isWide} onToggle={onToggleWidth} />
             <ThemeToggle />
 
             {/* Mobile Menu Button */}

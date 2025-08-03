@@ -21,7 +21,7 @@ function RecipesPage() {
   const recipes = Route.useLoaderData();
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -51,10 +51,10 @@ function RecipesPage() {
                   <tr className="border-b">
                     <th className="text-left p-4 font-medium">Title</th>
                     <th className="text-left p-4 font-medium">Recipe ID</th>
-                    <th className="text-left p-4 font-medium">Version</th>
+                    <th className="text-left p-4 font-medium @8xl:table-cell hidden">Version</th>
                     <th className="text-left p-4 font-medium">Tags</th>
                     <th className="text-left p-4 font-medium">Projects</th>
-                    <th className="text-left p-4 font-medium">Updated</th>
+                    <th className="text-left p-4 font-medium @8xl:table-cell hidden">Updated</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -71,7 +71,7 @@ function RecipesPage() {
                         </Link>
                       </td>
                       <td className="p-4 font-mono text-sm text-muted-foreground">{recipe.shortId}</td>
-                      <td className="p-4 text-sm text-muted-foreground">
+                      <td className="p-4 text-sm text-muted-foreground @8xl:table-cell hidden">
                         {recipe.currentVersion ? recipe.currentVersion.versionId : "No version"}
                       </td>
                       <td className="p-4">
@@ -112,7 +112,9 @@ function RecipesPage() {
                           <span className="text-sm text-muted-foreground italic">No projects</span>
                         )}
                       </td>
-                      <td className="p-4 text-sm text-muted-foreground">{formatDateOnly(recipe.updatedAt)}</td>
+                      <td className="p-4 text-sm text-muted-foreground @8xl:table-cell hidden">
+                        {formatDateOnly(recipe.updatedAt)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
