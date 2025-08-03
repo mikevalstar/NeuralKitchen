@@ -10,8 +10,31 @@ I am always running the app in dev mode, so you dont need to build or run the ap
 
 ## Technologies Used
 
-- Tanstack Start
-- Prisma
-- Shadcn
-- Tailwind CSS
-- Biome
+- **Frontend**: React 19 with TanStack Start (full-stack React framework)
+- **Router**: TanStack Router with file-based routing
+- **Database**: PostgreSQL with Prisma ORM and Accelerate extension
+- **Styling**: TailwindCSS v4 with Shadcn/ui components
+- **Forms**: TanStack Form with Zod validation
+- **Code Quality**: Biome for linting and formatting
+- **UI Components**: Radix UI primitives with custom styling
+
+## Development Notes
+
+### Biome Configuration
+- 2-space indentation
+- 120 character line width
+- Double quotes for JavaScript
+- Ignores generated files (`routeTree.gen.ts`, `generated/**`)
+- Auto-organize imports enabled
+
+### Database Client
+Prisma client is extended with Accelerate and outputs to custom location. Import from:
+```typescript
+import prisma from "~/lib/prisma";
+```
+
+### Component Development
+Follow existing Shadcn/ui patterns. Check `components.json` for configuration. Components use Tailwind with CSS variables for theming.
+
+### Form Handling
+Use TanStack Form with Zod adapters. Validation schemas are defined in `src/lib/dataValidators.ts`.
