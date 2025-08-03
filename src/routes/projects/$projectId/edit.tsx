@@ -17,15 +17,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Projects } from "~/lib/data/projects";
-import { projectSchema } from "~/lib/dataValidators";
+import { projectIdSchema, projectSchema } from "~/lib/dataValidators";
 
-const getProject = createServerFn({ method: "GET" }).handler(async (ctx) => {
-  const project = await Projects.read(ctx.data.projectId);
-  if (!project) {
-    throw new Error("Project not found");
-  }
-  return project;
-});
+const getProject = createServerFn({ method: "GET" })
+  .validator((data: unknown) => projectIdSchema.parse(data))
+  .handler(async (ctx) => {
+    const project = await Projects.read(ctx.data.projectId);
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    return project;
+  });
 
 const updateProject = createServerFn({ method: "POST" })
   .validator((data: unknown) => {
@@ -90,13 +92,13 @@ function ProjectEdit() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
+            <BreadcrumbLink>
               <Link to="/projects">Projects</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
+            <BreadcrumbLink>
               <Link to="/projects/$projectId" params={{ projectId: project.id }}>
                 {project.title}
               </Link>

@@ -38,7 +38,7 @@ function ProjectsPage() {
     defaultValues: {
       title: "",
       shortId: "",
-      description: "",
+      description: undefined as string | undefined,
     },
     validators: {
       onChange: projectSchema,
@@ -192,7 +192,7 @@ function ProjectsPage() {
             {/* Description Field */}
             <form.Field name="description">
               {(field) => {
-                const charCount = field.state.value.length;
+                const charCount = field.state.value?.length || 0;
                 const maxChars = 300;
                 const isNearLimit = charCount > 250;
                 const isAtLimit = charCount >= maxChars;
@@ -205,9 +205,9 @@ function ProjectsPage() {
                     <Textarea
                       id="description"
                       placeholder="Enter project description..."
-                      value={field.state.value}
+                      value={field.state.value || ""}
                       onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
+                      onChange={(e) => field.handleChange(e.target.value || undefined)}
                       disabled={isSubmitting}
                       className={`min-h-[80px] ${field.state.meta.errors?.length ? "border-destructive" : ""}`}
                     />

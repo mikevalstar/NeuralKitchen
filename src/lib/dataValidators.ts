@@ -15,7 +15,14 @@ export const projectSchema = z.object({
     .min(1, "Project ID is required")
     .max(50, "Project ID must be less than 50 characters")
     .regex(/^[a-zA-Z0-9_-]+$/, "Project ID can only contain letters, numbers, hyphens, and underscores"),
-  description: z.string().max(300, "Project description must be less than 300 characters").optional().or(z.literal("")),
+  description: z.union([z.string().max(300, "Project description must be less than 300 characters"), z.undefined()]),
 });
 
 export type ProjectInput = z.infer<typeof projectSchema>;
+
+// Project ID validation schema for server routes
+export const projectIdSchema = z.object({
+  projectId: z.string().min(1, "Project ID is required"),
+});
+
+export type ProjectIdInput = z.infer<typeof projectIdSchema>;

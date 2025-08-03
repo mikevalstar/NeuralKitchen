@@ -22,19 +22,24 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Projects } from "~/lib/data/projects";
+import { projectIdSchema } from "~/lib/dataValidators";
 import { formatDateTime } from "~/lib/dateUtils";
 
-const getProject = createServerFn({ method: "GET" }).handler(async (ctx) => {
-  const project = await Projects.read(ctx.data.projectId);
-  if (!project) {
-    throw new Error("Project not found");
-  }
-  return project;
-});
+const getProject = createServerFn({ method: "GET" })
+  .validator((data: unknown) => projectIdSchema.parse(data))
+  .handler(async (ctx) => {
+    const project = await Projects.read(ctx.data.projectId);
+    if (!project) {
+      throw new Error("Project not found");
+    }
+    return project;
+  });
 
-const deleteProject = createServerFn({ method: "POST" }).handler(async (ctx) => {
-  return Projects.deleteProject(ctx.data.projectId);
-});
+const deleteProject = createServerFn({ method: "POST" })
+  .validator((data: unknown) => projectIdSchema.parse(data))
+  .handler(async (ctx) => {
+    return Projects.deleteProject(ctx.data.projectId);
+  });
 
 export const Route = createFileRoute("/projects/$projectId/")({
   component: ProjectDetail,
@@ -70,7 +75,7 @@ function ProjectDetail() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
+            <BreadcrumbLink>
               <Link to="/projects">Projects</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
