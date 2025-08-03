@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TagsRouteImport } from './routes/tags'
 import { Route as RecipesRouteImport } from './routes/recipes'
-import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
+import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects/$projectId/index'
+import { Route as ProjectsProjectIdEditRouteImport } from './routes/projects/$projectId/edit'
 
 const TagsRoute = TagsRouteImport.update({
   id: '/tags',
@@ -23,11 +25,6 @@ const TagsRoute = TagsRouteImport.update({
 const RecipesRoute = RecipesRouteImport.update({
   id: '/recipes',
   path: '/recipes',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProjectsRoute = ProjectsRouteImport.update({
-  id: '/projects',
-  path: '/projects',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpRoute = HelpRouteImport.update({
@@ -40,43 +37,88 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProjectsIndexRoute = ProjectsIndexRouteImport.update({
+  id: '/projects/',
+  path: '/projects/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
+  id: '/projects/$projectId/',
+  path: '/projects/$projectId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjectsProjectIdEditRoute = ProjectsProjectIdEditRouteImport.update({
+  id: '/projects/$projectId/edit',
+  path: '/projects/$projectId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/help': typeof HelpRoute
-  '/projects': typeof ProjectsRoute
   '/recipes': typeof RecipesRoute
   '/tags': typeof TagsRoute
+  '/projects': typeof ProjectsIndexRoute
+  '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
+  '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/help': typeof HelpRoute
-  '/projects': typeof ProjectsRoute
   '/recipes': typeof RecipesRoute
   '/tags': typeof TagsRoute
+  '/projects': typeof ProjectsIndexRoute
+  '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
+  '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/help': typeof HelpRoute
-  '/projects': typeof ProjectsRoute
   '/recipes': typeof RecipesRoute
   '/tags': typeof TagsRoute
+  '/projects/': typeof ProjectsIndexRoute
+  '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
+  '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/help' | '/projects' | '/recipes' | '/tags'
+  fullPaths:
+    | '/'
+    | '/help'
+    | '/recipes'
+    | '/tags'
+    | '/projects'
+    | '/projects/$projectId/edit'
+    | '/projects/$projectId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/help' | '/projects' | '/recipes' | '/tags'
-  id: '__root__' | '/' | '/help' | '/projects' | '/recipes' | '/tags'
+  to:
+    | '/'
+    | '/help'
+    | '/recipes'
+    | '/tags'
+    | '/projects'
+    | '/projects/$projectId/edit'
+    | '/projects/$projectId'
+  id:
+    | '__root__'
+    | '/'
+    | '/help'
+    | '/recipes'
+    | '/tags'
+    | '/projects/'
+    | '/projects/$projectId/edit'
+    | '/projects/$projectId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HelpRoute: typeof HelpRoute
-  ProjectsRoute: typeof ProjectsRoute
   RecipesRoute: typeof RecipesRoute
   TagsRoute: typeof TagsRoute
+  ProjectsIndexRoute: typeof ProjectsIndexRoute
+  ProjectsProjectIdEditRoute: typeof ProjectsProjectIdEditRoute
+  ProjectsProjectIdIndexRoute: typeof ProjectsProjectIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -95,13 +137,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RecipesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/projects': {
-      id: '/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof ProjectsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/help': {
       id: '/help'
       path: '/help'
@@ -116,15 +151,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/projects/': {
+      id: '/projects/'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof ProjectsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/$projectId/': {
+      id: '/projects/$projectId/'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof ProjectsProjectIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projects/$projectId/edit': {
+      id: '/projects/$projectId/edit'
+      path: '/projects/$projectId/edit'
+      fullPath: '/projects/$projectId/edit'
+      preLoaderRoute: typeof ProjectsProjectIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HelpRoute: HelpRoute,
-  ProjectsRoute: ProjectsRoute,
   RecipesRoute: RecipesRoute,
   TagsRoute: TagsRoute,
+  ProjectsIndexRoute: ProjectsIndexRoute,
+  ProjectsProjectIdEditRoute: ProjectsProjectIdEditRoute,
+  ProjectsProjectIdIndexRoute: ProjectsProjectIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

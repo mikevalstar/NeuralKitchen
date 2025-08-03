@@ -112,3 +112,9 @@ Follow existing Shadcn/ui patterns. Check `components.json` for configuration. C
 
 ### Form Handling
 Use TanStack Form with Zod adapters. Validation schemas are defined in `src/lib/dataValidators.ts`.
+
+### Date Formatting Standards
+Always use the standardized date formatting utilities from `src/lib/dateUtils.ts`:
+- `formatDateOnly(date)` for date-only display using dayjs 'll' format (e.g., "Oct 13, 2014")
+- `formatDateTime(date)` for date with time using dayjs 'lll' format (e.g., "Oct 13, 2014 1:30 PM")
+- Never use native JavaScript date formatting methods like `toLocaleDateString()`

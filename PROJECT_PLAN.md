@@ -24,8 +24,8 @@ This document outlines the development phases for Neural Kitchen, a recipe/cookb
 - [x] **Projects UI**
   - [x] Create `/projects` route with project listing
   - [x] Add project creation form with TanStack Form
-  - [ ] Implement project detail/edit pages
-  - [ ] Add project deletion with confirmation dialog
+  - [x] Implement project detail/edit pages
+  - [x] Add project deletion with confirmation dialog
   - [x] Update navigation to include projects
 
 ### 1.2 Recipe Creation & Management

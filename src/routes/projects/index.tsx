@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { FolderOpen } from "lucide-react";
 import { useState } from "react";
@@ -10,6 +10,7 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Projects } from "~/lib/data/projects";
 import { projectSchema } from "~/lib/dataValidators";
+import { formatDateOnly } from "~/lib/dateUtils";
 
 const getProjects = createServerFn({ method: "GET" }).handler(async () => {
   return Projects.list();
@@ -21,7 +22,7 @@ const createProject = createServerFn({ method: "POST" })
     return Projects.create(ctx.data);
   });
 
-export const Route = createFileRoute("/projects")({
+export const Route = createFileRoute("/projects/")({
   component: ProjectsPage,
   loader: () => {
     return getProjects();
@@ -267,7 +268,14 @@ function ProjectsPage() {
                     <tr
                       key={project.id}
                       className={`border-b last:border-b-0 ${index % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
-                      <td className="p-4 font-medium">{project.title}</td>
+                      <td className="p-4 font-medium">
+                        <Link
+                          to="/projects/$projectId"
+                          params={{ projectId: project.id }}
+                          className="text-foreground hover:text-primary transition-colors hover:underline">
+                          {project.title}
+                        </Link>
+                      </td>
                       <td className="p-4 font-mono text-sm text-muted-foreground">{project.shortId}</td>
                       <td className="p-4 text-muted-foreground">
                         {project.description ? (
@@ -276,9 +284,7 @@ function ProjectsPage() {
                           <span className="italic">No description</span>
                         )}
                       </td>
-                      <td className="p-4 text-sm text-muted-foreground">
-                        {new Date(project.createdAt).toLocaleDateString()}
-                      </td>
+                      <td className="p-4 text-sm text-muted-foreground">{formatDateOnly(project.createdAt)}</td>
                     </tr>
                   ))}
                 </tbody>
