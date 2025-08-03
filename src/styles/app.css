@@ -141,3 +141,156 @@
     color-scheme: dark;
   }
 }
+
+@layer components {
+  /* MDX Editor Styling */
+  .mdxeditor {
+    @apply bg-background border-border text-foreground;
+  }
+
+  .mdxeditor-toolbar {
+    @apply bg-muted/50 border-border;
+  }
+
+  .mdxeditor-toolbar button {
+    @apply text-foreground transition-colors hover:bg-muted;
+  }
+
+  .mdxeditor-toolbar button[data-state="on"] {
+    @apply bg-primary text-primary-foreground;
+  }
+
+  .mdxeditor-rich-text-editor {
+    @apply text-foreground bg-background;
+  }
+
+  .mdxeditor-rich-text-editor h1 {
+    @apply text-3xl font-bold mb-4 mt-6 text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor h2 {
+    @apply text-2xl font-semibold mb-3 mt-5 text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor h3 {
+    @apply text-xl font-medium mb-2 mt-4 text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor h4 {
+    @apply text-lg font-medium mb-2 mt-3 text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor h5 {
+    @apply text-base font-medium mb-1 mt-2 text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor h6 {
+    @apply text-sm font-medium mb-1 mt-2 text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor p {
+    @apply mb-3 leading-relaxed text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor ul {
+    @apply list-disc pl-6 mb-3 space-y-1;
+  }
+  
+  .mdxeditor-rich-text-editor ol {
+    @apply list-decimal pl-6 mb-3 space-y-1;
+  }
+  
+  .mdxeditor-rich-text-editor li {
+    @apply leading-relaxed text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor code {
+    @apply bg-muted px-1.5 py-0.5 rounded text-sm font-mono text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor pre {
+    @apply bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto mb-4;
+  }
+  
+  .mdxeditor-rich-text-editor pre code {
+    @apply bg-transparent p-0 text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor blockquote {
+    @apply border-l-4 border-primary pl-4 italic text-muted-foreground mb-3 bg-muted/30 py-2;
+  }
+  
+  .mdxeditor-rich-text-editor a {
+    @apply text-primary underline underline-offset-2 hover:text-primary/80 transition-colors;
+  }
+  
+  .mdxeditor-rich-text-editor table {
+    @apply w-full border-collapse border border-border mb-4;
+  }
+  
+  .mdxeditor-rich-text-editor th {
+    @apply border border-border px-3 py-2 bg-muted/50 font-medium text-left;
+  }
+  
+  .mdxeditor-rich-text-editor td {
+    @apply border border-border px-3 py-2;
+  }
+  
+  .mdxeditor-rich-text-editor hr {
+    @apply border-border my-6;
+  }
+  
+  .mdxeditor-rich-text-editor strong {
+    @apply font-semibold text-foreground;
+  }
+  
+  .mdxeditor-rich-text-editor em {
+    @apply italic;
+  }
+
+  /* Source editor (CodeMirror) */
+  .cm-editor {
+    @apply bg-muted/30 text-foreground;
+  }
+
+  .cm-editor .cm-content {
+    @apply text-foreground;
+  }
+
+  .cm-editor.cm-focused {
+    @apply outline-2 outline-ring outline-offset-2;
+  }
+
+  .cm-editor .cm-line {
+    @apply text-foreground;
+  }
+
+  /* Diff view styling */
+  .mdxeditor-diff-editor {
+    @apply bg-background;
+  }
+
+  .mdxeditor-diff-editor .cm-editor {
+    @apply bg-muted/30;
+  }
+
+  /* Dropdowns and dialogs */
+  .mdxeditor-popup {
+    @apply bg-popover border-border text-popover-foreground;
+  }
+
+  /* Selection styling */
+  .mdxeditor-rich-text-editor ::selection {
+    @apply bg-primary/30;
+  }
+
+  /* Placeholder text */
+  .mdxeditor-rich-text-editor .ProseMirror p.is-empty:first-child::before {
+    @apply text-muted-foreground;
+  }
+
+  /* Focus styling */
+  .mdxeditor-rich-text-editor .ProseMirror:focus {
+    @apply outline-none;
+  }
+}

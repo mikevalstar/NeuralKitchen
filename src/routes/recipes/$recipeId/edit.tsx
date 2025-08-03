@@ -2,7 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Save } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   Breadcrumb,
@@ -18,7 +18,7 @@ import { Input } from "~/components/ui/input";
 import { Projects } from "~/lib/data/projects";
 import { Recipes } from "~/lib/data/recipes";
 import { Tags } from "~/lib/data/tags";
-import { recipeSchema, recipeVersionSchema } from "~/lib/dataValidators";
+import { recipeIdSchema, recipeSchema, recipeVersionSchema } from "~/lib/dataValidators";
 
 import {
   MDXEditor,
@@ -49,6 +49,16 @@ import {
 import '@mdxeditor/editor/style.css';
 
 // Server functions
+const getRecipe = createServerFn({ method: "GET" })
+  .validator((data: unknown) => recipeIdSchema.parse(data))
+  .handler(async (ctx) => {
+    const recipe = await Recipes.read(ctx.data.recipeId);
+    if (!recipe) {
+      throw new Error("Recipe not found");
+    }
+    return recipe;
+  });
+
 const getTags = createServerFn({ method: "GET" }).handler(async () => {
   return Tags.list();
 });
@@ -57,41 +67,109 @@ const getProjects = createServerFn({ method: "GET" }).handler(async () => {
   return Projects.list();
 });
 
-const createRecipe = createServerFn({ method: "POST" })
+const updateRecipe = createServerFn({ method: "POST" })
   .validator((data: unknown) => {
-    const parsed = data as { recipe: unknown; version: unknown };
+    const parsed = data as { recipeId: string; recipe: unknown; version: unknown };
     return {
+      recipeId: parsed.recipeId,
       recipe: recipeSchema.parse(parsed.recipe),
       version: recipeVersionSchema.parse(parsed.version),
     };
   })
   .handler(async (ctx) => {
-    return Recipes.create(ctx.data.recipe, ctx.data.version);
+    // Update recipe metadata if needed
+    if (ctx.data.recipe.title || ctx.data.recipe.shortId) {
+      await Recipes.updateMetadata(ctx.data.recipeId, ctx.data.recipe);
+    }
+    
+    // Save new version (this automatically creates a new version and sets it as current)
+    const newVersion = await Recipes.save(ctx.data.recipeId, ctx.data.version);
+    
+    // Return the updated recipe
+    const updatedRecipe = await Recipes.read(ctx.data.recipeId);
+    return { recipe: updatedRecipe, version: newVersion };
   });
 
-export const Route = createFileRoute("/recipes/create")({
-  component: RecipeCreate,
-  loader: async () => {
-    const [tags, projects] = await Promise.all([
+export const Route = createFileRoute("/recipes/$recipeId/edit")({
+  component: RecipeEdit,
+  loader: async ({ params }) => {
+    const [recipe, tags, projects] = await Promise.all([
+      getRecipe({ data: { recipeId: params.recipeId } }),
       getTags(),
       getProjects()
     ]);
-    return { tags, projects };
+    return { recipe, tags, projects };
   },
 });
 
-function RecipeCreate() {
+function RecipeEdit() {
   const router = useRouter();
-  const { tags, projects } = Route.useLoaderData();
+  const { recipe, tags, projects } = Route.useLoaderData();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [content, setContent] = useState("");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
+  const [editorError, setEditorError] = useState<string | null>(null);
+  const [content, setContent] = useState(() => {
+    // Safely initialize content, handling potential parsing issues
+    const rawContent = recipe.currentVersion?.content || "";
+    try {
+      // Basic validation - ensure content is a string and not empty
+      return typeof rawContent === 'string' ? rawContent : "";
+    } catch (error) {
+      console.warn("Issue loading recipe content:", error);
+      return "";
+    }
+  });
+  const [selectedTags, setSelectedTags] = useState<string[]>(
+    recipe.currentVersion?.tags.map(tag => tag.id) || []
+  );
+  const [selectedProjects, setSelectedProjects] = useState<string[]>(
+    recipe.currentVersion?.projects.map(project => project.id) || []
+  );
+
+  // Sanitize markdown content for better MDX editor compatibility
+  const sanitizeMarkdown = (markdown: string) => {
+    if (!markdown) return "";
+    
+    try {
+      // Fix common markdown parsing issues
+      let sanitized = markdown
+        // Ensure code blocks have proper language tags
+        .replace(/```(\s*\n)/g, '```text\n')
+        // Fix inline code that might be causing issues
+        .replace(/`([^`]*)`/g, (match, code) => {
+          // Ensure inline code doesn't contain problematic characters
+          return `\`${code.replace(/\n/g, ' ')}\``;
+        })
+        // Ensure proper line endings
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n');
+      
+      return sanitized;
+    } catch (error) {
+      console.warn("Error sanitizing markdown:", error);
+      return markdown;
+    }
+  };
+
+  // Effect to handle content sanitization and error recovery
+  useEffect(() => {
+    const rawContent = recipe.currentVersion?.content || "";
+    if (rawContent) {
+      try {
+        const sanitized = sanitizeMarkdown(rawContent);
+        setContent(sanitized);
+        setEditorError(null); // Clear any previous errors
+      } catch (error) {
+        console.error("Error processing recipe content:", error);
+        setEditorError(error instanceof Error ? error.message : "Failed to process recipe content");
+        setContent(rawContent); // Use raw content as fallback
+      }
+    }
+  }, [recipe.currentVersion?.content]);
 
   const form = useForm({
     defaultValues: {
-      title: "",
-      shortId: "",
+      title: recipe.title,
+      shortId: recipe.shortId,
     },
     validators: {
       onChange: recipeSchema,
@@ -104,8 +182,9 @@ function RecipeCreate() {
 
       setIsSubmitting(true);
       try {
-        const result = await createRecipe({
+        const result = await updateRecipe({
           data: {
+            recipeId: recipe.id,
             recipe: {
               title: value.title,
               shortId: value.shortId,
@@ -119,14 +198,15 @@ function RecipeCreate() {
           },
         });
         
-        toast.success("Recipe created successfully!");
+        toast.success("Recipe updated successfully! New version created.");
         router.navigate({ 
           to: "/recipes/$recipeId", 
-          params: { recipeId: result.recipe.id } 
+          params: { recipeId: recipe.id } 
         });
       } catch (error) {
-        console.error("Failed to create recipe:", error);
-        toast.error("Failed to create recipe. Please try again.");
+        console.error("Failed to update recipe:", error);
+        const errorMessage = error instanceof Error ? error.message : "Failed to update recipe. Please try again.";
+        toast.error(errorMessage);
       } finally {
         setIsSubmitting(false);
       }
@@ -134,7 +214,12 @@ function RecipeCreate() {
   });
 
   const handleContentChange = useCallback((value: string) => {
-    setContent(value);
+    try {
+      setContent(value);
+    } catch (error) {
+      console.error("Error updating content:", error);
+      setEditorError(error instanceof Error ? error.message : "Unknown error");
+    }
   }, []);
 
   const toggleTag = (tagId: string) => {
@@ -165,7 +250,15 @@ function RecipeCreate() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbPage>Create Recipe</BreadcrumbPage>
+            <BreadcrumbLink asChild>
+              <Link to="/recipes/$recipeId" params={{ recipeId: recipe.id }}>
+                {recipe.title}
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Edit</BreadcrumbPage>
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
@@ -173,12 +266,14 @@ function RecipeCreate() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create Recipe</h1>
-          <p className="text-muted-foreground">Create a new AI agent recipe</p>
+          <h1 className="text-3xl font-bold tracking-tight">Edit Recipe</h1>
+          <p className="text-muted-foreground">
+            Editing will create a new version (v{(recipe.currentVersion?.versionNumber || 0) + 1})
+          </p>
         </div>
       </div>
 
-      {/* Create Form */}
+      {/* Edit Form */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -191,7 +286,7 @@ function RecipeCreate() {
         <Card>
           <CardHeader>
             <CardTitle>Basic Information</CardTitle>
-            <CardDescription>Basic details about this recipe</CardDescription>
+            <CardDescription>Update basic details about this recipe</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Title Field */}
@@ -300,62 +395,116 @@ function RecipeCreate() {
         <Card>
           <CardHeader>
             <CardTitle>Recipe Content</CardTitle>
-            <CardDescription>Write the step-by-step instructions for AI agents</CardDescription>
+            <CardDescription>
+              Edit the step-by-step instructions for AI agents. Changes will create a new version.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="border rounded-lg">
-              <MDXEditor
-                markdown={content}
-                onChange={handleContentChange}
-                contentEditableClassName="min-h-[400px] p-4 max-w-none"
-                placeholder="Start writing your recipe content here..."
-                plugins={[
-                  headingsPlugin(),
-                  listsPlugin(),
-                  quotePlugin(),
-                  thematicBreakPlugin(),
-                  markdownShortcutPlugin(),
-                  linkPlugin(),
-                  linkDialogPlugin(),
-                  imagePlugin(),
-                  tablePlugin(),
-                  codeBlockPlugin(),
-                  codeMirrorPlugin({ 
-                    codeBlockLanguages: { 
-                      js: 'JavaScript', 
-                      tsx: 'TypeScript', 
-                      bash: 'Bash', 
-                      sql: 'SQL', 
-                      python: 'Python',
-                      json: 'JSON',
-                      css: 'CSS',
-                      html: 'HTML',
-                      yaml: 'YAML'
-                    } 
-                  }),
-                  diffSourcePlugin({ 
-                    viewMode: 'rich-text',
-                    diffMarkdown: '',
-                    readOnlyDiff: false
-                  }),
-                  toolbarPlugin({
-                    toolbarContents: () => (
-                      <DiffSourceToggleWrapper>
-                        <UndoRedo />
-                        <BoldItalicUnderlineToggles />
-                        <CodeToggle />
-                        <BlockTypeSelect />
-                        <CreateLink />
-                        <InsertImage />
-                        <InsertTable />
-                        <InsertThematicBreak />
-                        <ListsToggle />
-                      </DiffSourceToggleWrapper>
-                    )
-                  })
-                ]}
-                className="min-h-[400px]"
-              />
+              {editorError ? (
+                <div className="min-h-[400px] p-4">
+                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-4">
+                    <h4 className="font-medium text-destructive mb-2">Editor Loading Error</h4>
+                    <p className="text-sm text-muted-foreground mb-3">
+                      There was an issue loading the recipe content in the editor. You can still edit using the fallback text area below.
+                    </p>
+                    <details className="text-xs text-muted-foreground">
+                      <summary className="cursor-pointer hover:text-foreground">Error Details</summary>
+                      <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">{editorError}</pre>
+                    </details>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditorError(null);
+                        // Force re-initialization
+                        const rawContent = recipe.currentVersion?.content || "";
+                        setContent(sanitizeMarkdown(rawContent));
+                      }}
+                      className="mt-2"
+                    >
+                      Retry Editor
+                    </Button>
+                  </div>
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Start writing your recipe content here..."
+                    className="w-full min-h-[300px] p-3 border rounded-lg bg-background text-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              ) : content !== null ? (
+                <MDXEditor
+                  key={`${recipe.id}-${recipe.currentVersion?.id}`} // Force re-render
+                  markdown={content}
+                  onChange={handleContentChange}
+                  contentEditableClassName="min-h-[400px] p-4 max-w-none"
+                  placeholder="Start writing your recipe content here..."
+                  plugins={[
+                    headingsPlugin(),
+                    listsPlugin(),
+                    quotePlugin(),
+                    thematicBreakPlugin(),
+                    markdownShortcutPlugin(),
+                    linkPlugin(),
+                    linkDialogPlugin(),
+                    imagePlugin(),
+                    tablePlugin(),
+                    codeBlockPlugin({
+                      defaultCodeBlockLanguage: 'text'
+                    }),
+                    codeMirrorPlugin({ 
+                      codeBlockLanguages: { 
+                        '': 'Plain Text',
+                        text: 'Plain Text',
+                        js: 'JavaScript', 
+                        javascript: 'JavaScript', 
+                        tsx: 'TypeScript', 
+                        typescript: 'TypeScript', 
+                        bash: 'Bash', 
+                        shell: 'Shell',
+                        sql: 'SQL', 
+                        python: 'Python',
+                        py: 'Python',
+                        json: 'JSON',
+                        css: 'CSS',
+                        html: 'HTML',
+                        yaml: 'YAML',
+                        yml: 'YAML'
+                      }
+                    }),
+                    diffSourcePlugin({ 
+                      viewMode: 'rich-text',
+                      diffMarkdown: sanitizeMarkdown(recipe.currentVersion?.content || ''),
+                      readOnlyDiff: false
+                    }),
+                    toolbarPlugin({
+                      toolbarContents: () => (
+                        <DiffSourceToggleWrapper>
+                          <UndoRedo />
+                          <BoldItalicUnderlineToggles />
+                          <CodeToggle />
+                          <BlockTypeSelect />
+                          <CreateLink />
+                          <InsertImage />
+                          <InsertTable />
+                          <InsertThematicBreak />
+                          <ListsToggle />
+                        </DiffSourceToggleWrapper>
+                      )
+                    })
+                  ]}
+                  className="min-h-[400px]"
+                />
+              ) : (
+                <div className="min-h-[400px] p-4 flex items-center justify-center text-muted-foreground">
+                  <div className="text-center">
+                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                    Loading editor...
+                  </div>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -428,14 +577,14 @@ function RecipeCreate() {
 
         {/* Submit */}
         <div className="flex justify-end space-x-2">
-          <Link to="/recipes">
+          <Link to="/recipes/$recipeId" params={{ recipeId: recipe.id }}>
             <Button variant="outline" disabled={isSubmitting}>
               Cancel
             </Button>
           </Link>
           <Button type="submit" disabled={isSubmitting || !form.state.canSubmit}>
             <Save className="h-4 w-4 mr-2" />
-            {isSubmitting ? "Creating..." : "Create Recipe"}
+            {isSubmitting ? "Saving..." : "Save Changes"}
           </Button>
         </div>
       </form>

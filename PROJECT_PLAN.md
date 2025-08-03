@@ -29,26 +29,32 @@ This document outlines the development phases for Neural Kitchen, a recipe/cookb
   - [x] Update navigation to include projects
 
 ### 1.2 Recipe Creation & Management
-- [ ] **Recipe Content System**
-  - [ ] Update RecipeVersion model to store markdown content
-  - [ ] Implement recipe content validation (ensure valid markdown)
-  - [ ] Add recipe tags and project
+- [x] **Recipe Content System**
+  - [x] Update RecipeVersion model to store markdown content
+  - [x] Implement recipe content validation (ensure valid markdown)
+  - [x] Add recipe tags and project relationships
 
-- [ ] **Recipe CRUD Operations**
-  - [ ] Create `src/lib/data/recipes.ts` with full CRUD operations
-  - [ ] Implement recipe versioning logic, saving should be default create a new version (create new version, set current)
+- [x] **Recipe CRUD Operations**
+  - [x] Create `src/lib/data/recipes.ts` with full CRUD operations
+  - [x] Implement recipe versioning logic, saving creates new version automatically
+  - [x] Add content hashing to prevent duplicate versions
+  - [x] Implement version management (create, read, revert functionality)
 
-- [ ] **Recipe UI - Viewing**
-  - [ ] Create `/recipes` route with recipe listing
-  - [ ] Implement recipe detail page with markdown rendering using `react-markdown`
-  - [ ] Add version history display and navigation
-  - [ ] Create recipe card components for listing views
+- [x] **Recipe UI - Viewing**
+  - [x] Create `/recipes` route with recipe listing and container queries
+  - [x] Implement recipe detail page with markdown rendering using `react-markdown`
+  - [x] Add metadata sidebar with tags, projects, and version info
+  - [x] Create responsive recipe table with width toggle support
 
-- [ ] **Recipe UI - Editing**
-  - [ ] Use markdown editor `@mdxeditor/editor` - https://mdxeditor.dev/editor/docs/getting-started
-  - [ ] Create recipe creation/edit forms
-  - [ ] Add tag assignment interface
-  - [ ] Implement project association Dropdown
+- [x] **Recipe UI - Editing**
+  - [x] Use markdown editor `@mdxeditor/editor` with full plugin suite
+  - [x] Create recipe creation form with rich text editing
+  - [x] Add tag selection interface with toggle functionality
+  - [x] Implement project association with detailed project cards
+  - [x] Add dark mode support for MDX editor with custom styling
+  - [x] Add editor mode toggle buttons (rich text, diff, source)
+  - [x] Create recipe edit page with version management
+  - [x] Implement automatic new version creation on save
 
 ### 1.3 MCP Server Implementation
 - [ ] **MCP Server Setup**
