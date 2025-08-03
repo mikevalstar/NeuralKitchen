@@ -55,15 +55,17 @@ model Recipe {
 }
 
 model RecipeVersion {
-  id        String    @id @default(uuid())
-  title     String
-  shortId   String    // Short identifier for the version
-  content   String    @db.Text // The actual recipe content
-  versionId String    // Version identifier (e.g., "v1.0", "v2.1")
-  isCurrent Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
+  id          String    @id @default(uuid())
+  title       String
+  shortId     String    // Short identifier for the version
+  content     String    @db.Text // The actual recipe content (markdown)
+  versionId   String    // Version identifier (e.g., "v1.0", "v2.1")
+  versionNumber Int     // Numeric version for easier sorting/comparison
+  isCurrent   Boolean   @default(false)
+  contentHash String?   // Hash of content for duplicate detection
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
   
   // Many-to-many relationship with Tags
   tags Tag[] @relation("RecipeVersionTags")
@@ -77,4 +79,7 @@ model RecipeVersion {
   
   // One-to-many relationship with Recipe (as current version)
   currentForRecipes Recipe[] @relation("CurrentRecipeVersion")
+  
+  // Ensure unique version numbers per recipe
+  @@unique([recipeId, versionNumber])
 }

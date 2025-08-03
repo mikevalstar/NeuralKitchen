@@ -31,34 +31,24 @@ This document outlines the development phases for Neural Kitchen, a recipe/cookb
 ### 1.2 Recipe Creation & Management
 - [ ] **Recipe Content System**
   - [ ] Update RecipeVersion model to store markdown content
-  - [ ] Add recipe metadata (author, difficulty, estimated time, prerequisites)
   - [ ] Implement recipe content validation (ensure valid markdown)
-  - [ ] Add recipe categories/types (pattern, workflow, setup, etc.)
+  - [ ] Add recipe tags and project
 
 - [ ] **Recipe CRUD Operations**
   - [ ] Create `src/lib/data/recipes.ts` with full CRUD operations
-  - [ ] Implement recipe versioning logic (create new version, set current)
-  - [ ] Add recipe search by title, content, tags
-  - [ ] Implement recipe duplication functionality
+  - [ ] Implement recipe versioning logic, saving should be default create a new version (create new version, set current)
 
 - [ ] **Recipe UI - Viewing**
   - [ ] Create `/recipes` route with recipe listing
-  - [ ] Implement recipe detail page with markdown rendering
+  - [ ] Implement recipe detail page with markdown rendering using `react-markdown`
   - [ ] Add version history display and navigation
   - [ ] Create recipe card components for listing views
 
 - [ ] **Recipe UI - Editing**
-  - [ ] Build markdown editor component (with preview)
+  - [ ] Use markdown editor `@mdxeditor/editor` - https://mdxeditor.dev/editor/docs/getting-started
   - [ ] Create recipe creation/edit forms
   - [ ] Add tag assignment interface
-  - [ ] Implement project association UI
-  - [ ] Add version management interface (create new version, revert)
-
-- [ ] **Markdown Processing**
-  - [ ] Add markdown parser/renderer (react-markdown or similar)
-  - [ ] Implement syntax highlighting for code blocks
-  - [ ] Add support for recipe-specific markdown extensions
-  - [ ] Create markdown preview component
+  - [ ] Implement project association Dropdown
 
 ### 1.3 MCP Server Implementation
 - [ ] **MCP Server Setup**
@@ -146,6 +136,7 @@ This document outlines the development phases for Neural Kitchen, a recipe/cookb
   - [ ] Implement auto-save functionality
   - [ ] Add recipe templates and snippets
   - [ ] Create collaborative editing indicators
+  - [ ] Add version management interface (create new version, revert)
 
 - [ ] **Performance & Polish**
   - [ ] Implement recipe content caching
