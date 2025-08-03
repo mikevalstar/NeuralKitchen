@@ -4,63 +4,31 @@ import { createServerFn } from "@tanstack/react-start";
 import { Tag } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { z } from "zod";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
-import prisma from "../lib/prisma";
-
-const tagSchema = z.object({
-  name: z.string().min(1, "Tag name is required").max(50, "Tag name must be less than 50 characters"),
-});
+import { Tags } from "~/lib/data/tags";
+import { tagSchema } from "~/lib/dataValidators";
 
 const getTags = createServerFn({ method: "GET" }).handler(async () => {
-  return prisma.tag.findMany({
-    where: {
-      deletedAt: null, // Only show non-deleted tags
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+  return Tags.list();
 });
 
 const createTag = createServerFn({ method: "POST" })
   .validator((data: unknown) => tagSchema.parse(data))
   .handler(async (ctx) => {
-    const data = ctx.data;
-
-    // Check if tag already exists (case-insensitive)
-    const existingTag = await prisma.tag.findFirst({
-      where: {
-        name: {
-          equals: data.name,
-          mode: "insensitive",
-        },
-        deletedAt: null,
-      },
-    });
-
-    if (existingTag) {
-      throw new Error("Tag already exists");
-    }
-
-    return prisma.tag.create({
-      data: {
-        name: data.name.trim(),
-      },
-    });
+    return Tags.create(ctx.data);
   });
 
 export const Route = createFileRoute("/tags")({
-  component: Tags,
+  component: TagsPage,
   loader: () => {
     return getTags();
   },
 });
 
-function Tags() {
+function TagsPage() {
   const router = useRouter();
   const tags = Route.useLoaderData();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -113,31 +81,54 @@ function Tags() {
             }}
             className="space-y-4">
             <form.Field name="name">
-              {(field) => (
-                <div className="space-y-2">
-                  <div className="flex gap-3">
-                    <div className="flex-1">
-                      <Input
-                        type="text"
-                        placeholder="Enter tag name..."
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        disabled={isSubmitting}
-                        className={field.state.meta.errors?.length ? "border-destructive" : ""}
-                      />
+              {(field) => {
+                const charCount = field.state.value.length;
+                const maxChars = 50;
+                const isNearLimit = charCount > 40;
+                const isAtLimit = charCount >= maxChars;
+
+                return (
+                  <div className="space-y-2">
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <Input
+                          type="text"
+                          placeholder="Enter tag name..."
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          disabled={isSubmitting}
+                          className={field.state.meta.errors?.length ? "border-destructive" : ""}
+                        />
+                      </div>
+                      <Button type="submit" disabled={isSubmitting || !form.state.canSubmit} className="min-w-[100px]">
+                        {isSubmitting ? "Adding..." : "Add Tag"}
+                      </Button>
                     </div>
-                    <Button type="submit" disabled={isSubmitting || !form.state.canSubmit} className="min-w-[100px]">
-                      {isSubmitting ? "Adding..." : "Add Tag"}
-                    </Button>
+
+                    {/* Character counter */}
+                    <div className="flex justify-between items-center">
+                      <div className="flex-1">
+                        {field.state.meta.errors?.length ? (
+                          <div className="text-sm text-destructive">
+                            {field.state.meta.errors.map((error) => error?.message).join(", ")}
+                          </div>
+                        ) : null}
+                      </div>
+                      <div
+                        className={`text-xs ${
+                          isAtLimit
+                            ? "text-destructive font-medium"
+                            : isNearLimit
+                              ? "text-amber-600 dark:text-amber-400"
+                              : "text-muted-foreground"
+                        }`}>
+                        {charCount}/{maxChars}
+                      </div>
+                    </div>
                   </div>
-                  {field.state.meta.errors?.length ? (
-                    <div className="text-sm text-destructive">
-                      {field.state.meta.errors.map((error) => error?.message).join(", ")}
-                    </div>
-                  ) : null}
-                </div>
-              )}
+                );
+              }}
             </form.Field>
           </form>
         </CardContent>
