@@ -68,9 +68,6 @@ function RecipesPage() {
             <Button type="submit" disabled={!searchQuery.trim()}>
               Search
             </Button>
-            <Link to="/search">
-              <Button variant="outline">Advanced Search</Button>
-            </Link>
           </form>
         </CardContent>
       </Card>

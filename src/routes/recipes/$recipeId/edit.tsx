@@ -101,6 +101,31 @@ export const Route = createFileRoute("/recipes/$recipeId/edit")({
   },
 });
 
+// Sanitize markdown content for better MDX editor compatibility
+const sanitizeMarkdown = (markdown: string) => {
+  if (!markdown) return "";
+
+  try {
+    // Fix common markdown parsing issues
+    const sanitized = markdown
+      // Ensure code blocks have proper language tags
+      .replace(/```(\s*\n)/g, "```text\n")
+      // Fix inline code that might be causing issues
+      .replace(/`([^`]*)`/g, (_match, code) => {
+        // Ensure inline code doesn't contain problematic characters
+        return `\`${code.replace(/\n/g, " ")}\``;
+      })
+      // Ensure proper line endings
+      .replace(/\r\n/g, "\n")
+      .replace(/\r/g, "\n");
+
+    return sanitized;
+  } catch (error) {
+    console.warn("Error sanitizing markdown:", error);
+    return markdown;
+  }
+};
+
 function RecipeEdit() {
   const router = useRouter();
   const { recipe, tags, projects } = Route.useLoaderData();
@@ -121,31 +146,6 @@ function RecipeEdit() {
   const [selectedProjects, setSelectedProjects] = useState<string[]>(
     recipe.currentVersion?.projects.map((project) => project.id) || [],
   );
-
-  // Sanitize markdown content for better MDX editor compatibility
-  const sanitizeMarkdown = (markdown: string) => {
-    if (!markdown) return "";
-
-    try {
-      // Fix common markdown parsing issues
-      const sanitized = markdown
-        // Ensure code blocks have proper language tags
-        .replace(/```(\s*\n)/g, "```text\n")
-        // Fix inline code that might be causing issues
-        .replace(/`([^`]*)`/g, (match, code) => {
-          // Ensure inline code doesn't contain problematic characters
-          return `\`${code.replace(/\n/g, " ")}\``;
-        })
-        // Ensure proper line endings
-        .replace(/\r\n/g, "\n")
-        .replace(/\r/g, "\n");
-
-      return sanitized;
-    } catch (error) {
-      console.warn("Error sanitizing markdown:", error);
-      return markdown;
-    }
-  };
 
   // Effect to handle content sanitization and error recovery
   useEffect(() => {
@@ -179,7 +179,7 @@ function RecipeEdit() {
 
       setIsSubmitting(true);
       try {
-        const result = await updateRecipe({
+        await updateRecipe({
           data: {
             recipeId: recipe.id,
             recipe: {
@@ -235,13 +235,13 @@ function RecipeEdit() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
+            <BreadcrumbLink>
               <Link to="/recipes">Recipes</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
+            <BreadcrumbLink>
               <Link to="/recipes/$recipeId" params={{ recipeId: recipe.id }}>
                 {recipe.title}
               </Link>
