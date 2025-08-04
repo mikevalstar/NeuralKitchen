@@ -83,17 +83,15 @@ This document outlines the development phases for Neural Kitchen, a recipe/cookb
 
 
 ### 1.4 MCP Server Implementation
-- [ ] **MCP Server Setup**
-  - [ ] Research and choose MCP implementation library
-  - [ ] Create `src/mcp/` directory structure
-  - [ ] Set up MCP server configuration and initialization
-  - [ ] Add MCP server to development startup process
+- [x] **MCP Server Setup**
+  - [x] Research and choose MCP implementation library
+  - [x] Set up MCP server configuration and initialization
+  - [x] Add MCP server to development startup process
 
 - [ ] **Recipe Access Methods**
   - [ ] Implement `get_recipe` method (by ID or shortId)
   - [ ] Add `list_recipes` method with filtering options
-  - [ ] Create `search_recipes` method with full-text search
-  - [ ] Implement `get_project_recipes` method
+  - [ ] Create `search_recipes` method with NLP search
 
 - [ ] **MCP Recipe Formatting**
   - [ ] Design recipe output format for AI consumption

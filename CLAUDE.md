@@ -38,6 +38,8 @@ The file `PROJECT_PLAN.md` hs the current project plan, and is useful to referen
 - `pnpm db:studio` - Open Prisma Studio
 - `pnpm db:seed` - Seed the database with initial data
 
+When modifying the database, please use `pnpx prisma migrate dev --name {name_here}` to generate a new migration, so we keep the migrations in sync with the server.
+
 ## Architecture
 
 ### Tech Stack
