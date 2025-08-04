@@ -60,6 +60,39 @@ ${content}`,
   }
 
   /**
+   * Simple token estimation - approximately 4 characters per token for English text
+   * This is a rough approximation since proper tokenization requires the specific model's tokenizer
+   */
+  function estimateTokens(text: string): number {
+    return Math.ceil(text.length / 4);
+  }
+
+  /**
+   * Truncate text to approximately the specified number of tokens
+   */
+  function truncateToTokens(text: string, maxTokens: number): string {
+    const estimatedTokens = estimateTokens(text);
+    
+    if (estimatedTokens <= maxTokens) {
+      return text;
+    }
+    
+    // Estimate how many characters we need to keep
+    const targetLength = Math.floor(maxTokens * 4);
+    
+    // Truncate and try to break at a word boundary if possible
+    let truncated = text.slice(0, targetLength);
+    const lastSpaceIndex = truncated.lastIndexOf(' ');
+    
+    // If we can find a space within the last 100 characters, break there
+    if (lastSpaceIndex > targetLength - 100) {
+      truncated = truncated.slice(0, lastSpaceIndex);
+    }
+    
+    return truncated;
+  }
+
+  /**
    * Generate embeddings for a recipe document (for future vector search)
    * Using text-embedding-3-small for cost efficiency
    */
@@ -69,8 +102,8 @@ ${content}`,
     }
 
     try {
-      // Truncate text to first 8000 characters to stay within token limits
-      const truncatedText = text.slice(0, 8000);
+      // Truncate text to approximately 6000 tokens to stay well within the 8192 token limit
+      const truncatedText = truncateToTokens(text, 6000);
 
       const response = await openai.embeddings.create({
         model: "text-embedding-3-small",

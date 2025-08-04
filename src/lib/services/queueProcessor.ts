@@ -58,16 +58,16 @@ export class QueueProcessor {
       console.log(`Processing queue item: ${item.title} (${item.versionId})`);
 
       try {
-        // Generate AI summary for the recipe version
-        await Recipes.updateAISummary(item.versionId);
+        // Process the recipe version (generate AI summary and embedding)
+        await Recipes.processRecipeVersion(item.versionId);
 
         // Mark the queue item as completed
         await Queue.markCompleted(item.id);
         console.log(`Completed processing: ${item.title}`);
-      } catch (summaryError) {
-        console.error(`Failed to process queue item ${item.id}:`, summaryError);
+      } catch (processError) {
+        console.error(`Failed to process queue item ${item.id}:`, processError);
         await Queue.markFailed(item.id);
-        throw summaryError;
+        throw processError;
       }
     } catch (error) {
       console.error("Error processing queue item:", error);

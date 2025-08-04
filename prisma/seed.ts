@@ -31,6 +31,7 @@ export async function main() {
       createdTags.push(tag);
       console.log(`  ✅ Created tag: ${name}`);
     } catch (error) {
+      console.log(error);
       console.log(`  ⚠️  Tag "${name}" might already exist`);
       // Find existing tag
       const existingTag = await prisma.tag.findFirst({ where: { name, deletedAt: null } });
@@ -68,6 +69,7 @@ export async function main() {
       createdProjects.push(project);
       console.log(`  ✅ Created project: ${projectData.title}`);
     } catch (error) {
+      console.log(error);
       console.log(`  ⚠️  Project "${projectData.title}" might already exist`);
       // Find existing project
       const existingProject = await prisma.project.findFirst({

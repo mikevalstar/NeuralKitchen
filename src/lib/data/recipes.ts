@@ -3,6 +3,7 @@ import { type RecipeInput, type RecipeVersionInput, recipeSchema, recipeVersionS
 import prisma from "../prisma";
 import { OpenAIService } from "../services/openai";
 import { Queue } from "./queue";
+import { VecDocuments } from "./vecDocuments";
 
 export namespace Recipes {
   /**
@@ -407,6 +408,13 @@ export namespace Recipes {
           currentVersionId: null,
         },
       });
+
+      // Soft delete all vector documents for this recipe
+      await prisma.$executeRaw`
+        UPDATE "VecDocument" 
+        SET deletedat = NOW(), updatedat = NOW()
+        WHERE "recipeId" = ${recipeId}
+      `;
     });
   }
 
@@ -426,6 +434,13 @@ export namespace Recipes {
         where: { recipeId },
         data: { deletedAt: null },
       });
+
+      // Restore all vector documents for this recipe
+      await prisma.$executeRaw`
+        UPDATE "VecDocument" 
+        SET deletedat = NULL, updatedat = NOW()
+        WHERE "recipeId" = ${recipeId}
+      `;
     });
   }
 
@@ -461,6 +476,65 @@ export namespace Recipes {
       return summary;
     } catch (error) {
       console.error(`Failed to update AI summary for version ${versionId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate and store embedding for a recipe version
+   */
+  export async function updateEmbedding(versionId: string) {
+    // Get the version
+    const version = await prisma.recipeVersion.findFirst({
+      where: {
+        id: versionId,
+        deletedAt: null,
+      },
+    });
+
+    if (!version) {
+      throw new Error("Recipe version not found");
+    }
+
+    try {
+      // Combine title and content for embedding
+      const textToEmbed = `${version.title}\n\n${version.content}`;
+
+      // Generate embedding using OpenAI
+      const embedding = await OpenAIService.generateEmbedding(textToEmbed);
+
+      // Store in VecDocument table
+      await VecDocuments.upsert(
+        version.title,
+        version.shortId,
+        embedding,
+        version.id,
+        version.recipeId,
+        version.isCurrent,
+      );
+
+      console.log(`Updated embedding for recipe version: ${version.title}`);
+      return embedding;
+    } catch (error) {
+      console.error(`Failed to update embedding for version ${versionId}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Process a recipe version - generate both AI summary and embedding
+   */
+  export async function processRecipeVersion(versionId: string) {
+    console.log(`Processing recipe version: ${versionId}`);
+
+    try {
+      // Run both operations in parallel for efficiency
+      const [summary, embedding] = await Promise.all([updateAISummary(versionId), updateEmbedding(versionId)]);
+
+      console.log(`Successfully processed recipe version: ${versionId}`);
+      return { summary, embedding };
+    } catch (error) {
+      console.error(`Failed to process recipe version ${versionId}:`, error);
       throw error;
     }
   }
