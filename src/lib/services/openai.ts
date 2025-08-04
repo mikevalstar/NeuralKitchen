@@ -72,23 +72,23 @@ ${content}`,
    */
   function truncateToTokens(text: string, maxTokens: number): string {
     const estimatedTokens = estimateTokens(text);
-    
+
     if (estimatedTokens <= maxTokens) {
       return text;
     }
-    
+
     // Estimate how many characters we need to keep
     const targetLength = Math.floor(maxTokens * 4);
-    
+
     // Truncate and try to break at a word boundary if possible
     let truncated = text.slice(0, targetLength);
-    const lastSpaceIndex = truncated.lastIndexOf(' ');
-    
+    const lastSpaceIndex = truncated.lastIndexOf(" ");
+
     // If we can find a space within the last 100 characters, break there
     if (lastSpaceIndex > targetLength - 100) {
       truncated = truncated.slice(0, lastSpaceIndex);
     }
-    
+
     return truncated;
   }
 

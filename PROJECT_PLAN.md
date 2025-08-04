@@ -57,23 +57,26 @@ This document outlines the development phases for Neural Kitchen, a recipe/cookb
   - [x] Implement automatic new version creation on save
 
 ### 1.3 Summaries, Vectorization & Search
-- [ ] **Make a Queue System**
-  - [ ] Create a data class to manage the queue, it should pop off the top 1 at a time
-  - [ ] Create a loop based on setTimeout to pull from teh queue every 5 seconds
-  - [ ] When a new article is created/updated add it to the queue to summarize
-- [ ] **Summarize new versions of docs**
-  - [ ] In the loop call OPENAI to summarize the document using a cheap model
-  - [ ] Update the version in the DB with the summary
-  - [ ] Show the summary on the recipe view page
-- [ ] **Embed Versions of Docs**
+- [x] **Make a Queue System**
+  - [x] Create a data class to manage the queue, it should pop off the top 1 at a time
+  - [x] Create a loop based on setTimeout to pull from the queue every 5 seconds
+  - [x] When a new article is created/updated add it to the queue to summarize
+- [x] **Summarize new versions of docs**
+  - [x] In the loop call OPENAI to summarize the document using a cheap model (gpt-4o-mini)
+  - [x] Update the version in the DB with the summary
+  - [x] Show the summary on the recipe view page
+- [x] **Embed Versions of Docs**
   - [x] Create vec table for search later following https://www.prisma.io/docs/postgres/database/postgres-extensions
-  - [ ] On the same loop call embed the first few thousand tokens (words)
-  - [ ] Add embedding to the table following the guide above using $executeRaw
-- [ ] **Add vector search to UI**
-  - [ ] Add a search bar above the recipe list
-  - [ ] Add a backend search using the vector search to get the top 10 results
-  - [ ] Search should send you to a new page (/search) showing a google style search results (top 10 for now)
-  - [ ] The results should show the short summary below the title and be clickable 
+  - [x] On the same loop call embed the first few thousand tokens (6000 tokens using text-embedding-3-small)
+  - [x] Add embedding to the table following the guide above using $executeRaw
+  - [x] Add proper version management - mark old embeddings as not current when new versions created
+- [x] **Add vector search to UI**
+  - [x] Add a search bar above the recipe list
+  - [x] Add a backend search using the vector search to get the top 10 results
+  - [x] Search should send you to a new page (/search) showing a google style search results (top 10 for now)
+  - [x] The results should show the short summary below the title and be clickable
+  - [x] Added hybrid search (vector + text fallback) for better reliability
+  - [x] Added search to main navigation 
 - [ ] **Add queue visualization page**
   - [ ] Add a page to the ui to see the recent and pending queued items
   - [ ] Highlight any errored items

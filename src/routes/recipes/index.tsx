@@ -1,8 +1,10 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, Plus, Search } from "lucide-react";
+import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
 import { Recipes } from "~/lib/data/recipes";
 import { formatDateOnly } from "~/lib/dateUtils";
 
@@ -19,6 +21,18 @@ export const Route = createFileRoute("/recipes/")({
 
 function RecipesPage() {
   const recipes = Route.useLoaderData();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate({
+        to: "/search",
+        search: { q: searchQuery.trim() },
+      });
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -36,6 +50,30 @@ function RecipesPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Search Bar */}
+      <Card>
+        <CardContent className="pt-6">
+          <form onSubmit={handleSearch} className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search recipes using AI semantic search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Button type="submit" disabled={!searchQuery.trim()}>
+              Search
+            </Button>
+            <Link to="/search">
+              <Button variant="outline">Advanced Search</Button>
+            </Link>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Recipes Table */}
       <Card>

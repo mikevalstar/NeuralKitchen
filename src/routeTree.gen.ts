@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TagsRouteImport } from './routes/tags'
+import { Route as SearchRouteImport } from './routes/search'
 import { Route as HelpRouteImport } from './routes/help'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RecipesIndexRouteImport } from './routes/recipes/index'
@@ -23,6 +24,11 @@ import { Route as ProjectsProjectIdEditRouteImport } from './routes/projects/$pr
 const TagsRoute = TagsRouteImport.update({
   id: '/tags',
   path: '/tags',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SearchRoute = SearchRouteImport.update({
+  id: '/search',
+  path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HelpRoute = HelpRouteImport.update({
@@ -74,6 +80,7 @@ const ProjectsProjectIdEditRoute = ProjectsProjectIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/help': typeof HelpRoute
+  '/search': typeof SearchRoute
   '/tags': typeof TagsRoute
   '/recipes/create': typeof RecipesCreateRoute
   '/projects': typeof ProjectsIndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/help': typeof HelpRoute
+  '/search': typeof SearchRoute
   '/tags': typeof TagsRoute
   '/recipes/create': typeof RecipesCreateRoute
   '/projects': typeof ProjectsIndexRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/help': typeof HelpRoute
+  '/search': typeof SearchRoute
   '/tags': typeof TagsRoute
   '/recipes/create': typeof RecipesCreateRoute
   '/projects/': typeof ProjectsIndexRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/help'
+    | '/search'
     | '/tags'
     | '/recipes/create'
     | '/projects'
@@ -125,6 +135,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/help'
+    | '/search'
     | '/tags'
     | '/recipes/create'
     | '/projects'
@@ -137,6 +148,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/help'
+    | '/search'
     | '/tags'
     | '/recipes/create'
     | '/projects/'
@@ -150,6 +162,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HelpRoute: typeof HelpRoute
+  SearchRoute: typeof SearchRoute
   TagsRoute: typeof TagsRoute
   RecipesCreateRoute: typeof RecipesCreateRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
@@ -167,6 +180,13 @@ declare module '@tanstack/react-router' {
       path: '/tags'
       fullPath: '/tags'
       preLoaderRoute: typeof TagsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/search': {
+      id: '/search'
+      path: '/search'
+      fullPath: '/search'
+      preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/help': {
@@ -238,6 +258,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HelpRoute: HelpRoute,
+  SearchRoute: SearchRoute,
   TagsRoute: TagsRoute,
   RecipesCreateRoute: RecipesCreateRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,

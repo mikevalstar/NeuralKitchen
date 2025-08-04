@@ -108,7 +108,7 @@ export namespace VecDocuments {
    * Perform vector similarity search
    * Returns the top N most similar documents
    */
-  export async function similaritySearch(queryEmbedding: number[], limit = 10, threshold = 0.7) {
+  export async function similaritySearch(queryEmbedding: number[], limit = 10, threshold = 0.3) {
     const result = await prisma.$queryRaw<
       Array<{
         id: number;
