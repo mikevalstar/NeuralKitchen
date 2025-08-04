@@ -49,6 +49,17 @@ export const recipeVersionSchema = z.object({
 
 export type RecipeVersionInput = z.infer<typeof recipeVersionSchema>;
 
+// Help file validation schema
+export const helpFileSchema = z.object({
+  helpFile: z
+    .string()
+    .min(1, "Help file name is required")
+    .max(50, "Help file name must be less than 50 characters")
+    .regex(/^[a-zA-Z0-9_-]+$/, "Help file name can only contain letters, numbers, hyphens, and underscores"),
+});
+
+export type HelpFileInput = z.infer<typeof helpFileSchema>;
+
 // Recipe ID validation schema for server routes
 export const recipeIdSchema = z.object({
   recipeId: z.string().min(1, "Recipe ID is required"),

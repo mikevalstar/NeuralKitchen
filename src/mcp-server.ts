@@ -104,7 +104,7 @@ class StandaloneMcpServer {
       {
         title: "Get a single recipe by ID or shortId with full content",
         description: "Get a single recipe by ID or shortId with full content",
-        inputSchema:{
+        inputSchema: {
           identifier: z.string().describe("Recipe ID or shortId to retrieve"),
         },
       },
@@ -154,14 +154,12 @@ class StandaloneMcpServer {
 
     // Search recipes using the same logic as the UI
     this.server.registerTool(
-      "search_recipes", {
+      "search_recipes",
+      {
         title: "Search Rcipies",
         description: "Search recipes using semantic and text search with AI summaries",
-        inputSchema:
-        {
-          query: z
-            .string()
-            .describe("Search query to find relevant recipes"),
+        inputSchema: {
+          query: z.string().describe("Search query to find relevant recipes"),
         },
       },
       async (args) => {
