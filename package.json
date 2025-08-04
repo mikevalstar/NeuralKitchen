@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "concurrently --names \"APP,MCP\" --prefix-colors \"blue,green\" \"pnpm dev:web\" \"pnpm mcp:dev\"",
+    "dev": "concurrently --names \"UI,MCP\" --prefix-colors \"blue,green\" \"pnpm dev:web\" \"pnpm mcp:dev\"",
     "dev:web": "vite dev",
     "build": "vite build && tsc --noEmit",
     "start": "node .output/server/index.mjs",

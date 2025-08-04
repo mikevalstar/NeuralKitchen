@@ -90,7 +90,6 @@ This document outlines the development phases for Neural Kitchen, a recipe/cookb
 
 - [ ] **Recipe Access Methods**
   - [ ] Implement `get_recipe` method (by ID or shortId)
-  - [ ] Add `list_recipes` method with filtering options
   - [ ] Create `search_recipes` method with NLP search
 
 - [ ] **MCP Recipe Formatting**

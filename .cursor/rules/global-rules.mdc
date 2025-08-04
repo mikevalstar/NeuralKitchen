@@ -12,11 +12,15 @@ I am always running the app in dev mode, so you dont need to build or run the ap
 
 - **Frontend**: React 19 with TanStack Start (full-stack React framework)
 - **Router**: TanStack Router with file-based routing
-- **Database**: PostgreSQL with Prisma ORM and Accelerate extension
+- **Database**: PostgreSQL with Prisma ORM and Accelerate extension with vector search support
 - **Styling**: TailwindCSS v4 with Shadcn/ui components
 - **Forms**: TanStack Form with Zod validation
 - **Code Quality**: Biome for linting and formatting
 - **UI Components**: Radix UI primitives with custom styling
+- **MCP Server**: Model Context Protocol server for AI agent integration (port 3002)
+- **AI Services**: OpenAI API for content summarization and vector embeddings
+- **Background Processing**: Queue system for AI operations with error handling
+- **Vector Search**: PostgreSQL pgvector extension for semantic search
 
 ## Development Notes
 
@@ -44,3 +48,117 @@ Always use the standardized date formatting utilities from `src/lib/dateUtils.ts
 - `formatDateOnly(date)` for date-only display using dayjs 'll' format (e.g., "Oct 13, 2014")
 - `formatDateTime(date)` for date with time using dayjs 'lll' format (e.g., "Oct 13, 2014 1:30 PM")
 - Never use native JavaScript date formatting methods like `toLocaleDateString()`
+
+## Development Commands
+
+### Core Development
+- `pnpm dev` - Start development server on port 3000 AND MCP server on port 3002 (uses concurrently)
+- `pnpm dev:web` - Start only the web development server on port 3000
+- `pnpm build` - Build the application and run TypeScript checks
+- `pnpm start` - Start production server
+
+### MCP Server
+- `pnpm mcp:dev` - Start MCP server in watch mode on port 3002 (development)
+- `pnpm mcp:start` - Start MCP server on port 3002 (production)
+
+### Database Operations
+- `pnpm db:generate` - Generate Prisma client
+- `pnpm db:push` - Push schema changes to database
+- `pnpm db:migrate` - Create and apply new migration
+- `pnpm db:studio` - Open Prisma Studio
+- `pnpm db:seed` - Seed the database with initial data
+- `pnpx prisma migrate dev --name {name_here}` - Generate a new migration (ALWAYS use this for DB changes)
+
+### Code Quality
+- `pnpm check:fix` - Run all Biome checks with auto-fix (lint + format)
+- `pnpm lint:fix` - Run Biome linter with auto-fix
+- `pnpm format:fix` - Format code with Biome
+
+## Database Schema & Patterns
+
+### Core Models
+- **Recipe**: Main recipe entity with `shortId` and reference to current version
+- **RecipeVersion**: Versioned content with `title`, `content`, `versionId`, `summary`, and `isCurrent` flag
+- **Tag**: Tagging system with soft delete support (`deletedAt`)
+- **Project**: Project organization system for grouping related recipes
+- **Queue**: Background job processing system with `type`, `data`, `status`, `error`, and retry fields
+- **RecipeVersionVectorSearch**: Vector embeddings table for semantic search
+
+### Key Patterns
+
+#### Data Access Layer Pattern
+Data operations are organized in namespaces under `src/lib/data/`:
+```typescript
+export namespace Tags {
+  export async function list() { /* implementation */ }
+  export async function create(data: TagInput) { /* implementation */ }
+}
+```
+
+#### Soft Delete Pattern
+Models like Tag implement soft delete with `deletedAt` timestamp. Always filter `deletedAt: null` in queries.
+
+#### Background Processing Pattern
+Queue system processes AI operations asynchronously:
+- Recipe content is queued for summarization and embedding generation
+- Queue processor runs every 5 seconds using setTimeout loop
+- Error handling with retry logic and status tracking
+
+#### Vector Search Pattern
+Semantic search using PostgreSQL vector extension:
+- Content is embedded using OpenAI's text-embedding-3-small model (6000 token limit)
+- Hybrid search combines vector similarity with text fallback
+- Embeddings are versioned alongside recipe content
+
+#### MCP Integration Pattern
+Model Context Protocol server provides AI agents with recipe access:
+- Standalone server runs on port 3002 alongside main app
+- Uses @modelcontextprotocol/sdk for standard compliance
+- Currently implements basic "hello_world" tool (placeholder for recipe tools)
+- Health check endpoint available at `/health`
+
+## File Structure & Organization
+
+### Key Directories
+- `src/routes/` - File-based routing with TanStack Router
+- `src/components/` - React components including ui/ for Shadcn components
+- `src/lib/data/` - Namespaced data access functions (e.g., `Tags.list()`, `Tags.create()`)
+- `src/lib/services/` - Background services (queue processor, AI integrations)
+- `src/mcp-server.ts` - MCP (Model Context Protocol) server implementation
+- `src/generated/prisma/` - Generated Prisma client (custom output location)
+
+### Important Files
+- `PROJECT_PLAN.md` - Current project roadmap and progress tracking
+- `src/lib/dataValidators.ts` - Zod schemas for input validation
+- `src/lib/dateUtils.ts` - Standardized date formatting utilities
+- `src/lib/prisma.ts` - Database client configuration
+
+## AI Integration Guidelines
+
+### OpenAI Integration
+- Use gpt-4o-mini for content summarization (cost-effective)
+- Use text-embedding-3-small for vector embeddings (6000 token limit)
+- All AI operations are queued for background processing
+- Error handling and retry logic implemented
+
+### MCP Server Development
+- Server runs independently from main application
+- Uses Express.js with streamable HTTP transport for stateless operation
+- Graceful shutdown handling with SIGINT/SIGTERM
+- Development: runs in watch mode alongside main app
+
+## Code Style & Conventions
+
+### Never Add Comments
+- DO NOT ADD ***ANY*** COMMENTS unless explicitly requested
+- Code should be self-documenting through clear naming and structure
+
+### Follow Existing Patterns
+- Always check existing similar components/functions before creating new ones
+- Use the same import patterns and library choices as existing code
+- Follow the established naming conventions
+
+### Database Changes
+- ALWAYS use `pnpx prisma migrate dev --name {descriptive_name}` for schema changes
+- Never use `db:push` for structural changes in development
+- Keep migrations synchronized with the server

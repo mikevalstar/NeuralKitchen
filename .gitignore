@@ -4,3 +4,4 @@ app/generated
 .tanstack
 /src/generated/prisma
 .claude
+.output
