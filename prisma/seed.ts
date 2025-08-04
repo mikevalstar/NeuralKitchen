@@ -722,6 +722,7 @@ Brief description of changes
       createdRecipes.push(result);
       console.log(`  ✅ Created recipe: ${recipe.title}`);
     } catch (error) {
+      console.log(error);
       console.log(`  ⚠️  Recipe "${recipe.title}" might already exist`);
     }
   }

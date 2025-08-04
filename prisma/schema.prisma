@@ -45,7 +45,6 @@ model RecipeVersion {
   title             String
   shortId           String
   content           String
-  aiSummary         String?
   versionId         String
   isCurrent         Boolean   @default(false)
   createdAt         DateTime  @default(now())
@@ -54,6 +53,7 @@ model RecipeVersion {
   recipeId          String
   contentHash       String?
   versionNumber     Int
+  aiSummary         String?
   currentForRecipes Recipe[]  @relation("CurrentRecipeVersion")
   recipe            Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   projects          Project[] @relation("RecipeVersionProjects")
@@ -83,6 +83,7 @@ model VecDocument {
   deletedat DateTime?              @db.Timestamptz(6)
   versionId String?
   recipeId  String?
+  isCurrent Boolean                @default(false)
 
   @@index([embedding])
 }

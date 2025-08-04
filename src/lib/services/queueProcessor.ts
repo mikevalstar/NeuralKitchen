@@ -1,4 +1,5 @@
 import { Queue } from "../data/queue";
+import { Recipes } from "../data/recipes";
 
 export class QueueProcessor {
   private intervalId: NodeJS.Timeout | null = null;
@@ -56,15 +57,18 @@ export class QueueProcessor {
 
       console.log(`Processing queue item: ${item.title} (${item.versionId})`);
 
-      // TODO: Add actual processing logic here
-      // For now, we'll just mark it as completed
-      // In the next phase, this is where we'll call OpenAI for summarization and embeddings
+      try {
+        // Generate AI summary for the recipe version
+        await Recipes.updateAISummary(item.versionId);
 
-      // Simulate processing time
-      await new Promise((resolve) => setTimeout(resolve, 100));
-
-      await Queue.markCompleted(item.id);
-      console.log(`Completed processing: ${item.title}`);
+        // Mark the queue item as completed
+        await Queue.markCompleted(item.id);
+        console.log(`Completed processing: ${item.title}`);
+      } catch (summaryError) {
+        console.error(`Failed to process queue item ${item.id}:`, summaryError);
+        await Queue.markFailed(item.id);
+        throw summaryError;
+      }
     } catch (error) {
       console.error("Error processing queue item:", error);
 

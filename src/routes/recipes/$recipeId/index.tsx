@@ -194,6 +194,19 @@ function RecipeDetail() {
               </CardContent>
             </Card>
 
+            {/* AI Summary */}
+            {currentVersion?.aiSummary && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>AI Summary</CardTitle>
+                  <CardDescription>Auto-generated summary</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm leading-relaxed text-muted-foreground">{currentVersion.aiSummary}</p>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Tags */}
             {currentVersion?.tags && currentVersion.tags.length > 0 && (
               <Card>

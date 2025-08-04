@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { type RecipeInput, type RecipeVersionInput, recipeSchema, recipeVersionSchema } from "../dataValidators";
 import prisma from "../prisma";
+import { OpenAIService } from "../services/openai";
 import { Queue } from "./queue";
 
 export namespace Recipes {
@@ -426,5 +427,41 @@ export namespace Recipes {
         data: { deletedAt: null },
       });
     });
+  }
+
+  /**
+   * Generate and update AI summary for a recipe version
+   */
+  export async function updateAISummary(versionId: string) {
+    // Get the version
+    const version = await prisma.recipeVersion.findFirst({
+      where: {
+        id: versionId,
+        deletedAt: null,
+      },
+    });
+
+    if (!version) {
+      throw new Error("Recipe version not found");
+    }
+
+    try {
+      // Generate summary using OpenAI
+      const summary = await OpenAIService.summarizeRecipe(version.title, version.content);
+
+      // Update the version with the summary
+      await prisma.recipeVersion.update({
+        where: { id: versionId },
+        data: {
+          aiSummary: summary,
+        },
+      });
+
+      console.log(`Updated AI summary for recipe version: ${version.title}`);
+      return summary;
+    } catch (error) {
+      console.error(`Failed to update AI summary for version ${versionId}:`, error);
+      throw error;
+    }
   }
 }
