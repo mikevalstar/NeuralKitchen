@@ -1,0 +1,14 @@
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE "VecDocument" (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  shortid TEXT NOT NULL,
+  embedding VECTOR(1536),
+  createdAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  updatedAt TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  deletedAt TIMESTAMP WITH TIME ZONE,
+  UNIQUE(shortid)
+);
+
+CREATE INDEX ON "VecDocument" USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);

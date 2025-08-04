@@ -94,9 +94,7 @@ function RecipeDetail() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{recipe.title}</h1>
-          <p className="text-muted-foreground">
-            Version {currentVersion?.versionId || "No version"} • AI Agent Recipe
-          </p>
+          <p className="text-muted-foreground">Version {currentVersion?.versionId || "No version"} • AI Agent Recipe</p>
         </div>
 
         <div className="flex items-center space-x-2">
@@ -139,20 +137,23 @@ function RecipeDetail() {
                       ul: ({ children }) => <ul className="list-disc pl-6 mb-3 space-y-1">{children}</ul>,
                       ol: ({ children }) => <ol className="list-decimal pl-6 mb-3 space-y-1">{children}</ol>,
                       li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                      code: ({ inline, children }) => 
+                      code: ({ inline, children }) =>
                         inline ? (
                           <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
                         ) : (
-                          <code className="block bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto">{children}</code>
+                          <code className="block bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto">
+                            {children}
+                          </code>
                         ),
-                      pre: ({ children }) => <pre className="bg-muted p-4 rounded-lg overflow-x-auto mb-4">{children}</pre>,
+                      pre: ({ children }) => (
+                        <pre className="bg-muted p-4 rounded-lg overflow-x-auto mb-4">{children}</pre>
+                      ),
                       blockquote: ({ children }) => (
                         <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground mb-3">
                           {children}
                         </blockquote>
                       ),
-                    }}
-                  >
+                    }}>
                     {currentVersion.content}
                   </ReactMarkdown>
                 </div>
@@ -202,10 +203,7 @@ function RecipeDetail() {
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
                     {currentVersion.tags.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-sm"
-                      >
+                      <span key={tag.id} className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-sm">
                         {tag.name}
                       </span>
                     ))}
@@ -227,8 +225,7 @@ function RecipeDetail() {
                         key={project.id}
                         to="/projects/$projectId"
                         params={{ projectId: project.id }}
-                        className="block p-2 bg-primary/10 text-primary rounded text-sm hover:bg-primary/20 transition-colors"
-                      >
+                        className="block p-2 bg-primary/10 text-primary rounded text-sm hover:bg-primary/20 transition-colors">
                         {project.title}
                       </Link>
                     ))}
@@ -246,7 +243,8 @@ function RecipeDetail() {
           <DialogHeader>
             <DialogTitle>Delete Recipe</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{recipe.title}"? This action cannot be undone and will delete all versions of this recipe.
+              Are you sure you want to delete "{recipe.title}"? This action cannot be undone and will delete all
+              versions of this recipe.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>

@@ -13,8 +13,7 @@ export function WidthToggle({ isWide, onToggle }: WidthToggleProps) {
       size="sm"
       onClick={onToggle}
       className="p-2"
-      title={isWide ? "Switch to constrained width" : "Switch to full width"}
-    >
+      title={isWide ? "Switch to constrained width" : "Switch to full width"}>
       {isWide ? <Minimize className="h-4 w-4" /> : <Maximize className="h-4 w-4" />}
     </Button>
   );

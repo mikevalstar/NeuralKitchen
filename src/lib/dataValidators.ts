@@ -62,3 +62,13 @@ export const recipeVersionIdSchema = z.object({
 });
 
 export type RecipeVersionIdInput = z.infer<typeof recipeVersionIdSchema>;
+
+// Queue validation schema
+export const queueItemSchema = z.object({
+  title: z.string().min(1, "Title is required").max(200, "Title must be less than 200 characters"),
+  shortid: z.string().min(1, "Short ID is required").max(50, "Short ID must be less than 50 characters"),
+  versionId: z.string().min(1, "Version ID is required"),
+  status: z.enum(["pending", "processing", "completed", "failed"]).optional().default("pending"),
+});
+
+export type QueueItemInput = z.infer<typeof queueItemSchema>;

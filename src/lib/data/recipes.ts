@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { type RecipeInput, type RecipeVersionInput, recipeSchema, recipeVersionSchema } from "../dataValidators";
 import prisma from "../prisma";
+import { Queue } from "./queue";
 
 export namespace Recipes {
   /**
@@ -144,6 +145,18 @@ export namespace Recipes {
         data: { currentVersionId: version.id },
       });
 
+      // Add to queue for processing (summarization and embedding)
+      try {
+        await Queue.add({
+          title: version.title,
+          shortid: version.shortId,
+          versionId: version.id,
+        });
+      } catch (error) {
+        // Log error but don't fail the recipe creation
+        console.error("Failed to add recipe version to queue:", error);
+      }
+
       return {
         recipe,
         version,
@@ -230,6 +243,18 @@ export namespace Recipes {
         },
       });
 
+      // Add to queue for processing (summarization and embedding)
+      try {
+        await Queue.add({
+          title: newVersion.title,
+          shortid: newVersion.shortId,
+          versionId: newVersion.id,
+        });
+      } catch (error) {
+        // Log error but don't fail the save operation
+        console.error("Failed to add recipe version to queue:", error);
+      }
+
       return newVersion;
     });
   }
@@ -306,6 +331,7 @@ export namespace Recipes {
     }
 
     // Save it as a new version (this will create a new version with the old content)
+    // Note: The save() function will automatically add the new version to the queue
     return save(recipeId, {
       title: targetVersion.title,
       content: targetVersion.content,

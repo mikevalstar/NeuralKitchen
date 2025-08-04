@@ -1,3 +1,29 @@
+import {
+  BlockTypeSelect,
+  BoldItalicUnderlineToggles,
+  CodeToggle,
+  CreateLink,
+  codeBlockPlugin,
+  codeMirrorPlugin,
+  DiffSourceToggleWrapper,
+  diffSourcePlugin,
+  headingsPlugin,
+  InsertImage,
+  InsertTable,
+  InsertThematicBreak,
+  imagePlugin,
+  ListsToggle,
+  linkDialogPlugin,
+  linkPlugin,
+  listsPlugin,
+  MDXEditor,
+  markdownShortcutPlugin,
+  quotePlugin,
+  tablePlugin,
+  thematicBreakPlugin,
+  toolbarPlugin,
+  UndoRedo,
+} from "@mdxeditor/editor";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
@@ -19,34 +45,7 @@ import { Projects } from "~/lib/data/projects";
 import { Recipes } from "~/lib/data/recipes";
 import { Tags } from "~/lib/data/tags";
 import { recipeSchema, recipeVersionSchema } from "~/lib/dataValidators";
-
-import {
-  MDXEditor,
-  headingsPlugin,
-  listsPlugin,
-  quotePlugin,
-  thematicBreakPlugin,
-  markdownShortcutPlugin,
-  linkPlugin,
-  linkDialogPlugin,
-  imagePlugin,
-  tablePlugin,
-  codeBlockPlugin,
-  codeMirrorPlugin,
-  toolbarPlugin,
-  diffSourcePlugin,
-  UndoRedo,
-  BoldItalicUnderlineToggles,
-  CodeToggle,
-  CreateLink,
-  InsertImage,
-  InsertTable,
-  InsertThematicBreak,
-  ListsToggle,
-  BlockTypeSelect,
-  DiffSourceToggleWrapper,
-} from '@mdxeditor/editor';
-import '@mdxeditor/editor/style.css';
+import "@mdxeditor/editor/style.css";
 
 // Server functions
 const getTags = createServerFn({ method: "GET" }).handler(async () => {
@@ -72,10 +71,7 @@ const createRecipe = createServerFn({ method: "POST" })
 export const Route = createFileRoute("/recipes/create")({
   component: RecipeCreate,
   loader: async () => {
-    const [tags, projects] = await Promise.all([
-      getTags(),
-      getProjects()
-    ]);
+    const [tags, projects] = await Promise.all([getTags(), getProjects()]);
     return { tags, projects };
   },
 });
@@ -118,11 +114,11 @@ function RecipeCreate() {
             },
           },
         });
-        
+
         toast.success("Recipe created successfully!");
-        router.navigate({ 
-          to: "/recipes/$recipeId", 
-          params: { recipeId: result.recipe.id } 
+        router.navigate({
+          to: "/recipes/$recipeId",
+          params: { recipeId: result.recipe.id },
         });
       } catch (error) {
         console.error("Failed to create recipe:", error);
@@ -138,18 +134,12 @@ function RecipeCreate() {
   }, []);
 
   const toggleTag = (tagId: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tagId) 
-        ? prev.filter(id => id !== tagId)
-        : [...prev, tagId]
-    );
+    setSelectedTags((prev) => (prev.includes(tagId) ? prev.filter((id) => id !== tagId) : [...prev, tagId]));
   };
 
   const toggleProject = (projectId: string) => {
-    setSelectedProjects(prev => 
-      prev.includes(projectId) 
-        ? prev.filter(id => id !== projectId)
-        : [...prev, projectId]
+    setSelectedProjects((prev) =>
+      prev.includes(projectId) ? prev.filter((id) => id !== projectId) : [...prev, projectId],
     );
   };
 
@@ -186,7 +176,6 @@ function RecipeCreate() {
           form.handleSubmit();
         }}
         className="space-y-6">
-        
         {/* Basic Information */}
         <Card>
           <CardHeader>
@@ -320,23 +309,23 @@ function RecipeCreate() {
                   imagePlugin(),
                   tablePlugin(),
                   codeBlockPlugin(),
-                  codeMirrorPlugin({ 
-                    codeBlockLanguages: { 
-                      js: 'JavaScript', 
-                      tsx: 'TypeScript', 
-                      bash: 'Bash', 
-                      sql: 'SQL', 
-                      python: 'Python',
-                      json: 'JSON',
-                      css: 'CSS',
-                      html: 'HTML',
-                      yaml: 'YAML'
-                    } 
+                  codeMirrorPlugin({
+                    codeBlockLanguages: {
+                      js: "JavaScript",
+                      tsx: "TypeScript",
+                      bash: "Bash",
+                      sql: "SQL",
+                      python: "Python",
+                      json: "JSON",
+                      css: "CSS",
+                      html: "HTML",
+                      yaml: "YAML",
+                    },
                   }),
-                  diffSourcePlugin({ 
-                    viewMode: 'rich-text',
-                    diffMarkdown: '',
-                    readOnlyDiff: false
+                  diffSourcePlugin({
+                    viewMode: "rich-text",
+                    diffMarkdown: "",
+                    readOnlyDiff: false,
                   }),
                   toolbarPlugin({
                     toolbarContents: () => (
@@ -351,8 +340,8 @@ function RecipeCreate() {
                         <InsertThematicBreak />
                         <ListsToggle />
                       </DiffSourceToggleWrapper>
-                    )
-                  })
+                    ),
+                  }),
                 ]}
                 className="min-h-[400px]"
               />
@@ -380,8 +369,7 @@ function RecipeCreate() {
                         selectedTags.includes(tag.id)
                           ? "bg-primary text-primary-foreground"
                           : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                      }`}
-                    >
+                      }`}>
                       {tag.name}
                     </button>
                   ))}
@@ -410,12 +398,9 @@ function RecipeCreate() {
                         selectedProjects.includes(project.id)
                           ? "bg-primary text-primary-foreground"
                           : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                      }`}
-                    >
+                      }`}>
                       <div className="font-medium">{project.title}</div>
-                      {project.description && (
-                        <div className="text-xs opacity-80 mt-1">{project.description}</div>
-                      )}
+                      {project.description && <div className="text-xs opacity-80 mt-1">{project.description}</div>}
                     </button>
                   ))}
                 </div>

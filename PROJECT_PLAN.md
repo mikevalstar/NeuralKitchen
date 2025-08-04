@@ -56,7 +56,30 @@ This document outlines the development phases for Neural Kitchen, a recipe/cookb
   - [x] Create recipe edit page with version management
   - [x] Implement automatic new version creation on save
 
-### 1.3 MCP Server Implementation
+### 1.3 Summaries, Vectorization & Search
+- [ ] **Make a Queue System**
+  - [ ] Create a data class to manage the queue, it should pop off the top 1 at a time
+  - [ ] Create a loop based on setTimeout to pull from teh queue every 5 seconds
+  - [ ] When a new article is created/updated add it to the queue to summarize
+- [ ] **Summarize new versions of docs**
+  - [ ] In the loop call OPENAI to summarize the document using a cheap model
+  - [ ] Update the version in the DB with the summary
+  - [ ] Show the summary on the recipe view page
+- [ ] **Embed Versions of Docs**
+  - [x] Create vec table for search later following https://www.prisma.io/docs/postgres/database/postgres-extensions
+  - [ ] On the same loop call embed the first few thousand tokens (words)
+  - [ ] Add embedding to the table following the guide above using $executeRaw
+- [ ] **Add vector search to UI**
+  - [ ] Add a search bar above the recipe list
+  - [ ] Add a backend search using the vector search to get the top 10 results
+  - [ ] Search should send you to a new page (/search) showing a google style search results (top 10 for now)
+  - [ ] The results should show the short summary below the title and be clickable 
+- [ ] **Add queue visualization page**
+  - [ ] Add a page to the ui to see the recent and pending queued items
+  - [ ] Highlight any errored items
+
+
+### 1.4 MCP Server Implementation
 - [ ] **MCP Server Setup**
   - [ ] Research and choose MCP implementation library
   - [ ] Create `src/mcp/` directory structure

@@ -1,8 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { BookOpen, FolderOpen, HelpCircle, Tags } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
-import { WidthToggle } from "./WidthToggle";
 import { Button } from "./ui/button";
+import { WidthToggle } from "./WidthToggle";
 
 interface NavigationProps {
   isWide: boolean;

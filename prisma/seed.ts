@@ -13,7 +13,7 @@ export async function main() {
   console.log("📄 Creating tags...");
   const tagNames = [
     "Frontend",
-    "Backend", 
+    "Backend",
     "Database",
     "Testing",
     "Deployment",
@@ -21,7 +21,7 @@ export async function main() {
     "Authentication",
     "Performance",
     "Security",
-    "Debugging"
+    "Debugging",
   ];
 
   const createdTags = [];
@@ -44,18 +44,21 @@ export async function main() {
     {
       title: "React Component Library",
       shortId: "react-components",
-      description: "Best practices and patterns for building reusable React components with TypeScript and testing strategies."
+      description:
+        "Best practices and patterns for building reusable React components with TypeScript and testing strategies.",
     },
     {
-      title: "Node.js API Development", 
+      title: "Node.js API Development",
       shortId: "nodejs-api",
-      description: "Guidelines for building scalable REST APIs with Node.js, Express, authentication, and database integration."
+      description:
+        "Guidelines for building scalable REST APIs with Node.js, Express, authentication, and database integration.",
     },
     {
       title: "Full Stack Web Application",
-      shortId: "fullstack-webapp", 
-      description: "Complete workflows for building modern web applications from database design to deployment and monitoring."
-    }
+      shortId: "fullstack-webapp",
+      description:
+        "Complete workflows for building modern web applications from database design to deployment and monitoring.",
+    },
   ];
 
   const createdProjects = [];
@@ -67,8 +70,8 @@ export async function main() {
     } catch (error) {
       console.log(`  ⚠️  Project "${projectData.title}" might already exist`);
       // Find existing project
-      const existingProject = await prisma.project.findFirst({ 
-        where: { shortId: projectData.shortId, deletedAt: null } 
+      const existingProject = await prisma.project.findFirst({
+        where: { shortId: projectData.shortId, deletedAt: null },
       });
       if (existingProject) createdProjects.push(existingProject);
     }
@@ -119,8 +122,8 @@ Update \`tsconfig.json\` with strict settings:
 - Type-safe component development
 - Better IDE support and error catching`,
         tagIds: [],
-        projectIds: []
-      }
+        projectIds: [],
+      },
     },
     {
       recipe: { title: "Database Migration Strategy", shortId: "database-migrations" },
@@ -160,8 +163,8 @@ ALTER TABLE users DROP COLUMN email_verified;
 - [ ] Monitor performance impact
 - [ ] Update documentation`,
         tagIds: [],
-        projectIds: []
-      }
+        projectIds: [],
+      },
     },
     {
       recipe: { title: "API Authentication with JWT", shortId: "jwt-authentication" },
@@ -221,8 +224,8 @@ const authenticateToken = (req, res, next) => {
 - Add rate limiting
 - Log authentication attempts`,
         tagIds: [],
-        projectIds: []
-      }
+        projectIds: [],
+      },
     },
     {
       recipe: { title: "React Component Testing", shortId: "react-component-testing" },
@@ -293,13 +296,13 @@ test('loads and displays user data', async () => {
 - Test error states
 - Keep tests DRY with custom render functions`,
         tagIds: [],
-        projectIds: []
-      }
+        projectIds: [],
+      },
     },
     {
       recipe: { title: "Docker Deployment Setup", shortId: "docker-deployment" },
       version: {
-        title: "Docker Deployment Setup", 
+        title: "Docker Deployment Setup",
         content: `# Docker Deployment Setup
 
 Complete guide for containerizing and deploying applications with Docker.
@@ -366,8 +369,8 @@ volumes:
 - [ ] Security scan completed
 - [ ] Resource limits set`,
         tagIds: [],
-        projectIds: []
-      }
+        projectIds: [],
+      },
     },
     {
       recipe: { title: "Performance Optimization Checklist", shortId: "performance-optimization" },
@@ -441,8 +444,8 @@ const getCachedUser = async (userId) => {
 - Database queries < 100ms
 - API endpoints < 500ms`,
         tagIds: [],
-        projectIds: []
-      }
+        projectIds: [],
+      },
     },
     {
       recipe: { title: "Error Handling Best Practices", shortId: "error-handling" },
@@ -564,8 +567,8 @@ class NotFoundError extends Error {
 - Graceful degradation
 - Loading and error states`,
         tagIds: [],
-        projectIds: []
-      }
+        projectIds: [],
+      },
     },
     {
       recipe: { title: "Git Workflow and Best Practices", shortId: "git-workflow" },
@@ -689,33 +692,33 @@ Brief description of changes
 - Generate changelogs automatically
 - Automate deployments with CI/CD`,
         tagIds: [],
-        projectIds: []
-      }
-    }
+        projectIds: [],
+      },
+    },
   ];
 
   const createdRecipes = [];
   for (let i = 0; i < recipesData.length; i++) {
     const { recipe, version } = recipesData[i];
-    
+
     try {
       // Assign some tags and projects randomly
       const randomTags = createdTags
         .sort(() => 0.5 - Math.random())
         .slice(0, Math.floor(Math.random() * 3) + 1)
-        .map(tag => tag.id);
-      
+        .map((tag) => tag.id);
+
       const randomProjects = createdProjects
         .sort(() => 0.5 - Math.random())
         .slice(0, Math.floor(Math.random() * 2) + 1)
-        .map(project => project.id);
+        .map((project) => project.id);
 
       const result = await Recipes.create(recipe, {
         ...version,
         tagIds: randomTags,
-        projectIds: randomProjects
+        projectIds: randomProjects,
       });
-      
+
       createdRecipes.push(result);
       console.log(`  ✅ Created recipe: ${recipe.title}`);
     } catch (error) {
