@@ -1,35 +1,10 @@
-import {
-  BlockTypeSelect,
-  BoldItalicUnderlineToggles,
-  CodeToggle,
-  CreateLink,
-  codeBlockPlugin,
-  codeMirrorPlugin,
-  DiffSourceToggleWrapper,
-  diffSourcePlugin,
-  headingsPlugin,
-  InsertImage,
-  InsertTable,
-  InsertThematicBreak,
-  imagePlugin,
-  ListsToggle,
-  linkDialogPlugin,
-  linkPlugin,
-  listsPlugin,
-  MDXEditor,
-  markdownShortcutPlugin,
-  quotePlugin,
-  tablePlugin,
-  thematicBreakPlugin,
-  toolbarPlugin,
-  UndoRedo,
-} from "@mdxeditor/editor";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Save } from "lucide-react";
 import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { MarkdownEditor } from "~/components/MarkdownEditor";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,7 +20,6 @@ import { Projects } from "~/lib/data/projects";
 import { Recipes } from "~/lib/data/recipes";
 import { Tags } from "~/lib/data/tags";
 import { recipeSchema, recipeVersionSchema } from "~/lib/dataValidators";
-import "@mdxeditor/editor/style.css";
 
 // Server functions
 const getTags = createServerFn({ method: "GET" }).handler(async () => {
@@ -144,7 +118,7 @@ function RecipeCreate() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* Breadcrumbs */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -292,60 +266,12 @@ function RecipeCreate() {
             <CardDescription>Write the step-by-step instructions for AI agents</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="border rounded-lg">
-              <MDXEditor
-                markdown={content}
-                onChange={handleContentChange}
-                contentEditableClassName="min-h-[400px] p-4 max-w-none"
-                placeholder="Start writing your recipe content here..."
-                plugins={[
-                  headingsPlugin(),
-                  listsPlugin(),
-                  quotePlugin(),
-                  thematicBreakPlugin(),
-                  markdownShortcutPlugin(),
-                  linkPlugin(),
-                  linkDialogPlugin(),
-                  imagePlugin(),
-                  tablePlugin(),
-                  codeBlockPlugin(),
-                  codeMirrorPlugin({
-                    codeBlockLanguages: {
-                      js: "JavaScript",
-                      tsx: "TypeScript",
-                      bash: "Bash",
-                      sql: "SQL",
-                      python: "Python",
-                      json: "JSON",
-                      css: "CSS",
-                      html: "HTML",
-                      yaml: "YAML",
-                    },
-                  }),
-                  diffSourcePlugin({
-                    viewMode: "rich-text",
-                    diffMarkdown: "",
-                    readOnlyDiff: false,
-                  }),
-                  toolbarPlugin({
-                    toolbarContents: () => (
-                      <DiffSourceToggleWrapper>
-                        <UndoRedo />
-                        <BoldItalicUnderlineToggles />
-                        <CodeToggle />
-                        <BlockTypeSelect />
-                        <CreateLink />
-                        <InsertImage />
-                        <InsertTable />
-                        <InsertThematicBreak />
-                        <ListsToggle />
-                      </DiffSourceToggleWrapper>
-                    ),
-                  }),
-                ]}
-                className="min-h-[400px]"
-              />
-            </div>
+            <MarkdownEditor
+              value={content}
+              onChange={handleContentChange}
+              placeholder="Start writing your recipe content here..."
+              minHeight="400px"
+            />
           </CardContent>
         </Card>
 
@@ -410,20 +336,50 @@ function RecipeCreate() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Submit */}
-        <div className="flex justify-end space-x-2">
-          <Link to="/recipes">
-            <Button variant="outline" disabled={isSubmitting}>
-              Cancel
-            </Button>
-          </Link>
-          <Button type="submit" disabled={isSubmitting || !form.state.canSubmit}>
-            <Save className="h-4 w-4 mr-2" />
-            {isSubmitting ? "Creating..." : "Create Recipe"}
-          </Button>
-        </div>
       </form>
+
+      {/* Bottom Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border z-50">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Stats */}
+            <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+              <div>
+                Content:{" "}
+                {
+                  content
+                    .trim()
+                    .split(/\s+/)
+                    .filter((word) => word.length > 0).length
+                }{" "}
+                words
+              </div>
+              <div>Tags: {selectedTags.length}</div>
+              <div>Projects: {selectedProjects.length}</div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex space-x-2">
+              <Link to="/recipes">
+                <Button variant="outline" disabled={isSubmitting}>
+                  Cancel
+                </Button>
+              </Link>
+              <Button
+                type="submit"
+                disabled={isSubmitting || !form.state.canSubmit}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  form.handleSubmit();
+                }}>
+                <Save className="h-4 w-4 mr-2" />
+                {isSubmitting ? "Creating..." : "Create Recipe"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

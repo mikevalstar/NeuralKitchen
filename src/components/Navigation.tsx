@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { BookOpen, FolderOpen, HelpCircle, Search, Tags } from "lucide-react";
+import { Activity, BookOpen, FolderOpen, HelpCircle, Search, Tags } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "./ui/button";
 import { WidthToggle } from "./WidthToggle";
@@ -15,6 +15,7 @@ export function Navigation({ isWide, onToggleWidth }: NavigationProps) {
     { href: "/search", label: "Search", icon: Search },
     { href: "/projects", label: "Projects", icon: FolderOpen },
     { href: "/tags", label: "Tags", icon: Tags },
+    { href: "/queue", label: "Queue", icon: Activity },
     { href: "/help", label: "Help", icon: HelpCircle },
   ];
 

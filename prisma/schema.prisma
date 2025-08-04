@@ -71,6 +71,8 @@ model RecipeQueue {
   createdAt   DateTime  @default(now())
   completedAt DateTime?
   deletedAt   DateTime?
+  error       String?
+  updatedAt   DateTime  @updatedAt
 }
 
 model VecDocument {

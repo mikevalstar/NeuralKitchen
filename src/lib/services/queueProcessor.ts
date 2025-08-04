@@ -66,7 +66,8 @@ export class QueueProcessor {
         console.log(`Completed processing: ${item.title}`);
       } catch (processError) {
         console.error(`Failed to process queue item ${item.id}:`, processError);
-        await Queue.markFailed(item.id);
+        const errorMessage = processError instanceof Error ? processError.message : String(processError);
+        await Queue.markFailed(item.id, errorMessage);
         throw processError;
       }
     } catch (error) {

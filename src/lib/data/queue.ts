@@ -93,12 +93,13 @@ export namespace Queue {
   /**
    * Mark an item as failed
    */
-  export async function markFailed(id: string) {
+  export async function markFailed(id: string, error?: string) {
     return prisma.recipeQueue.update({
       where: { id },
       data: {
         status: "failed",
         completedAt: new Date(),
+        error: error || null,
       },
     });
   }
@@ -150,5 +151,143 @@ export namespace Queue {
         deletedAt: new Date(),
       },
     });
+  }
+
+  /**
+   * Get recent error items with recipe details
+   */
+  export async function getRecentErrors(limit = 10) {
+    const queueItems = await prisma.recipeQueue.findMany({
+      where: {
+        status: "failed",
+        deletedAt: null,
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      take: limit,
+    });
+
+    // Manually join with RecipeVersion and Recipe data
+    const itemsWithDetails = await Promise.all(
+      queueItems.map(async (item) => {
+        const recipeVersion = await prisma.recipeVersion.findUnique({
+          where: { id: item.versionId },
+          include: {
+            recipe: true,
+          },
+        });
+
+        return {
+          ...item,
+          recipeVersion,
+        };
+      })
+    );
+
+    return itemsWithDetails.filter(item => item.recipeVersion !== null);
+  }
+
+  /**
+   * Get pending items with recipe details
+   */
+  export async function getPending(limit = 20) {
+    const queueItems = await prisma.recipeQueue.findMany({
+      where: {
+        status: "pending",
+        deletedAt: null,
+      },
+      orderBy: {
+        createdAt: "asc",
+      },
+      take: limit,
+    });
+
+    // Manually join with RecipeVersion and Recipe data
+    const itemsWithDetails = await Promise.all(
+      queueItems.map(async (item) => {
+        const recipeVersion = await prisma.recipeVersion.findUnique({
+          where: { id: item.versionId },
+          include: {
+            recipe: true,
+          },
+        });
+
+        return {
+          ...item,
+          recipeVersion,
+        };
+      })
+    );
+
+    return itemsWithDetails.filter(item => item.recipeVersion !== null);
+  }
+
+  /**
+   * Get recently completed items with recipe details
+   */
+  export async function getRecentCompleted(limit = 10) {
+    const queueItems = await prisma.recipeQueue.findMany({
+      where: {
+        status: "completed",
+        deletedAt: null,
+      },
+      orderBy: {
+        completedAt: "desc",
+      },
+      take: limit,
+    });
+
+    // Manually join with RecipeVersion and Recipe data
+    const itemsWithDetails = await Promise.all(
+      queueItems.map(async (item) => {
+        const recipeVersion = await prisma.recipeVersion.findUnique({
+          where: { id: item.versionId },
+          include: {
+            recipe: true,
+          },
+        });
+
+        return {
+          ...item,
+          recipeVersion,
+        };
+      })
+    );
+
+    return itemsWithDetails.filter(item => item.recipeVersion !== null);
+  }
+
+  /**
+   * Retry a failed queue item
+   */
+  export async function retry(id: string) {
+    return prisma.recipeQueue.update({
+      where: { id },
+      data: {
+        status: "pending",
+        error: null,
+        completedAt: null,
+      },
+    });
+  }
+
+  /**
+   * Retry all failed queue items
+   */
+  export async function retryAllErrors() {
+    const result = await prisma.recipeQueue.updateMany({
+      where: {
+        status: "failed",
+        deletedAt: null,
+      },
+      data: {
+        status: "pending",
+        error: null,
+        completedAt: null,
+      },
+    });
+
+    return { count: result.count };
   }
 }

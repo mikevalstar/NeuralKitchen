@@ -2,9 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Edit, History, Trash2 } from "lucide-react";
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { toast } from "sonner";
+import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -79,7 +78,7 @@ function RecipeDetail() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
+            <BreadcrumbLink>
               <Link to="/recipes">Recipes</Link>
             </BreadcrumbLink>
           </BreadcrumbItem>
@@ -126,37 +125,7 @@ function RecipeDetail() {
             </CardHeader>
             <CardContent>
               {currentVersion?.content ? (
-                <div className="prose prose-slate dark:prose-invert max-w-none">
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      h1: ({ children }) => <h1 className="text-2xl font-bold mb-4">{children}</h1>,
-                      h2: ({ children }) => <h2 className="text-xl font-semibold mb-3 mt-6">{children}</h2>,
-                      h3: ({ children }) => <h3 className="text-lg font-medium mb-2 mt-4">{children}</h3>,
-                      p: ({ children }) => <p className="mb-3 leading-relaxed">{children}</p>,
-                      ul: ({ children }) => <ul className="list-disc pl-6 mb-3 space-y-1">{children}</ul>,
-                      ol: ({ children }) => <ol className="list-decimal pl-6 mb-3 space-y-1">{children}</ol>,
-                      li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                      code: ({ inline, children }) =>
-                        inline ? (
-                          <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
-                        ) : (
-                          <code className="block bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto">
-                            {children}
-                          </code>
-                        ),
-                      pre: ({ children }) => (
-                        <pre className="bg-muted p-4 rounded-lg overflow-x-auto mb-4">{children}</pre>
-                      ),
-                      blockquote: ({ children }) => (
-                        <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground mb-3">
-                          {children}
-                        </blockquote>
-                      ),
-                    }}>
-                    {currentVersion.content}
-                  </ReactMarkdown>
-                </div>
+                <MarkdownRenderer content={currentVersion.content} variant="default" />
               ) : (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <p className="text-muted-foreground">No content available for this recipe.</p>
@@ -242,39 +211,7 @@ function RecipeDetail() {
                   <CardDescription>Auto-generated summary</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="prose prose-sm prose-slate dark:prose-invert max-w-none">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        h1: ({ children }) => <h1 className="text-base font-semibold mb-2">{children}</h1>,
-                        h2: ({ children }) => <h2 className="text-sm font-medium mb-2">{children}</h2>,
-                        h3: ({ children }) => <h3 className="text-sm font-medium mb-1">{children}</h3>,
-                        p: ({ children }) => (
-                          <p className="text-sm mb-2 last:mb-0 leading-relaxed text-muted-foreground">{children}</p>
-                        ),
-                        ul: ({ children }) => <ul className="list-disc pl-4 mb-2 text-sm space-y-1">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 text-sm space-y-1">{children}</ol>,
-                        li: ({ children }) => <li className="leading-relaxed text-muted-foreground">{children}</li>,
-                        code: ({ inline, children }) =>
-                          inline ? (
-                            <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">{children}</code>
-                          ) : (
-                            <code className="block bg-muted p-3 rounded text-xs font-mono overflow-x-auto">
-                              {children}
-                            </code>
-                          ),
-                        pre: ({ children }) => (
-                          <pre className="bg-muted p-3 rounded overflow-x-auto mb-2">{children}</pre>
-                        ),
-                        blockquote: ({ children }) => (
-                          <blockquote className="border-l-4 border-primary pl-3 italic text-muted-foreground mb-2">
-                            {children}
-                          </blockquote>
-                        ),
-                      }}>
-                      {currentVersion.aiSummary}
-                    </ReactMarkdown>
-                  </div>
+                  <MarkdownRenderer content={currentVersion.aiSummary} variant="compact" />
                 </CardContent>
               </Card>
             )}

@@ -3,9 +3,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { ArrowRight, ChevronDown, ChevronUp, Search } from "lucide-react";
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { z } from "zod";
+import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -201,42 +200,14 @@ function SearchResultCard({ result }: { result: SearchResult }) {
         {result.summary && (
           <div className="mt-3">
             <div
-              className={`prose prose-sm prose-slate dark:prose-invert max-w-none ${
-                !isExpanded && shouldShowExpandButton ? "line-clamp-5" : ""
-              }`}
+              className={!isExpanded && shouldShowExpandButton ? "line-clamp-5" : ""}
               style={{
                 display: "-webkit-box",
                 WebkitLineClamp: !isExpanded && shouldShowExpandButton ? 5 : "unset",
                 WebkitBoxOrient: "vertical",
                 overflow: !isExpanded && shouldShowExpandButton ? "hidden" : "visible",
               }}>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  h1: ({ children }) => <h1 className="text-sm font-semibold mb-1">{children}</h1>,
-                  h2: ({ children }) => <h2 className="text-sm font-medium mb-1">{children}</h2>,
-                  h3: ({ children }) => <h3 className="text-sm font-medium mb-1">{children}</h3>,
-                  p: ({ children }) => <p className="text-sm mb-2 last:mb-0 leading-relaxed">{children}</p>,
-                  ul: ({ children }) => <ul className="list-disc pl-4 mb-2 text-sm space-y-0.5">{children}</ul>,
-                  ol: ({ children }) => <ol className="list-decimal pl-4 mb-2 text-sm space-y-0.5">{children}</ol>,
-                  li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                  code: ({ inline, children }) =>
-                    inline ? (
-                      <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">{children}</code>
-                    ) : (
-                      <code className="block bg-muted p-2 rounded text-xs font-mono overflow-x-auto">{children}</code>
-                    ),
-                  pre: ({ children }) => (
-                    <pre className="bg-muted p-2 rounded overflow-x-auto mb-2 text-xs">{children}</pre>
-                  ),
-                  blockquote: ({ children }) => (
-                    <blockquote className="border-l-2 border-primary pl-3 italic text-muted-foreground mb-2 text-sm">
-                      {children}
-                    </blockquote>
-                  ),
-                }}>
-                {result.summary}
-              </ReactMarkdown>
+              <MarkdownRenderer content={result.summary} variant="search" />
             </div>
 
             {shouldShowExpandButton && (

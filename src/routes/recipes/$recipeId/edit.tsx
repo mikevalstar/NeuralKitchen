@@ -1,35 +1,10 @@
-import {
-  BlockTypeSelect,
-  BoldItalicUnderlineToggles,
-  CodeToggle,
-  CreateLink,
-  codeBlockPlugin,
-  codeMirrorPlugin,
-  DiffSourceToggleWrapper,
-  diffSourcePlugin,
-  headingsPlugin,
-  InsertImage,
-  InsertTable,
-  InsertThematicBreak,
-  imagePlugin,
-  ListsToggle,
-  linkDialogPlugin,
-  linkPlugin,
-  listsPlugin,
-  MDXEditor,
-  markdownShortcutPlugin,
-  quotePlugin,
-  tablePlugin,
-  thematicBreakPlugin,
-  toolbarPlugin,
-  UndoRedo,
-} from "@mdxeditor/editor";
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Save } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
+import { MarkdownEditor } from "~/components/MarkdownEditor";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -45,7 +20,6 @@ import { Projects } from "~/lib/data/projects";
 import { Recipes } from "~/lib/data/recipes";
 import { Tags } from "~/lib/data/tags";
 import { recipeIdSchema, recipeSchema, recipeVersionSchema } from "~/lib/dataValidators";
-import "@mdxeditor/editor/style.css";
 
 // Server functions
 const getRecipe = createServerFn({ method: "GET" })
@@ -101,67 +75,15 @@ export const Route = createFileRoute("/recipes/$recipeId/edit")({
   },
 });
 
-// Sanitize markdown content for better MDX editor compatibility
-const sanitizeMarkdown = (markdown: string) => {
-  if (!markdown) return "";
-
-  try {
-    // Fix common markdown parsing issues
-    const sanitized = markdown
-      // Ensure code blocks have proper language tags
-      .replace(/```(\s*\n)/g, "```text\n")
-      // Fix inline code that might be causing issues
-      .replace(/`([^`]*)`/g, (_match, code) => {
-        // Ensure inline code doesn't contain problematic characters
-        return `\`${code.replace(/\n/g, " ")}\``;
-      })
-      // Ensure proper line endings
-      .replace(/\r\n/g, "\n")
-      .replace(/\r/g, "\n");
-
-    return sanitized;
-  } catch (error) {
-    console.warn("Error sanitizing markdown:", error);
-    return markdown;
-  }
-};
-
 function RecipeEdit() {
   const router = useRouter();
   const { recipe, tags, projects } = Route.useLoaderData();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [editorError, setEditorError] = useState<string | null>(null);
-  const [content, setContent] = useState(() => {
-    // Safely initialize content, handling potential parsing issues
-    const rawContent = recipe.currentVersion?.content || "";
-    try {
-      // Basic validation - ensure content is a string and not empty
-      return typeof rawContent === "string" ? rawContent : "";
-    } catch (error) {
-      console.warn("Issue loading recipe content:", error);
-      return "";
-    }
-  });
+  const [content, setContent] = useState(recipe.currentVersion?.content || "");
   const [selectedTags, setSelectedTags] = useState<string[]>(recipe.currentVersion?.tags.map((tag) => tag.id) || []);
   const [selectedProjects, setSelectedProjects] = useState<string[]>(
     recipe.currentVersion?.projects.map((project) => project.id) || [],
   );
-
-  // Effect to handle content sanitization and error recovery
-  useEffect(() => {
-    const rawContent = recipe.currentVersion?.content || "";
-    if (rawContent) {
-      try {
-        const sanitized = sanitizeMarkdown(rawContent);
-        setContent(sanitized);
-        setEditorError(null); // Clear any previous errors
-      } catch (error) {
-        console.error("Error processing recipe content:", error);
-        setEditorError(error instanceof Error ? error.message : "Failed to process recipe content");
-        setContent(rawContent); // Use raw content as fallback
-      }
-    }
-  }, [recipe.currentVersion?.content]);
 
   const form = useForm({
     defaultValues: {
@@ -211,12 +133,7 @@ function RecipeEdit() {
   });
 
   const handleContentChange = useCallback((value: string) => {
-    try {
-      setContent(value);
-    } catch (error) {
-      console.error("Error updating content:", error);
-      setEditorError(error instanceof Error ? error.message : "Unknown error");
-    }
+    setContent(value);
   }, []);
 
   const toggleTag = (tagId: string) => {
@@ -230,7 +147,7 @@ function RecipeEdit() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20">
       {/* Breadcrumbs */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -390,112 +307,12 @@ function RecipeEdit() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="border rounded-lg">
-              {editorError ? (
-                <div className="min-h-[400px] p-4">
-                  <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-4">
-                    <h4 className="font-medium text-destructive mb-2">Editor Loading Error</h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                      There was an issue loading the recipe content in the editor. You can still edit using the fallback
-                      text area below.
-                    </p>
-                    <details className="text-xs text-muted-foreground">
-                      <summary className="cursor-pointer hover:text-foreground">Error Details</summary>
-                      <pre className="mt-2 p-2 bg-muted rounded text-xs overflow-auto">{editorError}</pre>
-                    </details>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setEditorError(null);
-                        // Force re-initialization
-                        const rawContent = recipe.currentVersion?.content || "";
-                        setContent(sanitizeMarkdown(rawContent));
-                      }}
-                      className="mt-2">
-                      Retry Editor
-                    </Button>
-                  </div>
-                  <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Start writing your recipe content here..."
-                    className="w-full min-h-[300px] p-3 border rounded-lg bg-background text-foreground font-mono text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
-                </div>
-              ) : content !== null ? (
-                <MDXEditor
-                  key={`${recipe.id}-${recipe.currentVersion?.id}`} // Force re-render
-                  markdown={content}
-                  onChange={handleContentChange}
-                  contentEditableClassName="min-h-[400px] p-4 max-w-none"
-                  placeholder="Start writing your recipe content here..."
-                  plugins={[
-                    headingsPlugin(),
-                    listsPlugin(),
-                    quotePlugin(),
-                    thematicBreakPlugin(),
-                    markdownShortcutPlugin(),
-                    linkPlugin(),
-                    linkDialogPlugin(),
-                    imagePlugin(),
-                    tablePlugin(),
-                    codeBlockPlugin({
-                      defaultCodeBlockLanguage: "text",
-                    }),
-                    codeMirrorPlugin({
-                      codeBlockLanguages: {
-                        "": "Plain Text",
-                        text: "Plain Text",
-                        js: "JavaScript",
-                        javascript: "JavaScript",
-                        tsx: "TypeScript",
-                        typescript: "TypeScript",
-                        bash: "Bash",
-                        shell: "Shell",
-                        sql: "SQL",
-                        python: "Python",
-                        py: "Python",
-                        json: "JSON",
-                        css: "CSS",
-                        html: "HTML",
-                        yaml: "YAML",
-                        yml: "YAML",
-                      },
-                    }),
-                    diffSourcePlugin({
-                      viewMode: "rich-text",
-                      diffMarkdown: sanitizeMarkdown(recipe.currentVersion?.content || ""),
-                      readOnlyDiff: false,
-                    }),
-                    toolbarPlugin({
-                      toolbarContents: () => (
-                        <DiffSourceToggleWrapper>
-                          <UndoRedo />
-                          <BoldItalicUnderlineToggles />
-                          <CodeToggle />
-                          <BlockTypeSelect />
-                          <CreateLink />
-                          <InsertImage />
-                          <InsertTable />
-                          <InsertThematicBreak />
-                          <ListsToggle />
-                        </DiffSourceToggleWrapper>
-                      ),
-                    }),
-                  ]}
-                  className="min-h-[400px]"
-                />
-              ) : (
-                <div className="min-h-[400px] p-4 flex items-center justify-center text-muted-foreground">
-                  <div className="text-center">
-                    <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                    Loading editor...
-                  </div>
-                </div>
-              )}
-            </div>
+            <MarkdownEditor
+              value={content}
+              onChange={handleContentChange}
+              placeholder="Start writing your recipe content here..."
+              minHeight="400px"
+            />
           </CardContent>
         </Card>
 
@@ -560,20 +377,51 @@ function RecipeEdit() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Submit */}
-        <div className="flex justify-end space-x-2">
-          <Link to="/recipes/$recipeId" params={{ recipeId: recipe.id }}>
-            <Button variant="outline" disabled={isSubmitting}>
-              Cancel
-            </Button>
-          </Link>
-          <Button type="submit" disabled={isSubmitting || !form.state.canSubmit}>
-            <Save className="h-4 w-4 mr-2" />
-            {isSubmitting ? "Saving..." : "Save Changes"}
-          </Button>
-        </div>
       </form>
+
+      {/* Bottom Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border z-50">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Stats */}
+            <div className="flex items-center space-x-6 text-sm text-muted-foreground">
+              <div>
+                Content:{" "}
+                {
+                  content
+                    .trim()
+                    .split(/\s+/)
+                    .filter((word) => word.length > 0).length
+                }{" "}
+                words
+              </div>
+              <div>Tags: {selectedTags.length}</div>
+              <div>Projects: {selectedProjects.length}</div>
+              <div>Version: {(recipe.currentVersion?.versionNumber || 0) + 1}</div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex space-x-2">
+              <Link to="/recipes/$recipeId" params={{ recipeId: recipe.id }}>
+                <Button variant="outline" disabled={isSubmitting}>
+                  Cancel
+                </Button>
+              </Link>
+              <Button
+                type="submit"
+                disabled={isSubmitting || !form.state.canSubmit}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  form.handleSubmit();
+                }}>
+                <Save className="h-4 w-4 mr-2" />
+                {isSubmitting ? "Saving..." : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
