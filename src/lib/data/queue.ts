@@ -182,10 +182,10 @@ export namespace Queue {
           ...item,
           recipeVersion,
         };
-      })
+      }),
     );
 
-    return itemsWithDetails.filter(item => item.recipeVersion !== null);
+    return itemsWithDetails.filter((item) => item.recipeVersion !== null);
   }
 
   /**
@@ -217,10 +217,10 @@ export namespace Queue {
           ...item,
           recipeVersion,
         };
-      })
+      }),
     );
 
-    return itemsWithDetails.filter(item => item.recipeVersion !== null);
+    return itemsWithDetails.filter((item) => item.recipeVersion !== null);
   }
 
   /**
@@ -252,10 +252,10 @@ export namespace Queue {
           ...item,
           recipeVersion,
         };
-      })
+      }),
     );
 
-    return itemsWithDetails.filter(item => item.recipeVersion !== null);
+    return itemsWithDetails.filter((item) => item.recipeVersion !== null);
   }
 
   /**

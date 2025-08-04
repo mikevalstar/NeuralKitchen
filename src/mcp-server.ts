@@ -5,10 +5,14 @@
  * Runs independently from the main application
  */
 
+import "dotenv/config";
 import type { Server } from "node:http";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import express, { type Request, type Response } from "express";
+import { z } from "zod";
+import { Recipes } from "./lib/data/recipes.js";
+import { SearchService } from "./lib/services/search.js";
 
 class StandaloneMcpServer {
   private server: McpServer | null = null;
@@ -94,20 +98,122 @@ class StandaloneMcpServer {
   private registerTools() {
     if (!this.server) return;
 
-    // Hello world tool (example)
-    this.server.tool("hello_world", "Hello World", {}, async () => {
-      return {
-        content: [
-          {
-            type: "text",
-            text: "Hello World from Neural Kitchen MCP Server!",
-          },
-        ],
-      };
-    });
+    // Get a single recipe by ID or shortId (full content)
+    this.server.registerTool(
+      "get_recipe",
+      {
+        title: "Get a single recipe by ID or shortId with full content",
+        description: "Get a single recipe by ID or shortId with full content",
+        inputSchema:{
+          identifier: z.string().describe("Recipe ID or shortId to retrieve"),
+        },
+      },
+      async (args) => {
+        try {
+          const { identifier } = args;
 
-    // TODO: Add your custom tools here
-    // You can import and register additional tools as needed
+          // Try to get recipe by ID first, then by shortId
+          let recipe = await Recipes.read(identifier);
+          if (!recipe) {
+            recipe = await Recipes.readByShortId(identifier);
+          }
+
+          if (!recipe || !recipe.currentVersion) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `Recipe not found: ${identifier}`,
+                },
+              ],
+            };
+          }
+
+          // Return full recipe content
+          return {
+            content: [
+              {
+                type: "text",
+                text: `# ${recipe.currentVersion.title}\n\n${recipe.currentVersion.content}`,
+              },
+            ],
+          };
+        } catch (error) {
+          console.error("Error in get_recipe:", error);
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Error retrieving recipe: ${error instanceof Error ? error.message : "Unknown error"}`,
+              },
+            ],
+          };
+        }
+      },
+    );
+
+    // Search recipes using the same logic as the UI
+    this.server.registerTool(
+      "search_recipes", {
+        title: "Search Rcipies",
+        description: "Search recipes using semantic and text search with AI summaries",
+        inputSchema:
+        {
+          query: z
+            .string()
+            .describe("Search query to find relevant recipes"),
+        },
+      },
+      async (args) => {
+        try {
+          const { query, limit = 10 } = args;
+
+          // Use hybrid search (vector + text fallback)
+          const results = await SearchService.hybridSearch(query, limit);
+
+          if (results.length === 0) {
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: `No recipes found for query: "${query}"`,
+                },
+              ],
+            };
+          }
+
+          // Format results for AI consumption
+          const formattedResults = results
+            .map((result, index) => {
+              const summary = result.summary || "No summary available";
+              return `${index + 1}. **${result.title}** (ID: ${result.shortid})
+   Summary: ${summary}
+   
+   *This is a short summary. Use get_recipe with ID "${result.shortid}" to get the full content.*`;
+            })
+            .join("\n\n");
+
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Found ${results.length} recipe(s) for "${query}":\n\n${formattedResults}`,
+              },
+            ],
+          };
+        } catch (error) {
+          console.error("Error in search_recipes:", error);
+          return {
+            content: [
+              {
+                type: "text",
+                text: `Error searching recipes: ${error instanceof Error ? error.message : "Unknown error"}`,
+              },
+            ],
+          };
+        }
+      },
+    );
   }
 
   /**

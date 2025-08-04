@@ -4,7 +4,7 @@ import { Recipes } from "../data/recipes";
 export class QueueProcessor {
   private intervalId: NodeJS.Timeout | null = null;
   private isProcessing = false;
-  private readonly intervalMs = 5000; // 5 seconds
+  private readonly intervalMs = 5000000; // 5000 seconds
 
   /**
    * Start the queue processor
