@@ -8,25 +8,22 @@ Neural Kitchen helps developers create and organize structured guidance for AI a
 
 AI agents often struggle with:
 - **Lack of context**: They don't understand project-specific conventions or patterns
-- **Missing institutional knowledge**: Why certain approaches are used over others
+- **Missing institutional knowledge**: Why certain approaches are used over others, or when an old pattern is being phased out
 - **Inconsistent implementations**: Without examples, they reinvent solutions differently each time
 - **Limited guidance**: Hard to know which files contain good examples to follow
 
-## The Solution
+Humans often struggle with:
+- **AI forgets**: AI tools don't remember your past conversations or corrections you made
+- **AI is eager to please**: The AI tools don't stop to ask questions, they just build what they "know"
+- **Forgetting about best practices**: Best practices are learned (and contextual), yours wont match the AIs
+
+## The Kitchen
 
 Neural Kitchen provides:
-- **Versioned Recipes**: Step-by-step instructions and code examples for common development tasks
-- **Contextual Tagging**: Organize recipes by technology, domain, or complexity
-- **Project Association**: Group recipes by codebase or project type
-- **MCP Integration**: (Planned) Model Context Protocol interface for AI agents to access recipes
-
-## Use Cases
-
-- **Onboarding new AI agents** to existing projects with established patterns
-- **Standardizing implementations** across different parts of a codebase
-- **Capturing tribal knowledge** before team members leave
-- **Creating reusable workflows** for common development tasks
-- **Providing context** for why certain architectural decisions were made
+- **Recipes**: Step-by-step instructions and code examples for common development tasks written by you
+- **NLP Search**: Natural language search for your documentation and standards
+- **Project Association**: Group recipes by codebase or project (share with other teams or projects)
+- **MCP Integration**: Model Context Protocol interface for AI agents to access and search recipes
 
 ## Current Status
 
@@ -37,28 +34,29 @@ Neural Kitchen provides:
 - Tag organization
 - Project grouping
 - Web interface for managing recipes
+- MCP server integration for AI agent access
 
 **Planned:**
-- MCP server integration for AI agent access
+- Project specific MCP endpoints
 - Rich recipe templates and examples
 - Advanced search and filtering
-- Recipe validation and testing
-- Integration with popular AI coding tools
+- Recipe validation
+- Recipe auto generation
 
 ## Tech Stack
 
-- **Frontend**: React 19 with TanStack Start
-- **Database**: PostgreSQL with Prisma ORM
-- **Styling**: TailwindCSS v4 + Shadcn/ui
-- **Code Quality**: Biome
-- **Future**: MCP (Model Context Protocol) server
+- React 19 with TanStack Start
+- PostgreSQL with Prisma ORM
+- TailwindCSS v4 + Shadcn/ui
+- Biome
+- MCP (Model Context Protocol) server
 
 ## Getting Started
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/neuralkitchen.git
-   cd neuralkitchen
+   git clone https://github.com/mikevalstar/NeuralKitchen.git
+   cd NeuralKitchen
    ```
 
 2. **Install dependencies**
@@ -68,7 +66,7 @@ Neural Kitchen provides:
 
 3. **Set up the database**
    ```bash
-   # Configure your DATABASE_URL in .env
+   # Configure your DATABASE_URL in .env, and seed (optional)
    pnpm db:push
    pnpm db:seed
    ```
@@ -80,12 +78,12 @@ Neural Kitchen provides:
 
 ## Development
 
-- `pnpm dev` - Start development server
+- `pnpm dev` - Start development server and mcp server
 - `pnpm build` - Build for production
 - `pnpm check` - Run linting and formatting
 - `pnpm db:studio` - Open database GUI
 
-See [CLAUDE.md](./CLAUDE.md) for detailed development guidance.
+See [CLAUDE.md](./CLAUDE.md) for detailed AI development guidance.
 
 ## Contributing
 
