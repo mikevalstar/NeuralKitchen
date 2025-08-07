@@ -53,6 +53,8 @@ function ProjectDetail() {
   const project = Route.useLoaderData();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const mcpEndpoint =
+    typeof window !== "undefined" ? `${window.location.origin}/mcp?projects=${project.shortId}` : undefined;
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -137,6 +139,15 @@ function ProjectDetail() {
                   <p className="text-base mt-1 italic text-muted-foreground">No description provided</p>
                 )}
               </div>
+
+              {mcpEndpoint && (
+                <div>
+                  <div className="text-sm font-medium text-muted-foreground">MCP Endpoint</div>
+                  <a href={mcpEndpoint} className="text-base mt-1 font-mono break-all text-blue-600 underline">
+                    {mcpEndpoint}
+                  </a>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
