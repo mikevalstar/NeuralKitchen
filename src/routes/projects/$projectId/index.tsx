@@ -150,6 +150,39 @@ function ProjectDetail() {
               )}
             </CardContent>
           </Card>
+
+          {mcpEndpoint && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>MCP Integration</CardTitle>
+                <CardDescription>Configure this endpoint in Cursor or Claude</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Cursor</div>
+                  <p className="text-sm text-muted-foreground">
+                    Settings → Features → MCP Servers → Add. Use the following configuration:
+                  </p>
+                  <pre className="bg-muted rounded p-3 overflow-auto text-sm">
+                    <code>{`{
+  "mcpServers": {
+    "Neural Kitchen": {
+      "type": "http",
+      "url": "${mcpEndpoint}"
+    }
+  }
+}`}</code>
+                  </pre>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Claude.ai / Claude Desktop</div>
+                  <p className="text-sm text-muted-foreground">Add a custom connector and set the server URL to:</p>
+                  <div className="text-sm font-mono break-all">{mcpEndpoint}</div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Metadata Sidebar */}
