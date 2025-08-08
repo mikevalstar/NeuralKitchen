@@ -15,7 +15,9 @@ import {
 } from "~/components/ui/breadcrumb";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
 import { Projects } from "~/lib/data/projects";
 import { Recipes } from "~/lib/data/recipes";
 import { Tags } from "~/lib/data/tags";
@@ -118,148 +120,27 @@ function RecipeCreate() {
   };
 
   return (
-    <div className="space-y-6 pb-20">
-      {/* Breadcrumbs */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/recipes">Recipes</Link>
-            </BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>Create Recipe</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Create Recipe</h1>
-          <p className="text-muted-foreground">Create a new AI agent recipe</p>
+    <div className="grid flex-1 auto-rows-max gap-4 lg:grid-cols-3 lg:gap-8 pb-20">
+      <div className="grid auto-rows-max items-start gap-4 lg:col-span-2 lg:gap-8">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/recipes">Recipes</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Create Recipe</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">Create Recipe</h1>
+            <p className="text-muted-foreground">Create a new AI agent recipe</p>
+          </div>
         </div>
-      </div>
-
-      {/* Create Form */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          form.handleSubmit();
-        }}
-        className="space-y-6">
-        {/* Basic Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Basic Information</CardTitle>
-            <CardDescription>Basic details about this recipe</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Title Field */}
-            <form.Field name="title">
-              {(field) => {
-                const charCount = field.state.value.length;
-                const maxChars = 200;
-                const isNearLimit = charCount > 160;
-                const isAtLimit = charCount >= maxChars;
-
-                return (
-                  <div className="space-y-2">
-                    <label htmlFor="title" className="text-sm font-medium">
-                      Recipe Title *
-                    </label>
-                    <Input
-                      id="title"
-                      type="text"
-                      placeholder="Enter recipe title..."
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      disabled={isSubmitting}
-                      className={field.state.meta.errors?.length ? "border-destructive" : ""}
-                    />
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        {field.state.meta.errors?.length ? (
-                          <div className="text-sm text-destructive">
-                            {field.state.meta.errors.map((error) => error?.message).join(", ")}
-                          </div>
-                        ) : null}
-                      </div>
-                      <div
-                        className={`text-xs ${
-                          isAtLimit
-                            ? "text-destructive font-medium"
-                            : isNearLimit
-                              ? "text-amber-600 dark:text-amber-400"
-                              : "text-muted-foreground"
-                        }`}>
-                        {charCount}/{maxChars}
-                      </div>
-                    </div>
-                  </div>
-                );
-              }}
-            </form.Field>
-
-            {/* ShortId Field */}
-            <form.Field name="shortId">
-              {(field) => {
-                const charCount = field.state.value.length;
-                const maxChars = 50;
-                const isNearLimit = charCount > 40;
-                const isAtLimit = charCount >= maxChars;
-
-                return (
-                  <div className="space-y-2">
-                    <label htmlFor="shortId" className="text-sm font-medium">
-                      Recipe ID *
-                    </label>
-                    <Input
-                      id="shortId"
-                      type="text"
-                      placeholder="e.g., my-awesome-recipe"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      disabled={isSubmitting}
-                      className={field.state.meta.errors?.length ? "border-destructive" : ""}
-                    />
-
-                    <div className="flex justify-between items-center">
-                      <div className="flex-1">
-                        {field.state.meta.errors?.length ? (
-                          <div className="text-sm text-destructive">
-                            {field.state.meta.errors.map((error) => error?.message).join(", ")}
-                          </div>
-                        ) : (
-                          <div className="text-xs text-muted-foreground">
-                            Letters, numbers, hyphens, and underscores only. No spaces.
-                          </div>
-                        )}
-                      </div>
-                      <div
-                        className={`text-xs ${
-                          isAtLimit
-                            ? "text-destructive font-medium"
-                            : isNearLimit
-                              ? "text-amber-600 dark:text-amber-400"
-                              : "text-muted-foreground"
-                        }`}>
-                        {charCount}/{maxChars}
-                      </div>
-                    </div>
-                  </div>
-                );
-              }}
-            </form.Field>
-          </CardContent>
-        </Card>
-
-        {/* Content Editor */}
         <Card>
           <CardHeader>
             <CardTitle>Recipe Content</CardTitle>
@@ -274,9 +155,124 @@ function RecipeCreate() {
             />
           </CardContent>
         </Card>
+      </div>
 
-        {/* Tags and Projects */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid auto-rows-max items-start gap-4 lg:gap-8">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+          className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Basic Information</CardTitle>
+              <CardDescription>Basic details about this recipe</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Title Field */}
+              <form.Field name="title">
+                {(field) => {
+                  const charCount = field.state.value.length;
+                  const maxChars = 200;
+                  const isNearLimit = charCount > 160;
+                  const isAtLimit = charCount >= maxChars;
+
+                  return (
+                    <div className="space-y-2">
+                      <label htmlFor="title" className="text-sm font-medium">
+                        Recipe Title *
+                      </label>
+                      <Input
+                        id="title"
+                        type="text"
+                        placeholder="Enter recipe title..."
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        disabled={isSubmitting}
+                        className={field.state.meta.errors?.length ? "border-destructive" : ""}
+                      />
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex-1">
+                          {field.state.meta.errors?.length ? (
+                            <div className="text-sm text-destructive">
+                              {field.state.meta.errors.map((error) => error?.message).join(", ")}
+                            </div>
+                          ) : null}
+                        </div>
+                        <div
+                          className={`text-xs ${
+                            isAtLimit
+                              ? "text-destructive font-medium"
+                              : isNearLimit
+                                ? "text-amber-600 dark:text-amber-400"
+                                : "text-muted-foreground"
+                          }`}>
+                          {charCount}/{maxChars}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }}
+              </form.Field>
+
+              {/* ShortId Field */}
+              <form.Field name="shortId">
+                {(field) => {
+                  const charCount = field.state.value.length;
+                  const maxChars = 50;
+                  const isNearLimit = charCount > 40;
+                  const isAtLimit = charCount >= maxChars;
+
+                  return (
+                    <div className="space-y-2">
+                      <label htmlFor="shortId" className="text-sm font-medium">
+                        Recipe ID *
+                      </label>
+                      <Input
+                        id="shortId"
+                        type="text"
+                        placeholder="e.g., my-awesome-recipe"
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        disabled={isSubmitting}
+                        className={field.state.meta.errors?.length ? "border-destructive" : ""}
+                      />
+
+                      <div className="flex justify-between items-center">
+                        <div className="flex-1">
+                          {field.state.meta.errors?.length ? (
+                            <div className="text-sm text-destructive">
+                              {field.state.meta.errors.map((error) => error?.message).join(", ")}
+                            </div>
+                          ) : (
+                            <div className="text-xs text-muted-foreground">
+                              Letters, numbers, hyphens, and underscores only. No spaces.
+                            </div>
+                          )}
+                        </div>
+                        <div
+                          className={`text-xs ${
+                            isAtLimit
+                              ? "text-destructive font-medium"
+                              : isNearLimit
+                                ? "text-amber-600 dark:text-amber-400"
+                                : "text-muted-foreground"
+                          }`}>
+                          {charCount}/{maxChars}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }}
+              </form.Field>
+            </CardContent>
+          </Card>
+
           {/* Tags */}
           <Card>
             <CardHeader>
@@ -291,7 +287,7 @@ function RecipeCreate() {
                       key={tag.id}
                       type="button"
                       onClick={() => toggleTag(tag.id)}
-                      className={`px-3 py-1 rounded text-sm transition-colors ${
+                      className={`px-3 py-1 rounded-full text-sm transition-colors ${
                         selectedTags.includes(tag.id)
                           ? "bg-primary text-primary-foreground"
                           : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -314,20 +310,21 @@ function RecipeCreate() {
             </CardHeader>
             <CardContent>
               {projects.length > 0 ? (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {projects.map((project) => (
-                    <button
-                      key={project.id}
-                      type="button"
-                      onClick={() => toggleProject(project.id)}
-                      className={`w-full text-left p-2 rounded text-sm transition-colors ${
-                        selectedProjects.includes(project.id)
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
-                      }`}>
-                      <div className="font-medium">{project.title}</div>
-                      {project.description && <div className="text-xs opacity-80 mt-1">{project.description}</div>}
-                    </button>
+                    <div key={project.id} className="flex items-start space-x-3">
+                      <Checkbox
+                        id={`project-${project.id}`}
+                        checked={selectedProjects.includes(project.id)}
+                        onCheckedChange={() => toggleProject(project.id)}
+                      />
+                      <div className="grid gap-1.5 leading-none">
+                        <Label htmlFor={`project-${project.id}`} className="font-medium cursor-pointer">
+                          {project.title}
+                        </Label>
+                        {project.description && <p className="text-xs text-muted-foreground">{project.description}</p>}
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -335,8 +332,8 @@ function RecipeCreate() {
               )}
             </CardContent>
           </Card>
-        </div>
-      </form>
+        </form>
+      </div>
 
       {/* Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border z-50">
