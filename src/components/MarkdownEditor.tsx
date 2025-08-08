@@ -1,6 +1,7 @@
 import {
   BlockTypeSelect,
   BoldItalicUnderlineToggles,
+  CodeMirrorEditor,
   CreateLink,
   codeBlockPlugin,
   codeMirrorPlugin,
@@ -57,13 +58,22 @@ export function MarkdownEditor({
           linkDialogPlugin(),
           imagePlugin(),
           tablePlugin(),
-          codeBlockPlugin(),
+          codeBlockPlugin({
+            codeBlockEditorDescriptors: [{ priority: -10, match: (_) => true, Editor: CodeMirrorEditor }],
+          }),
           codeMirrorPlugin({
             autoLoadLanguageSupport: true,
             // TODO: Figure out how to just have all the languages available
             codeBlockLanguages: {
+              null: "Text",
+              "": "Text",
+              javascript: "JavaScript",
               js: "JavaScript",
-              tsx: "TypeScript",
+              jsx: "JavaScript (react)",
+              ts: "TypeScript",
+              py: "Python",
+              typescript: "TypeScript",
+              tsx: "TypeScript (react)",
               bash: "Bash",
               sql: "SQL",
               python: "Python",
@@ -73,7 +83,7 @@ export function MarkdownEditor({
               yaml: "YAML",
               markdown: "Markdown",
               text: "Text",
-              plaintext: "Plain Text",
+              plaintext: "Plaintext",
               dockerfile: "Dockerfile",
             },
           }),

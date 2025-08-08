@@ -112,7 +112,7 @@ export namespace VecDocuments {
   export async function similaritySearch(queryEmbedding: number[], limit = 10, threshold = 0.3, projectIds?: string[]) {
     const projectIdsArray = projectIds || [];
 
-    if(projectIdsArray.length === 0){
+    if (projectIdsArray.length === 0) {
       const result = await prisma.$queryRaw<
         Array<{
           id: number;
@@ -169,7 +169,7 @@ export namespace VecDocuments {
             FROM "RecipeVersion" rv
             INNER JOIN "_RecipeVersionProjects" rvp ON rv.id = rvp."B"
             INNER JOIN "Project" p ON rvp."A" = p.id
-            WHERE p."shortId" IN(${Prisma.join(projectIdsArray.length ? projectIdsArray : ['nope'])})
+            WHERE p."shortId" IN(${Prisma.join(projectIdsArray.length ? projectIdsArray : ["nope"])})
               AND rv."deletedAt" IS NULL
               AND p."deletedAt" IS NULL
           )

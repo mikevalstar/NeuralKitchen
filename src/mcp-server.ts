@@ -134,11 +134,13 @@ class StandaloneMcpServer {
           // Check if recipe belongs to specified projects (if projects filter is provided)
           let projectWarning = "";
           if (projects && projects.length > 0) {
-            const recipeProjectShortIds = recipe.currentVersion.projects?.map(p => p.shortId) || [];
-            const hasMatchingProject = projects.some(projectShortId => recipeProjectShortIds.includes(projectShortId));
-            
+            const recipeProjectShortIds = recipe.currentVersion.projects?.map((p) => p.shortId) || [];
+            const hasMatchingProject = projects.some((projectShortId) =>
+              recipeProjectShortIds.includes(projectShortId),
+            );
+
             if (!hasMatchingProject) {
-              const projectNames = recipe.currentVersion.projects?.map(p => p.title).join(", ") || "none";
+              const projectNames = recipe.currentVersion.projects?.map((p) => p.title).join(", ") || "none";
               projectWarning = `\n\n*Note: This recipe is not associated with the specified projects. Recipe projects: ${projectNames}*`;
             }
           }
@@ -255,17 +257,15 @@ class StandaloneMcpServer {
         });
 
         console.info("Query params", req.query.projects);
-        
 
         if (req.query.projects && req.body?.params?.arguments) {
           const projectsParam = req.query.projects;
-          if (typeof projectsParam === 'string') {
+          if (typeof projectsParam === "string") {
             req.body.params.arguments.projects = projectsParam.split(",");
           } else if (Array.isArray(projectsParam)) {
             req.body.params.arguments.projects = projectsParam;
           }
         }
-
 
         console.info("Body", req.body);
 
@@ -323,7 +323,6 @@ class StandaloneMcpServer {
         }),
       );
     });
-    
   }
 
   /**

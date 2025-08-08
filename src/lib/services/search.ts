@@ -73,7 +73,7 @@ export namespace SearchService {
     try {
       const projectIdsArray = projectIds || [];
 
-      if(projectIdsArray.length === 0){
+      if (projectIdsArray.length === 0) {
         // Search in recipe titles and content using PostgreSQL full-text search
         const results = await prisma.$queryRaw<
           Array<{
@@ -146,7 +146,7 @@ export namespace SearchService {
               SELECT rvp."B" 
               FROM "_RecipeVersionProjects" rvp
               INNER JOIN "Project" p ON rvp."A" = p.id
-              WHERE p."shortId" IN(${Prisma.join(projectIdsArray.length ? projectIdsArray : ['nope'])})
+              WHERE p."shortId" IN(${Prisma.join(projectIdsArray.length ? projectIdsArray : ["nope"])})
                 AND p."deletedAt" IS NULL
             )
           )

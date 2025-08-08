@@ -365,9 +365,7 @@ function RecipeEdit() {
                         <Label htmlFor={`project-${project.id}`} className="font-medium cursor-pointer">
                           {project.title}
                         </Label>
-                        {project.description && (
-                          <p className="text-xs text-muted-foreground">{project.description}</p>
-                        )}
+                        {project.description && <p className="text-xs text-muted-foreground">{project.description}</p>}
                       </div>
                     </div>
                   ))}

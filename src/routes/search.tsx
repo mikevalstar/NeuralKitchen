@@ -1,18 +1,21 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
-import { ArrowRight, ChevronDown, ChevronUp, Search } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, ChevronDown, ChevronUp, Filter, Search } from "lucide-react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
+import { Projects } from "~/lib/data/projects";
 import { type SearchResult, SearchService } from "~/lib/services/search";
 
 const searchSchema = z.object({
   q: z.string().optional(),
   limit: z.number().optional().default(10),
+  projects: z.array(z.string()).optional(),
 });
 
 const searchRecipes = createServerFn({ method: "GET" })
@@ -22,27 +25,44 @@ const searchRecipes = createServerFn({ method: "GET" })
       return [];
     }
 
-    return await SearchService.hybridSearch(data.q, data.limit);
+    return await SearchService.hybridSearch(data.q, data.limit, data.projects);
   });
+
+const getProjects = createServerFn({ method: "GET" }).handler(async () => {
+  return await Projects.list();
+});
 
 export const Route = createFileRoute("/search")({
   component: SearchPage,
   validateSearch: zodValidator(searchSchema),
-  loaderDeps: ({ search: { q, limit } }) => ({ q, limit }),
-  loader: ({ deps }) => {
+  loaderDeps: ({ search: { q, limit, projects } }) => ({ q, limit, projects }),
+  loader: async ({ deps }) => {
+    const projectsData = await getProjects();
+
     if (deps.q) {
-      return searchRecipes({ data: deps });
+      const searchResults = await searchRecipes({ data: deps });
+      return { results: searchResults, projects: projectsData };
     }
-    return [];
+
+    return { results: [], projects: projectsData };
   },
 });
 
 function SearchPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
-  const results = Route.useLoaderData();
+  const { results, projects } = Route.useLoaderData();
   const [query, setQuery] = useState(search.q || "");
+  const [selectedProjects, setSelectedProjects] = useState<string[]>(search.projects || []);
+  const [showAdvanced, setShowAdvanced] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+
+  // Show advanced filters if any filters are active
+  useEffect(() => {
+    if (selectedProjects.length > 0) {
+      setShowAdvanced(true);
+    }
+  }, [selectedProjects]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,10 +72,31 @@ function SearchPage() {
     try {
       await navigate({
         to: "/search",
-        search: { q: query.trim() },
+        search: {
+          q: query.trim(),
+          projects: selectedProjects.length > 0 ? selectedProjects : undefined,
+        },
       });
     } finally {
       setIsSearching(false);
+    }
+  };
+
+  const handleProjectToggle = (projectShortId: string, checked: boolean) => {
+    const newSelectedProjects = checked
+      ? [...selectedProjects, projectShortId]
+      : selectedProjects.filter((id) => id !== projectShortId);
+
+    setSelectedProjects(newSelectedProjects);
+  };
+
+  const clearAllFilters = () => {
+    setSelectedProjects([]);
+    if (search.q) {
+      navigate({
+        to: "/search",
+        search: { q: search.q },
+      });
     }
   };
 
@@ -69,30 +110,102 @@ function SearchPage() {
         </div>
 
         {/* Search Bar */}
-        <form onSubmit={handleSearch} className="flex gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search for recipes, frameworks, concepts..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="pl-9"
-            />
+        <form onSubmit={handleSearch} className="space-y-4">
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="Search for recipes, frameworks, concepts..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="pl-9"
+              />
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="flex items-center gap-2">
+              <Filter className="h-4 w-4" />
+              Filters
+              {selectedProjects.length > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs bg-primary text-primary-foreground rounded-full">
+                  {selectedProjects.length}
+                </span>
+              )}
+            </Button>
+            <Button type="submit" disabled={isSearching || !query.trim()}>
+              {isSearching ? "Searching..." : "Search"}
+            </Button>
           </div>
-          <Button type="submit" disabled={isSearching || !query.trim()}>
-            {isSearching ? "Searching..." : "Search"}
-          </Button>
+
+          {/* Advanced Filters */}
+          {showAdvanced && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-base">Search Filters</CardTitle>
+                  {selectedProjects.length > 0 && (
+                    <Button variant="ghost" size="sm" onClick={clearAllFilters}>
+                      Clear All
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Project Filters */}
+                {projects.length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium mb-3">Projects</h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {projects.map((project) => (
+                        <div key={project.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`project-${project.id}`}
+                            checked={selectedProjects.includes(project.shortId)}
+                            onCheckedChange={(checked) => handleProjectToggle(project.shortId, !!checked)}
+                          />
+                          <label
+                            htmlFor={`project-${project.id}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                            {project.title}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </form>
       </div>
 
       {/* Search Results */}
       <div className="space-y-4">
         {search.q && (
-          <div className="text-sm text-muted-foreground">
-            {results.length > 0
-              ? `Found ${results.length} result${results.length === 1 ? "" : "s"} for "${search.q}"`
-              : `No results found for "${search.q}"`}
+          <div className="text-sm text-muted-foreground space-y-1">
+            <div>
+              {results.length > 0
+                ? `Found ${results.length} result${results.length === 1 ? "" : "s"} for "${search.q}"`
+                : `No results found for "${search.q}"`}
+            </div>
+            {selectedProjects.length > 0 && (
+              <div className="flex items-center gap-2">
+                <span>Filtered by projects:</span>
+                <div className="flex gap-1">
+                  {selectedProjects.map((projectId) => {
+                    const project = projects.find((p) => p.shortId === projectId);
+                    return project ? (
+                      <span key={projectId} className="px-2 py-1 text-xs bg-muted rounded-md">
+                        {project.title}
+                      </span>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
