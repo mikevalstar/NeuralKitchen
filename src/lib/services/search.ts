@@ -1,3 +1,4 @@
+import { Prisma } from "~/generated/prisma/client";
 import { VecDocuments } from "../data/vecDocuments";
 import { OpenAIService } from "./openai";
 
@@ -15,7 +16,12 @@ export namespace SearchService {
   /**
    * Perform semantic search using vector embeddings
    */
-  export async function searchRecipes(query: string, limit = 10, threshold = 0.3): Promise<SearchResult[]> {
+  export async function searchRecipes(
+    query: string,
+    limit = 10,
+    threshold = 0.3,
+    projectIds?: string[],
+  ): Promise<SearchResult[]> {
     if (!query.trim()) {
       return [];
     }
@@ -25,7 +31,7 @@ export namespace SearchService {
       const queryEmbedding = await OpenAIService.generateEmbedding(query);
 
       // Perform vector similarity search
-      const results = await VecDocuments.similaritySearch(queryEmbedding, limit, threshold);
+      const results = await VecDocuments.similaritySearch(queryEmbedding, limit, threshold, projectIds);
 
       // Get additional details for each result (including AI summaries)
       const enrichedResults = await Promise.all(
@@ -59,12 +65,58 @@ export namespace SearchService {
   /**
    * Simple text-based search (fallback when vector search fails)
    */
-  export async function textSearch(query: string, limit = 10): Promise<SearchResult[]> {
+  export async function textSearch(query: string, limit = 10, projectIds?: string[]): Promise<SearchResult[]> {
     if (!query.trim()) {
       return [];
     }
 
     try {
+      const projectIdsArray = projectIds || [];
+
+      if(projectIdsArray.length === 0){
+        // Search in recipe titles and content using PostgreSQL full-text search
+        const results = await prisma.$queryRaw<
+          Array<{
+            versionId: string;
+            recipeId: string;
+            title: string;
+            shortId: string;
+            aiSummary: string | null;
+          }>
+        >`
+          SELECT 
+            rv.id as "versionId",
+            rv."recipeId",
+            rv.title,
+            rv."shortId",
+            rv."aiSummary"
+          FROM "RecipeVersion" rv
+          WHERE rv."deletedAt" IS NULL 
+            AND rv."isCurrent" = true
+            AND (
+              rv.title ILIKE ${`%${query}%`} 
+              OR rv.content ILIKE ${`%${query}%`}
+            )
+          ORDER BY 
+            CASE 
+              WHEN rv.title ILIKE ${`%${query}%`} THEN 1 
+              ELSE 2 
+            END,
+            rv."updatedAt" DESC
+          LIMIT ${limit}
+        `;
+
+        return results.map((result, index) => ({
+          id: index, // Not from VecDocument, so use array index
+          title: result.title,
+          shortid: result.shortId,
+          versionId: result.versionId,
+          recipeId: result.recipeId,
+          similarity: 0.8, // Default similarity for text search
+          summary: result.aiSummary || undefined,
+        }));
+      }
+
       // Search in recipe titles and content using PostgreSQL full-text search
       const results = await prisma.$queryRaw<
         Array<{
@@ -87,6 +139,16 @@ export namespace SearchService {
           AND (
             rv.title ILIKE ${`%${query}%`} 
             OR rv.content ILIKE ${`%${query}%`}
+          )
+          AND (
+            ${projectIdsArray.length} = 0 
+            OR rv.id IN (
+              SELECT rvp."B" 
+              FROM "_RecipeVersionProjects" rvp
+              INNER JOIN "Project" p ON rvp."A" = p.id
+              WHERE p."shortId" IN(${Prisma.join(projectIdsArray.length ? projectIdsArray : ['nope'])})
+                AND p."deletedAt" IS NULL
+            )
           )
         ORDER BY 
           CASE 
@@ -115,10 +177,10 @@ export namespace SearchService {
   /**
    * Hybrid search - tries vector search first, falls back to text search
    */
-  export async function hybridSearch(query: string, limit = 10): Promise<SearchResult[]> {
+  export async function hybridSearch(query: string, limit = 10, projectIds?: string[]): Promise<SearchResult[]> {
     try {
       // Try vector search first
-      const vectorResults = await searchRecipes(query, limit);
+      const vectorResults = await searchRecipes(query, limit, 0.3, projectIds);
 
       if (vectorResults.length > 0) {
         return vectorResults;
@@ -126,10 +188,10 @@ export namespace SearchService {
 
       // Fall back to text search if no vector results
       console.log("No vector search results, falling back to text search");
-      return await textSearch(query, limit);
+      return await textSearch(query, limit, projectIds);
     } catch (error) {
       console.error("Vector search failed, falling back to text search:", error);
-      return await textSearch(query, limit);
+      return await textSearch(query, limit, projectIds);
     }
   }
 }

@@ -112,7 +112,7 @@ class StandaloneMcpServer {
       async (args, extra) => {
         try {
           console.log("get_recipe", args, extra);
-          const { identifier } = args;
+          const { identifier, projects } = args;
 
           // Try to get recipe by ID first, then by shortId
           let recipe = await Recipes.read(identifier);
@@ -131,12 +131,24 @@ class StandaloneMcpServer {
             };
           }
 
+          // Check if recipe belongs to specified projects (if projects filter is provided)
+          let projectWarning = "";
+          if (projects && projects.length > 0) {
+            const recipeProjectShortIds = recipe.currentVersion.projects?.map(p => p.shortId) || [];
+            const hasMatchingProject = projects.some(projectShortId => recipeProjectShortIds.includes(projectShortId));
+            
+            if (!hasMatchingProject) {
+              const projectNames = recipe.currentVersion.projects?.map(p => p.title).join(", ") || "none";
+              projectWarning = `\n\n*Note: This recipe is not associated with the specified projects. Recipe projects: ${projectNames}*`;
+            }
+          }
+
           // Return full recipe content
           return {
             content: [
               {
                 type: "text",
-                text: `# ${recipe.currentVersion.title}\n\n${recipe.currentVersion.content}`,
+                text: `# ${recipe.currentVersion.title}\n\n${recipe.currentVersion.content}${projectWarning}`,
               },
             ],
           };
@@ -168,10 +180,11 @@ class StandaloneMcpServer {
       async (args) => {
         try {
           const limit = 10;
-          const { query } = args;
+          const { query, projects } = args;
+          console.info("search_recipes", args);
 
           // Use hybrid search (vector + text fallback)
-          const results = await SearchService.hybridSearch(query, limit);
+          const results = await SearchService.hybridSearch(query, limit, projects);
 
           if (results.length === 0) {
             return {
@@ -241,11 +254,16 @@ class StandaloneMcpServer {
           sessionIdGenerator: undefined,
         });
 
-        console.info("Query params", req.query.project);
+        console.info("Query params", req.query.projects);
         
 
         if (req.query.projects && req.body?.params?.arguments) {
-          req.body.params.arguments.projects = req.query.projects.split(",");
+          const projectsParam = req.query.projects;
+          if (typeof projectsParam === 'string') {
+            req.body.params.arguments.projects = projectsParam.split(",");
+          } else if (Array.isArray(projectsParam)) {
+            req.body.params.arguments.projects = projectsParam;
+          }
         }
 
 

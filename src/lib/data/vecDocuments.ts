@@ -1,3 +1,4 @@
+import { Prisma } from "~/generated/prisma/client";
 import prisma from "../prisma";
 
 export namespace VecDocuments {
@@ -108,7 +109,38 @@ export namespace VecDocuments {
    * Perform vector similarity search
    * Returns the top N most similar documents
    */
-  export async function similaritySearch(queryEmbedding: number[], limit = 10, threshold = 0.3) {
+  export async function similaritySearch(queryEmbedding: number[], limit = 10, threshold = 0.3, projectIds?: string[]) {
+    const projectIdsArray = projectIds || [];
+
+    if(projectIdsArray.length === 0){
+      const result = await prisma.$queryRaw<
+        Array<{
+          id: number;
+          title: string;
+          shortid: string;
+          versionId: string;
+          recipeId: string;
+          similarity: number;
+        }>
+      >`
+        SELECT 
+          id, 
+          title, 
+          shortid, 
+          "versionId", 
+          "recipeId",
+          1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) as similarity
+        FROM "VecDocument"
+        WHERE deletedat IS NULL 
+          AND "isCurrent" = true
+          AND 1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) > ${threshold}
+        ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::vector
+        LIMIT ${limit}
+      `;
+
+      return result;
+    }
+
     const result = await prisma.$queryRaw<
       Array<{
         id: number;
@@ -130,6 +162,18 @@ export namespace VecDocuments {
       WHERE deletedat IS NULL 
         AND "isCurrent" = true
         AND 1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) > ${threshold}
+        AND (
+          ${projectIdsArray.length} = 0 
+          OR "versionId" IN (
+            SELECT rv.id 
+            FROM "RecipeVersion" rv
+            INNER JOIN "_RecipeVersionProjects" rvp ON rv.id = rvp."B"
+            INNER JOIN "Project" p ON rvp."A" = p.id
+            WHERE p."shortId" IN(${Prisma.join(projectIdsArray.length ? projectIdsArray : ['nope'])})
+              AND rv."deletedAt" IS NULL
+              AND p."deletedAt" IS NULL
+          )
+        )
       ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::vector
       LIMIT ${limit}
     `;
