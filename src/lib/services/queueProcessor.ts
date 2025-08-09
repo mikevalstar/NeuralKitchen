@@ -15,6 +15,12 @@ export class QueueProcessor {
       return;
     }
 
+    // Check for required environment variable
+    if (!process.env.OPENAI_API_KEY) {
+      console.error("OPENAI_API_KEY environment variable is required but not set. Queue processor will not start.");
+      return;
+    }
+
     console.log("Starting queue processor...");
     this.intervalId = setInterval(() => {
       this.processNext();
