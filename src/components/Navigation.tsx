@@ -1,5 +1,5 @@
-import { useAtom } from "jotai";
 import { Link } from "@tanstack/react-router";
+import { useAtom } from "jotai";
 import { Activity, BookOpen, FolderOpen, HelpCircle, Search, Tags } from "lucide-react";
 import { isWideLayoutAtom } from "~/lib/atoms/ui";
 import { BackgroundToggle } from "./BackgroundToggle";
@@ -9,7 +9,7 @@ import { WidthToggle } from "./WidthToggle";
 
 export function Navigation() {
   const [isWide] = useAtom(isWideLayoutAtom);
-  
+
   const navItems = [
     { href: "/recipes", label: "Recipes", icon: BookOpen },
     { href: "/search", label: "Search", icon: Search },

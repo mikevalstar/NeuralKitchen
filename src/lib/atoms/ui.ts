@@ -9,7 +9,7 @@ export const themeAtom = atomWithStorage<Theme>("theme", "system");
 // Resolved theme atom - computed from theme atom and system preference
 export const resolvedThemeAtom = atom<"light" | "dark">((get) => {
   const theme = get(themeAtom);
-  
+
   if (theme === "system") {
     // Check system preference
     if (typeof window !== "undefined") {
@@ -17,7 +17,7 @@ export const resolvedThemeAtom = atom<"light" | "dark">((get) => {
     }
     return "light";
   }
-  
+
   return theme;
 });
 

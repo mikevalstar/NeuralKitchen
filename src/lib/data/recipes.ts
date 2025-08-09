@@ -8,9 +8,13 @@ import { VecDocuments } from "./vecDocuments";
 export namespace Recipes {
   /**
    * Create a hash of the content for duplicate detection
+   * Includes title, content, tags, and projects
    */
-  function createContentHash(content: string, title: string): string {
-    return crypto.createHash("sha256").update(`${title}:${content}`).digest("hex");
+  function createContentHash(content: string, title: string, tagIds: string[] = [], projectIds: string[] = []): string {
+    const sortedTagIds = [...tagIds].sort();
+    const sortedProjectIds = [...projectIds].sort();
+    const hashInput = `${title}:${content}:${sortedTagIds.join(",")}:${sortedProjectIds.join(",")}`;
+    return crypto.createHash("sha256").update(hashInput).digest("hex");
   }
 
   /**
@@ -106,7 +110,12 @@ export namespace Recipes {
     }
 
     // Create content hash
-    const contentHash = createContentHash(validatedVersion.content, validatedVersion.title);
+    const contentHash = createContentHash(
+      validatedVersion.content,
+      validatedVersion.title,
+      validatedVersion.tagIds,
+      validatedVersion.projectIds,
+    );
 
     return prisma.$transaction(async (tx) => {
       // Create the recipe
@@ -154,6 +163,7 @@ export namespace Recipes {
           title: version.title,
           shortid: version.shortId,
           versionId: version.id,
+          status: "pending",
         });
       } catch (error) {
         // Log error but don't fail the recipe creation
@@ -180,7 +190,12 @@ export namespace Recipes {
     const recipe = await prisma.recipe.findFirst({
       where: { id: recipeId, deletedAt: null },
       include: {
-        currentVersion: true,
+        currentVersion: {
+          include: {
+            tags: true,
+            projects: true,
+          },
+        },
       },
     });
 
@@ -189,10 +204,22 @@ export namespace Recipes {
     }
 
     // Create content hash for comparison
-    const newContentHash = createContentHash(validatedVersion.content, validatedVersion.title);
+    const newContentHash = createContentHash(
+      validatedVersion.content,
+      validatedVersion.title,
+      validatedVersion.tagIds,
+      validatedVersion.projectIds,
+    );
+
+    // Get current version's tag and project IDs for comparison
+    const currentTagIds = recipe.currentVersion?.tags?.map((tag) => tag.id) || [];
+    const currentProjectIds = recipe.currentVersion?.projects?.map((project) => project.id) || [];
+    const currentContentHash = recipe.currentVersion
+      ? createContentHash(recipe.currentVersion.content, recipe.currentVersion.title, currentTagIds, currentProjectIds)
+      : null;
 
     // Check if content is identical to current version (avoid duplicates)
-    if (recipe.currentVersion?.contentHash === newContentHash) {
+    if (currentContentHash === newContentHash) {
       throw new Error("No changes detected - content is identical to current version");
     }
 
@@ -253,6 +280,7 @@ export namespace Recipes {
           title: newVersion.title,
           shortid: newVersion.shortId,
           versionId: newVersion.id,
+          status: "pending",
         });
       } catch (error) {
         // Log error but don't fail the save operation

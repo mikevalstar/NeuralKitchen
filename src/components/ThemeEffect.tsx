@@ -14,7 +14,7 @@ export function ThemeEffect() {
   useEffect(() => {
     // Listen for system theme changes
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    
+
     const handleChange = () => {
       if (theme === "system") {
         // Force DOM update when system theme changes

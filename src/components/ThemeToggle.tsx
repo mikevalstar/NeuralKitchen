@@ -1,6 +1,6 @@
 import { useAtom } from "jotai";
 import { Monitor, Moon, Sun } from "lucide-react";
-import { resolvedThemeAtom, themeAtom, type Theme } from "~/lib/atoms/ui";
+import { resolvedThemeAtom, type Theme, themeAtom } from "~/lib/atoms/ui";
 import { Button } from "./ui/button";
 
 export function ThemeToggle() {
