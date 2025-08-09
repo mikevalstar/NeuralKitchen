@@ -2,6 +2,7 @@ import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
+import { DiffView } from "~/components/DiffView";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 import {
   AlertDialog,
@@ -175,7 +176,16 @@ function VersionHistory() {
                           onClick={() => {
                             const isSelected = selectedVersions.includes(version.id);
                             handleVersionSelect(version.id, !isSelected);
-                          }}>
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                              e.preventDefault();
+                              const isSelected = selectedVersions.includes(version.id);
+                              handleVersionSelect(version.id, !isSelected);
+                            }
+                          }}
+                          role="button"
+                          tabIndex={0}>
                           {/* Git-style graph line */}
                           <div className="relative flex flex-col items-center">
                             {/* Top line (except for first item) */}
@@ -381,75 +391,114 @@ function ComparisonView({
   version2: VersionWithRelations;
   onRestore: (version: VersionWithRelations) => void;
 }) {
+  const [viewMode, setViewMode] = useState<"side-by-side" | "diff">("side-by-side");
+
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Comparing Versions</CardTitle>
-          <CardDescription>
-            Side-by-side comparison of {version1.versionId} and {version2.versionId}
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Comparing Versions</CardTitle>
+              <CardDescription>
+                Comparison of {version1.versionId} and {version2.versionId}
+              </CardDescription>
+            </div>
+            <div className="flex items-center space-x-1 bg-muted p-1 rounded-md">
+              <Button
+                variant={viewMode === "side-by-side" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("side-by-side")}
+                className="h-8">
+                Side-by-Side
+              </Button>
+              <Button
+                variant={viewMode === "diff" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("diff")}
+                className="h-8">
+                Diff View
+              </Button>
+            </div>
+          </div>
         </CardHeader>
       </Card>
 
-      {/* Side-by-side comparison */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Version 1 */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">
-                  {version1.versionId}: {version1.title}
-                </CardTitle>
-                <CardDescription>
-                  {formatDateTime(version1.createdAt)}
-                  {version1.isCurrent && " • Current"}
-                </CardDescription>
-              </div>
-              {!version1.isCurrent && (
-                <Button variant="outline" size="sm" onClick={() => onRestore(version1)}>
-                  Restore
-                </Button>
-              )}
-            </div>
-            {version1.comment && <div className="text-sm italic text-muted-foreground">"{version1.comment}"</div>}
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none">
-              <MarkdownRenderer content={version1.content} variant="compact" />
-            </div>
-          </CardContent>
-        </Card>
+      {viewMode === "side-by-side" ? (
+        <SideBySideView version1={version1} version2={version2} onRestore={onRestore} />
+      ) : (
+        <DiffView version1={version1} version2={version2} onRestore={onRestore} />
+      )}
+    </div>
+  );
+}
 
-        {/* Version 2 */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <CardTitle className="text-lg">
-                  {version2.versionId}: {version2.title}
-                </CardTitle>
-                <CardDescription>
-                  {formatDateTime(version2.createdAt)}
-                  {version2.isCurrent && " • Current"}
-                </CardDescription>
-              </div>
-              {!version2.isCurrent && (
-                <Button variant="outline" size="sm" onClick={() => onRestore(version2)}>
-                  Restore
-                </Button>
-              )}
+function SideBySideView({
+  version1,
+  version2,
+  onRestore,
+}: {
+  version1: VersionWithRelations;
+  version2: VersionWithRelations;
+  onRestore: (version: VersionWithRelations) => void;
+}) {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      {/* Version 1 */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">
+                {version1.versionId}: {version1.title}
+              </CardTitle>
+              <CardDescription>
+                {formatDateTime(version1.createdAt)}
+                {version1.isCurrent && " • Current"}
+              </CardDescription>
             </div>
-            {version2.comment && <div className="text-sm italic text-muted-foreground">"{version2.comment}"</div>}
-          </CardHeader>
-          <CardContent>
-            <div className="prose prose-sm max-w-none">
-              <MarkdownRenderer content={version2.content} variant="compact" />
+            {!version1.isCurrent && (
+              <Button variant="outline" size="sm" onClick={() => onRestore(version1)}>
+                Restore
+              </Button>
+            )}
+          </div>
+          {version1.comment && <div className="text-sm italic text-muted-foreground">"{version1.comment}"</div>}
+        </CardHeader>
+        <CardContent>
+          <div className="prose prose-sm max-w-none">
+            <MarkdownRenderer content={version1.content} variant="compact" />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Version 2 */}
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-lg">
+                {version2.versionId}: {version2.title}
+              </CardTitle>
+              <CardDescription>
+                {formatDateTime(version2.createdAt)}
+                {version2.isCurrent && " • Current"}
+              </CardDescription>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            {!version2.isCurrent && (
+              <Button variant="outline" size="sm" onClick={() => onRestore(version2)}>
+                Restore
+              </Button>
+            )}
+          </div>
+          {version2.comment && <div className="text-sm italic text-muted-foreground">"{version2.comment}"</div>}
+        </CardHeader>
+        <CardContent>
+          <div className="prose prose-sm max-w-none">
+            <MarkdownRenderer content={version2.content} variant="compact" />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
