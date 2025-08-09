@@ -54,6 +54,11 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
               {children}
             </blockquote>
           ),
+          a: ({ children, href }: { children: React.ReactNode; href?: string }) => (
+            <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+              {children}
+            </a>
+          ),
         };
       case "search":
         return {
@@ -86,6 +91,11 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
               {children}
             </blockquote>
           ),
+          a: ({ children, href }: { children: React.ReactNode; href?: string }) => (
+            <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+              {children}
+            </a>
+          ),
         };
       default:
         return {
@@ -117,6 +127,11 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
             <blockquote className="border-l-4 border-primary pl-4 italic text-muted-foreground mb-3">
               {children}
             </blockquote>
+          ),
+          a: ({ children, href }: { children: React.ReactNode; href?: string }) => (
+            <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+              {children}
+            </a>
           ),
         };
     }
