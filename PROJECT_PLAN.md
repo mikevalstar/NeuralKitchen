@@ -62,6 +62,9 @@ Neural Kitchen is a recipe/cookbook management system designed specifically for 
 
 ### 2.4 Auth
 - [ ] **Basic Auth Options**
+  - [ ] Basic auth with better-auth
+  - [ ] CLI Create user setup
+  - [ ] Simple User Management Tools (UI)
 
 ### 2.5 Public Website
 Make a public website, separate repo
