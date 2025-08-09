@@ -5,3 +5,4 @@ app/generated
 /src/generated/prisma
 .claude
 .output
+.nitro
