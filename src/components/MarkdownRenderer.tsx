@@ -40,12 +40,15 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
           li: ({ children }: { children: React.ReactNode }) => (
             <li className="leading-relaxed text-muted-foreground">{children}</li>
           ),
-          code: ({ inline, children }: { inline?: boolean; children: React.ReactNode }) =>
-            inline ? (
-              <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">{children}</code>
-            ) : (
-              <code className="block bg-muted p-3 rounded text-xs font-mono overflow-x-auto">{children}</code>
-            ),
+          code: ({ className, children }: { className?: string; children: React.ReactNode }) => {
+            const match = /language-(\w+)/.exec(className || "");
+
+            if (!match) {
+              return <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono">{children}</code>;
+            }
+
+            return <code className="block bg-muted p-3 rounded text-xs font-mono overflow-x-auto">{children}</code>;
+          },
           pre: ({ children }: { children: React.ReactNode }) => (
             <pre className="bg-muted p-3 rounded overflow-x-auto mb-2">{children}</pre>
           ),
@@ -55,7 +58,7 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
             </blockquote>
           ),
           a: ({ children, href }: { children: React.ReactNode; href?: string }) => (
-            <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+            <a href={href} className="text-primary hover:underline" rel="noopener noreferrer">
               {children}
             </a>
           ),
@@ -77,12 +80,15 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
             <ol className="list-decimal pl-4 mb-2 text-sm space-y-0.5">{children}</ol>
           ),
           li: ({ children }: { children: React.ReactNode }) => <li className="leading-relaxed">{children}</li>,
-          code: ({ inline, children }: { inline?: boolean; children: React.ReactNode }) =>
-            inline ? (
-              <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">{children}</code>
-            ) : (
-              <code className="block bg-muted p-2 rounded text-xs font-mono overflow-x-auto">{children}</code>
-            ),
+          code: ({ className, children }: { className?: string; children: React.ReactNode }) => {
+            const match = /language-(\w+)/.exec(className || "");
+
+            if (!match) {
+              return <code className="bg-muted px-1 py-0.5 rounded text-xs font-mono">{children}</code>;
+            }
+
+            return <code className="block bg-muted p-2 rounded text-xs font-mono overflow-x-auto">{children}</code>;
+          },
           pre: ({ children }: { children: React.ReactNode }) => (
             <pre className="bg-muted p-2 rounded overflow-x-auto mb-2 text-xs">{children}</pre>
           ),
@@ -92,7 +98,7 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
             </blockquote>
           ),
           a: ({ children, href }: { children: React.ReactNode; href?: string }) => (
-            <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+            <a href={href} className="text-primary hover:underline" rel="noopener noreferrer">
               {children}
             </a>
           ),
@@ -114,12 +120,15 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
             <ol className="list-decimal pl-6 mb-3 space-y-1">{children}</ol>
           ),
           li: ({ children }: { children: React.ReactNode }) => <li className="leading-relaxed">{children}</li>,
-          code: ({ inline, children }: { inline?: boolean; children: React.ReactNode }) =>
-            inline ? (
-              <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>
-            ) : (
-              <code className="block bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto">{children}</code>
-            ),
+          code: ({ className, children }: { className?: string; children: React.ReactNode }) => {
+            const match = /language-(\w+)/.exec(className || "");
+
+            if (!match) {
+              return <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">{children}</code>;
+            }
+
+            return <code className="block bg-muted p-4 rounded-lg text-sm font-mono overflow-x-auto">{children}</code>;
+          },
           pre: ({ children }: { children: React.ReactNode }) => (
             <pre className="bg-muted p-4 rounded-lg overflow-x-auto mb-4">{children}</pre>
           ),
@@ -129,7 +138,7 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
             </blockquote>
           ),
           a: ({ children, href }: { children: React.ReactNode; href?: string }) => (
-            <a href={href} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+            <a href={href} className="text-primary hover:underline" rel="noopener noreferrer">
               {children}
             </a>
           ),

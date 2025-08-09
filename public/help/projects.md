@@ -11,6 +11,8 @@ Projects in Neural Kitchen are collections of related recipes that belong to the
 - Filter recipes by specific projects
 - Organize your knowledge by domain
 
+Projects will be referenced in your MCP connection to allow you to store recipes across projects.
+
 ## Creating Projects
 
 1. **Navigate to Projects** - Click "Projects" in the main navigation
@@ -21,11 +23,6 @@ Projects in Neural Kitchen are collections of related recipes that belong to the
    - **Description**: What this project encompasses
 
 ## Best Practices for Projects
-
-### Project Naming
-- Use clear, descriptive names: "E-commerce Frontend", "Authentication Service"
-- Keep it consistent with your actual codebase structure
-- Avoid overly broad or narrow scopes
 
 ### Project Organization
 - **By Codebase**: One project per repository or major application
@@ -50,7 +47,7 @@ This allows filtering by either project context or technical category.
 ## Managing Project Relationships
 
 When creating or editing recipes:
-1. Select relevant projects from the dropdown
+1. Select relevant projects
 2. Recipes can belong to multiple projects
 3. Use the project filter on the recipes page to focus on specific domains
 

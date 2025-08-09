@@ -6,11 +6,11 @@ Neural Kitchen includes a Model Context Protocol (MCP) server that allows AI age
 
 The Model Context Protocol is a standard for connecting AI agents to external data sources. Neural Kitchen's MCP server provides AI assistants with access to your curated recipes and development knowledge.
 
+https://modelcontextprotocol.io
+
 ## Server Details
 
-- **Port**: 3002 (runs alongside main app on port 3000)
-- **Protocol**: HTTP with streamable transport
-- **Format**: Stateless server for compatibility
+To get a sample connection string setup, visit a project page and you will get a quick setup guide for the MCP server.
 
 ## Available Tools
 
@@ -31,28 +31,6 @@ Searches recipes using the same hybrid search as the web interface.
 
 **Returns**: List of recipes with AI summaries and instructions to use `get_recipe` for full content
 
-## Using with AI Assistants
-
-### Claude Code
-Neural Kitchen's MCP server is designed to work seamlessly with Claude Code and other MCP-compatible AI assistants.
-
-### Integration Benefits
-- **Contextual Guidance**: AI agents get access to your team's best practices
-- **Consistent Patterns**: Agents follow established code conventions
-- **Knowledge Preservation**: Institutional knowledge is accessible to AI workflows
-
-## Server Management
-
-### Development
-```bash
-pnpm dev        # Starts both web app and MCP server
-pnpm mcp:dev    # Starts only MCP server in watch mode
-```
-
-### Production
-```bash
-pnpm mcp:start  # Starts MCP server for production
-```
 
 ### Health Check
 Visit `http://localhost:3002/health` to verify the server is running.
@@ -72,10 +50,7 @@ The MCP server automatically:
 
 ## Troubleshooting
 
-### Common Issues
-- **Connection Failed**: Verify server is running on port 3002
-- **Search Not Working**: Check OpenAI API key is configured
-- **No Results**: Ensure recipes exist and have been processed
+Coming Soon...
 
 ### Logs
 Check the console output where you started the MCP server for error messages and debugging information.
