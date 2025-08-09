@@ -59,7 +59,7 @@ function SettingsPage() {
                 </AlertDescription>
               </Alert>
             )}
-            
+
             {validation.openaiApiKey && (
               <Alert>
                 <CheckCircle className="h-4 w-4" />

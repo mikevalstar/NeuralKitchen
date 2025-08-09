@@ -25,6 +25,29 @@ export namespace Recipes {
   }
 
   /**
+   * Get recently updated recipes, ordered by updatedAt desc
+   */
+  export async function getRecentlyUpdated(limit = 20) {
+    return prisma.recipe.findMany({
+      where: {
+        deletedAt: null,
+      },
+      include: {
+        currentVersion: {
+          include: {
+            tags: true,
+            projects: true,
+          },
+        },
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      take: limit,
+    });
+  }
+
+  /**
    * Get all non-deleted recipes, ordered by title
    */
   export async function list(options?: { page?: number; pageSize?: number }) {
@@ -47,7 +70,7 @@ export namespace Recipes {
 
     if (options?.page && options?.pageSize) {
       const skip = (options.page - 1) * options.pageSize;
-      
+
       const [recipes, totalCount] = await Promise.all([
         prisma.recipe.findMany({
           where,
