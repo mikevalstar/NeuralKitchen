@@ -127,6 +127,7 @@ export namespace Recipes {
           versionNumber: 1,
           isCurrent: true,
           contentHash,
+          comment: validatedVersion.comment,
           recipeId: recipe.id,
           tags: {
             connect: validatedVersion.tagIds.map((id) => ({ id })),
@@ -222,6 +223,7 @@ export namespace Recipes {
           versionNumber: nextVersionNumber,
           isCurrent: true,
           contentHash: newContentHash,
+          comment: validatedVersion.comment,
           recipeId: recipe.id,
           tags: {
             connect: validatedVersion.tagIds.map((id) => ({ id })),
@@ -332,6 +334,9 @@ export namespace Recipes {
       throw new Error("Target version not found");
     }
 
+    // Create automatic restore comment
+    const restoreComment = `Restored from version ${targetVersion.versionId}`;
+
     // Save it as a new version (this will create a new version with the old content)
     // Note: The save() function will automatically add the new version to the queue
     return save(recipeId, {
@@ -339,6 +344,7 @@ export namespace Recipes {
       content: targetVersion.content,
       tagIds: targetVersion.tags.map((tag) => tag.id),
       projectIds: targetVersion.projects.map((project) => project.id),
+      comment: restoreComment,
     });
   }
 

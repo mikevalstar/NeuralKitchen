@@ -127,6 +127,8 @@ Built-in dark/light mode with `next-themes` and theme script in root route for f
 
 ## Development Notes
 
+The user is always running the app with `pnpm run dev:web` and is monitoring your progress
+
 ### Biome Configuration
 - 2-space indentation
 - 120 character line width

@@ -190,11 +190,11 @@ export function ThreeBackground() {
   }, []);
 
   return (
-    <div 
-      ref={containerRef} 
+    <div
+      ref={containerRef}
       className="fixed inset-0 pointer-events-none bg-background"
-      style={{ 
-        zIndex: 1
+      style={{
+        zIndex: 1,
       }}
     />
   );

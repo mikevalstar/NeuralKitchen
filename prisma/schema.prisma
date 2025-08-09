@@ -54,6 +54,7 @@ model RecipeVersion {
   contentHash       String?
   versionNumber     Int
   aiSummary         String?
+  comment           String?
   currentForRecipes Recipe[]  @relation("CurrentRecipeVersion")
   recipe            Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   projects          Project[] @relation("RecipeVersionProjects")

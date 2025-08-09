@@ -97,10 +97,12 @@ function RecipeDetail() {
         </div>
 
         <div className="flex items-center space-x-2">
-          <Button variant="outline" size="sm">
-            <History className="h-4 w-4 mr-2" />
-            Version History
-          </Button>
+          <Link to="/recipes/$recipeId/versions" params={{ recipeId: recipe.id }}>
+            <Button variant="outline" size="sm">
+              <History className="h-4 w-4 mr-2" />
+              Version History
+            </Button>
+          </Link>
           <Link to="/recipes/$recipeId/edit" params={{ recipeId: recipe.id }}>
             <Button variant="outline" size="sm">
               <Edit className="h-4 w-4 mr-2" />

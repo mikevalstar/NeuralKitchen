@@ -45,6 +45,7 @@ export const recipeVersionSchema = z.object({
   content: z.string().min(1, "Recipe content is required"),
   tagIds: z.array(z.string()).optional().default([]),
   projectIds: z.array(z.string()).optional().default([]),
+  comment: z.string().max(500, "Comment must be less than 500 characters").optional(),
 });
 
 export type RecipeVersionInput = z.infer<typeof recipeVersionSchema>;
@@ -83,3 +84,11 @@ export const queueItemSchema = z.object({
 });
 
 export type QueueItemInput = z.infer<typeof queueItemSchema>;
+
+// Version restore validation schema
+export const versionRestoreSchema = z.object({
+  recipeId: z.string().min(1, "Recipe ID is required"),
+  versionNumber: z.number().min(1, "Version number must be positive"),
+});
+
+export type VersionRestoreInput = z.infer<typeof versionRestoreSchema>;
