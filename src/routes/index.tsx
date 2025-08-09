@@ -26,28 +26,28 @@ function Home() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
-        <Link to="/recipes" className="group">
-          <div className="p-6 border rounded-lg bg-card transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer">
+        <Link to="/recipes" className="group h-full">
+          <div className="p-6 border rounded-lg bg-card transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer h-full flex flex-col">
             <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">Recipes</h3>
-            <p className="text-muted-foreground">Manage and organize your favorite recipes</p>
+            <p className="text-muted-foreground flex-1">Manage and organize your favorite recipes</p>
           </div>
         </Link>
-        <Link to="/projects" className="group">
-          <div className="p-6 border rounded-lg bg-card transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer">
+        <Link to="/projects" className="group h-full">
+          <div className="p-6 border rounded-lg bg-card transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer h-full flex flex-col">
             <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">Projects</h3>
-            <p className="text-muted-foreground">Track your culinary projects and experiments</p>
+            <p className="text-muted-foreground flex-1">Track your culinary projects and experiments</p>
           </div>
         </Link>
-        <Link to="/tags" className="group">
-          <div className="p-6 border rounded-lg bg-card transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer">
+        <Link to="/tags" className="group h-full">
+          <div className="p-6 border rounded-lg bg-card transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer h-full flex flex-col">
             <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">Tags</h3>
-            <p className="text-muted-foreground">Organize content with custom tags</p>
+            <p className="text-muted-foreground flex-1">Organize content with custom tags</p>
           </div>
         </Link>
-        <Link to="/help" className="group">
-          <div className="p-6 border rounded-lg bg-card transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer">
+        <Link to="/help" className="group h-full">
+          <div className="p-6 border rounded-lg bg-card transition-all duration-200 hover:shadow-lg hover:scale-105 cursor-pointer h-full flex flex-col">
             <h3 className="text-lg font-semibold mb-2 group-hover:text-primary transition-colors">Help</h3>
-            <p className="text-muted-foreground">Get assistance and learn more features</p>
+            <p className="text-muted-foreground flex-1">Get assistance and learn more features</p>
           </div>
         </Link>
       </div>
