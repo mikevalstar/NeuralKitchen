@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { Prompts } from "../data/prompts";
 
 // Initialize OpenAI client
 const openai = new OpenAI({
@@ -15,31 +16,25 @@ export namespace OpenAIService {
     }
 
     try {
+      // Get prompts from database with fallback to constants
+      const [systemPrompt, userPromptTemplate] = await Promise.all([
+        Prompts.getByKey("RECIPE_SUMMARY_SYSTEM"),
+        Prompts.getByKey("RECIPE_SUMMARY_USER"),
+      ]);
+
+      // Replace placeholders in user prompt
+      const userPrompt = userPromptTemplate.replace("{title}", title).replace("{content}", content);
+
       const response = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: `You are an AI assistant that creates concise summaries of code development recipes/tutorials and code documentation. Your summaries should:
-
-1. Be 5 paragraphs maximum
-2. It should be written in markdown format
-3. Should be written in the same language, tone and style as the original content
-4. Focus on the main purpose and key outcome
-5. Mention the primary technology/framework if relevant  
-6. Be written so that it has all keywords and phrases that would be used to search for this recipe
-7. Avoid implementation details - focus on the "what" and "why"
-
-Keep the summary professional and actionable.`,
+            content: systemPrompt,
           },
           {
             role: "user",
-            content: `Please summarize this development recipe:
-
-Title: ${title}
-
-Content:
-${content}`,
+            content: userPrompt,
           },
         ],
         max_tokens: 2000,

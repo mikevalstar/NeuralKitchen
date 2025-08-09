@@ -90,3 +90,14 @@ model VecDocument {
 
   @@index([embedding])
 }
+
+model Prompt {
+  id          String    @id @default(uuid())
+  key         String    @unique
+  name        String
+  description String?
+  content     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+}

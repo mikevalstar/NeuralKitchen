@@ -13,6 +13,7 @@ import express, { type Request, type Response } from "express";
 import { z } from "zod";
 import { Recipes } from "./lib/data/recipes.js";
 import { SearchService } from "./lib/services/search.js";
+import { Prompts } from "./lib/data/prompts.js";
 
 class StandaloneMcpServer {
   private server: McpServer | null = null;
@@ -23,7 +24,7 @@ class StandaloneMcpServer {
   /**
    * Start the MCP server
    */
-  start() {
+  async start() {
     if (this.httpServer) {
       console.log("MCP server is already running");
       return;
@@ -31,25 +32,21 @@ class StandaloneMcpServer {
 
     console.log("Starting standalone MCP server...");
 
+    // Get prompts from database with fallback to constants
+    const [description, instructions] = await Promise.all([
+      Prompts.getByKey("MCP_SERVER_DESCRIPTION"),
+      Prompts.getByKey("MCP_SERVER_INSTRUCTIONS"),
+    ]);
+
     // Create the MCP server
     this.server = new McpServer(
       {
         name: "Neural Kitchen",
         version: "0.1.0",
-        description:
-          "A MCP server providing AI coding assistants with reusable recipes and procedures for common tasks and projects. It is a collection of recipes and procedures for use in determining next steps on a task and prescriptive instructions.",
+        description,
       },
       {
-        instructions: `This provides a list of reusable tasks and procedures also known as cookbooks or recipes for use in determining next steps on a task and prescriptive instructions.
-
-      The recipe, cookbook, or procedure is a list of steps to complete a task.
-      The recipe, cookbook, or procedure is written in markdown format.
-      The recipe, cookbook, or procedure is written in a way that is easy to understand and follow.
-
-      When you know the name of the recipe, cookbook, or procedure you want to use, you can use the read_recipe tool to read the recipe, cookbook, or procedure.
-
-      You should follow these recipes when there is one available, it will help you complete the task, always search for a recipe before starting a new task.
-      `,
+        instructions,
       },
     );
 
@@ -172,7 +169,7 @@ class StandaloneMcpServer {
     this.server.registerTool(
       "search_recipes",
       {
-        title: "Search Rcipies",
+        title: "Search Recipes",
         description: "Search recipes using semantic and text search with AI summaries",
         inputSchema: {
           query: z.string().describe("Search query to find relevant recipes"),
@@ -354,7 +351,10 @@ class StandaloneMcpServer {
 // Start the server if this file is run directly
 if (import.meta.url === `file://${process.argv[1]}`) {
   const mcpServer = new StandaloneMcpServer();
-  mcpServer.start();
+  mcpServer.start().catch((error) => {
+    console.error("Failed to start MCP server:", error);
+    process.exit(1);
+  });
 }
 
 export { StandaloneMcpServer };

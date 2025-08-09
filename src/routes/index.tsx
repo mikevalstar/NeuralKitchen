@@ -71,7 +71,10 @@ function Home() {
                     <div key={recipe.id} className="p-4 border rounded-lg bg-card hover:bg-accent transition-colors">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <Link to="/recipes/$recipeId" params={{ recipeId: recipe.shortId }} className="hover:underline">
+                          <Link
+                            to="/recipes/$recipeId"
+                            params={{ recipeId: recipe.shortId }}
+                            className="hover:underline">
                             <h3 className="font-medium text-foreground">{recipe.title}</h3>
                           </Link>
                           {recipe.currentVersion?.projects && recipe.currentVersion.projects.length > 0 ? (
@@ -120,7 +123,9 @@ function Home() {
               {tags.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag) => (
-                    <span key={tag.id} className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm">
+                    <span
+                      key={tag.id}
+                      className="px-3 py-1 bg-secondary text-secondary-foreground rounded-full text-sm">
                       {tag.name}
                     </span>
                   ))}
