@@ -54,6 +54,39 @@ Neural Kitchen provides:
 
 ## Getting Started
 
+### Option 1: Docker/Podman (Recommended)
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/mikevalstar/NeuralKitchen.git
+   cd NeuralKitchen
+   ```
+
+2. **Set up environment (optional)**
+   ```bash
+   cp .env.example .env
+   # Edit .env and add your OPENAI_API_KEY if you want AI features
+   ```
+
+3. **Start with Docker Compose**
+   ```bash
+   docker-compose up
+   # or with Podman
+   podman-compose up
+   ```
+
+4. **Set up database (first time only)**
+   ```bash
+   # In another terminal, run migrations
+   docker-compose exec app pnpm db:push
+   docker-compose exec app pnpm db:seed  # Optional: add sample data
+   ```
+
+The application will be available at:
+- Web UI: http://localhost:3000
+
+### Option 2: Local Development
+
 1. **Clone the repository**
    ```bash
    git clone https://github.com/mikevalstar/NeuralKitchen.git

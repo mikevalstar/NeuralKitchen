@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: neuralkitchen-postgres
+    environment:
+      POSTGRES_USER: neuralkitchen
+      POSTGRES_PASSWORD: neuralkitchen
+      POSTGRES_DB: neuralkitchen
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U neuralkitchen"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: neuralkitchen-app
+    environment:
+      - DATABASE_URL=postgresql://neuralkitchen:neuralkitchen@postgres:5432/neuralkitchen
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+    ports:
+      - "3000:3000"
+      - "3002:3002"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: pnpm dev
+
+volumes:
+  postgres_data:
