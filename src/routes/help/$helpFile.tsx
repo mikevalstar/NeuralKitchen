@@ -1,7 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "~/components/ui/breadcrumb";
 import { Button } from "~/components/ui/button";
+import { Card, CardContent } from "~/components/ui/card";
 import { helpFileSchema } from "~/lib/dataValidators";
 
 interface HelpContent {
@@ -69,33 +78,50 @@ function HelpFile() {
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted rounded w-1/4 mb-4"></div>
-          <div className="space-y-3">
-            <div className="h-4 bg-muted rounded w-3/4"></div>
-            <div className="h-4 bg-muted rounded w-1/2"></div>
-            <div className="h-4 bg-muted rounded w-5/6"></div>
+      <Card>
+        <CardContent>
+          <div className="animate-pulse">
+            <div className="h-8 bg-muted rounded w-1/4 mb-4"></div>
+            <div className="space-y-3">
+              <div className="h-4 bg-muted rounded w-3/4"></div>
+              <div className="h-4 bg-muted rounded w-1/2"></div>
+              <div className="h-4 bg-muted rounded w-5/6"></div>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (error) {
     return (
       <div className="space-y-6">
+        {/* Breadcrumbs */}
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbPage>Help</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
+        {/* Header */}
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Help Page Not Found</h1>
           <p className="text-muted-foreground">The requested help page could not be found.</p>
         </div>
 
-        <div className="p-8 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center">
-          <p className="text-muted-foreground mb-4">{error}</p>
-          <Link to="/help/home">
-            <Button>Return to Help Home</Button>
-          </Link>
-        </div>
+        {/* Error Content */}
+        <Card>
+          <CardContent>
+            <div className="p-8 border-2 border-dashed border-muted-foreground/25 rounded-lg text-center">
+              <p className="text-muted-foreground mb-4">{error}</p>
+              <Link to="/help/$helpFile" params={{ helpFile: "home" }}>
+                <Button>Return to Help Home</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -106,23 +132,35 @@ function HelpFile() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <nav className="text-sm text-muted-foreground mb-4">
-          <Link to="/help/home" className="hover:text-foreground">
-            Help
-          </Link>
+      {/* Breadcrumbs */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink>
+              <Link to="/help/$helpFile" params={{ helpFile: "home" }}>
+                Help
+              </Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
           {content.filename !== "home" && (
             <>
-              <span className="mx-2">/</span>
-              <span>{content.filename}</span>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>{content.filename}</BreadcrumbPage>
+              </BreadcrumbItem>
             </>
           )}
-        </nav>
-      </div>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <div className="prose prose-gray dark:prose-invert max-w-none">
-        <MarkdownRenderer content={content.content} />
-      </div>
+      {/* Content */}
+      <Card>
+        <CardContent>
+          <div className="prose prose-gray dark:prose-invert max-w-none">
+            <MarkdownRenderer content={content.content} />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

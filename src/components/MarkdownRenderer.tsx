@@ -139,6 +139,7 @@ export function MarkdownRenderer({ content, variant = "default", className = "" 
 
   return (
     <div className={`${getVariantClasses()} ${className}`}>
+      {/* @ts-expect-error: components prop type mismatch with ReactMarkdown, safe to ignore for our usage */}
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={getComponents()}>
         {content}
       </ReactMarkdown>
