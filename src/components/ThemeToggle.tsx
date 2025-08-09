@@ -1,12 +1,14 @@
+import { useAtom } from "jotai";
 import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme } from "./ThemeProvider";
+import { resolvedThemeAtom, themeAtom, type Theme } from "~/lib/atoms/ui";
 import { Button } from "./ui/button";
 
 export function ThemeToggle() {
-  const { theme, setTheme, resolvedTheme } = useTheme();
+  const [theme, setTheme] = useAtom(themeAtom);
+  const [resolvedTheme] = useAtom(resolvedThemeAtom);
 
   const toggleTheme = () => {
-    const themes: Array<"light" | "dark" | "system"> = ["light", "dark", "system"];
+    const themes: Array<Theme> = ["light", "dark", "system"];
     const currentIndex = themes.indexOf(theme);
     const nextIndex = (currentIndex + 1) % themes.length;
     setTheme(themes[nextIndex]);

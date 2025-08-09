@@ -1,9 +1,10 @@
+import { useAtom } from "jotai";
 import { useEffect, useRef } from "react";
 import type * as THREE from "three";
-import { useBackground } from "./BackgroundProvider";
+import { isBackgroundEnabledAtom } from "~/lib/atoms/ui";
 
 export function ThreeBackground() {
-  const { isEnabled } = useBackground();
+  const [isEnabled] = useAtom(isBackgroundEnabledAtom);
   const containerRef = useRef<HTMLDivElement>(null);
   const sceneRef = useRef<THREE.Scene | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);

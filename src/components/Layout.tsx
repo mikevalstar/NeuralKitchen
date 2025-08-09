@@ -1,8 +1,8 @@
+import { useAtom } from "jotai";
 import type { ReactNode } from "react";
-import { useEffect, useState } from "react";
-import { BackgroundProvider } from "./BackgroundProvider";
+import { isWideLayoutAtom } from "~/lib/atoms/ui";
 import { Navigation } from "./Navigation";
-import { ThemeProvider } from "./ThemeProvider";
+import { ThemeEffect } from "./ThemeEffect";
 import { ThreeBackground } from "./ThreeBackground";
 import { Toaster } from "./ui/sonner";
 
@@ -11,38 +11,20 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
-  const [isWideLayout, setIsWideLayout] = useState(false);
-
-  // Load width preference from localStorage on mount
-  useEffect(() => {
-    const savedWidth = localStorage.getItem("layout-width");
-    if (savedWidth === "wide") {
-      setIsWideLayout(true);
-    }
-  }, []);
-
-  const toggleWidth = () => {
-    const newIsWide = !isWideLayout;
-    setIsWideLayout(newIsWide);
-    // Save preference to localStorage
-    localStorage.setItem("layout-width", newIsWide ? "wide" : "constrained");
-  };
+  const [isWideLayout] = useAtom(isWideLayoutAtom);
 
   return (
-    <ThemeProvider>
-      <BackgroundProvider>
-        <div className="min-h-screen bg-background relative">
-          <ThreeBackground />
-          <Navigation isWide={isWideLayout} onToggleWidth={toggleWidth} />
-          <main
-            className={`@container mx-auto py-8 relative z-10 ${
-              isWideLayout ? "px-4 sm:px-6 lg:px-8" : "container px-4 sm:px-6 lg:px-8"
-            }`}>
-            {children}
-          </main>
-          <Toaster />
-        </div>
-      </BackgroundProvider>
-    </ThemeProvider>
+    <div className="min-h-screen bg-background relative">
+      <ThemeEffect />
+      <ThreeBackground />
+      <Navigation />
+      <main
+        className={`@container mx-auto py-8 relative z-10 ${
+          isWideLayout ? "px-4 sm:px-6 lg:px-8" : "container px-4 sm:px-6 lg:px-8"
+        }`}>
+        {children}
+      </main>
+      <Toaster />
+    </div>
   );
 }

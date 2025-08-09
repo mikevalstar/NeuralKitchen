@@ -1,9 +1,10 @@
-import { Layers, Eye, EyeOff } from "lucide-react";
-import { useBackground } from "./BackgroundProvider";
+import { useAtom } from "jotai";
+import { Eye, EyeOff } from "lucide-react";
+import { isBackgroundEnabledAtom } from "~/lib/atoms/ui";
 import { Button } from "./ui/button";
 
 export function BackgroundToggle() {
-  const { isEnabled, setIsEnabled } = useBackground();
+  const [isEnabled, setIsEnabled] = useAtom(isBackgroundEnabledAtom);
 
   const toggleBackground = () => {
     setIsEnabled(!isEnabled);

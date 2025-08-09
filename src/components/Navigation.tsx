@@ -1,16 +1,15 @@
+import { useAtom } from "jotai";
 import { Link } from "@tanstack/react-router";
 import { Activity, BookOpen, FolderOpen, HelpCircle, Search, Tags } from "lucide-react";
+import { isWideLayoutAtom } from "~/lib/atoms/ui";
 import { BackgroundToggle } from "./BackgroundToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "./ui/button";
 import { WidthToggle } from "./WidthToggle";
 
-interface NavigationProps {
-  isWide: boolean;
-  onToggleWidth: () => void;
-}
-
-export function Navigation({ isWide, onToggleWidth }: NavigationProps) {
+export function Navigation() {
+  const [isWide] = useAtom(isWideLayoutAtom);
+  
   const navItems = [
     { href: "/recipes", label: "Recipes", icon: BookOpen },
     { href: "/search", label: "Search", icon: Search },
@@ -49,7 +48,7 @@ export function Navigation({ isWide, onToggleWidth }: NavigationProps) {
 
           {/* Right side - Width Toggle, Background Toggle, Theme Toggle and Mobile Menu */}
           <div className="flex items-center space-x-2">
-            <WidthToggle isWide={isWide} onToggle={onToggleWidth} />
+            <WidthToggle />
             <BackgroundToggle />
             <ThemeToggle />
 
