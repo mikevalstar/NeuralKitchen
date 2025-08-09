@@ -2,6 +2,14 @@
 
 > A recipe/cookbook management system for AI agents
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen)](https://nodejs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TanStack Start](https://img.shields.io/badge/Built_with-TanStack_Start-FF6154?style=flat)](https://tanstack.com/start)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Checked with Biome](https://img.shields.io/badge/Checked_with-Biome-60a5fa?style=flat&logo=biome)](https://biomejs.dev/)
+[![AI Assisted](https://img.shields.io/badge/AI-Assisted-blue)](./AI_DISCLOSURE.md)
+
 Neural Kitchen helps developers create and organize structured guidance for AI agents working on software projects. Think of it as a knowledge base that captures institutional knowledge, coding patterns, and step-by-step workflows that AI agents can follow.
 
 ## The Problem
@@ -119,9 +127,14 @@ The application will be available at:
 
 See [CLAUDE.md](./CLAUDE.md) for detailed AI development guidance.
 
+## AI Development Disclosure
+This project was developed with assistance from AI coding tools including Cursor and Claude. AI tools were used for code generation, debugging, and documentation throughout the development process. All code has been reviewed before addition to the project for good structure and security concerns.
+
 ## Contributing
 
 This project is in early development. Contributions, ideas, and feedback are welcome!
+
+This project welcomes contributions developed with or without AI assistance. Contributors using AI tools should ensure all generated code is reviewed and tested before submission and indicate the tools used in the Pull Request.
 
 ## License
 
