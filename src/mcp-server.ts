@@ -48,7 +48,7 @@ class StandaloneMcpServer {
 
       When you know the name of the recipe, cookbook, or procedure you want to use, you can use the read_recipe tool to read the recipe, cookbook, or procedure.
 
-      You should follow these recipes when there is one available, it will help you complete the task.
+      You should follow these recipes when there is one available, it will help you complete the task, always search for a recipe before starting a new task.
       `,
       },
     );

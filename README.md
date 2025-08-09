@@ -21,7 +21,7 @@ Humans often struggle with:
 
 Neural Kitchen provides:
 - **Recipes**: Step-by-step instructions and code examples for common development tasks written by you
-- **NLP Search**: Natural language search for your documentation and standards
+- **NLP Search**: Natural language (RAG Based) search for your documentation and standards
 - **Project Association**: Group recipes by codebase or project (share with other teams or projects)
 - **MCP Integration**: Model Context Protocol interface for AI agents to access and search recipes
 
@@ -35,13 +35,14 @@ Neural Kitchen provides:
 - Project grouping
 - Web interface for managing recipes
 - MCP server integration for AI agent access
+- Project specific MCP endpoints
 
 **Planned:**
-- Project specific MCP endpoints
 - Rich recipe templates and examples
 - Advanced search and filtering
 - Recipe validation
 - Recipe auto generation
+- Recipe review tools
 
 ## Tech Stack
 
