@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Recipes } from "~/lib/data/recipes";
 import { formatDateOnly } from "~/lib/dateUtils";
 
@@ -80,81 +81,77 @@ function RecipesPage() {
         </CardHeader>
         <CardContent>
           {recipes.length > 0 ? (
-            <div className="border rounded-lg overflow-hidden">
-              <table className="w-full">
-                <thead className="bg-muted/50">
-                  <tr className="border-b">
-                    <th className="text-left p-4 font-medium">Title</th>
-                    <th className="text-left p-4 font-medium">Recipe ID</th>
-                    <th className="text-left p-4 font-medium @8xl:table-cell hidden">Version</th>
-                    <th className="text-left p-4 font-medium">Tags</th>
-                    <th className="text-left p-4 font-medium">Projects</th>
-                    <th className="text-left p-4 font-medium @8xl:table-cell hidden">Updated</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recipes.map((recipe, index) => (
-                    <tr
-                      key={recipe.id}
-                      className={`border-b last:border-b-0 ${index % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
-                      <td className="p-4 font-medium">
-                        <Link
-                          to="/recipes/$recipeId"
-                          params={{ recipeId: recipe.id }}
-                          className="text-foreground hover:text-primary transition-colors hover:underline">
-                          {recipe.title}
-                        </Link>
-                      </td>
-                      <td className="p-4 font-mono text-sm text-muted-foreground">{recipe.shortId}</td>
-                      <td className="p-4 text-sm text-muted-foreground @8xl:table-cell hidden">
-                        {recipe.currentVersion ? recipe.currentVersion.versionId : "No version"}
-                      </td>
-                      <td className="p-4">
-                        {recipe.currentVersion?.tags.length ? (
-                          <div className="flex flex-wrap gap-1">
-                            {recipe.currentVersion.tags.slice(0, 3).map((tag) => (
-                              <span
-                                key={tag.id}
-                                className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
-                                {tag.name}
-                              </span>
-                            ))}
-                            {recipe.currentVersion.tags.length > 3 && (
-                              <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
-                                +{recipe.currentVersion.tags.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground italic">No tags</span>
-                        )}
-                      </td>
-                      <td className="p-4">
-                        {recipe.currentVersion?.projects.length ? (
-                          <div className="flex flex-wrap gap-1">
-                            {recipe.currentVersion.projects.slice(0, 2).map((project) => (
-                              <span key={project.id} className="px-2 py-1 bg-primary/10 text-primary rounded text-xs">
-                                {project.title}
-                              </span>
-                            ))}
-                            {recipe.currentVersion.projects.length > 2 && (
-                              <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs">
-                                +{recipe.currentVersion.projects.length - 2}
-                              </span>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-sm text-muted-foreground italic">No projects</span>
-                        )}
-                      </td>
-                      <td className="p-4 text-sm text-muted-foreground @8xl:table-cell hidden">
-                        {formatDateOnly(recipe.updatedAt)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="p-4">Title</TableHead>
+                  <TableHead className="p-4">Recipe ID</TableHead>
+                  <TableHead className="p-4 @8xl:table-cell hidden">Version</TableHead>
+                  <TableHead className="p-4">Tags</TableHead>
+                  <TableHead className="p-4">Projects</TableHead>
+                  <TableHead className="p-4 @8xl:table-cell hidden">Updated</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {recipes.map((recipe, index) => (
+                  <TableRow key={recipe.id} className={index % 2 === 0 ? "bg-background/50" : ""}>
+                    <TableCell className="p-4 font-medium">
+                      <Link
+                        to="/recipes/$recipeId"
+                        params={{ recipeId: recipe.id }}
+                        className="text-foreground hover:text-primary transition-colors hover:underline">
+                        {recipe.title}
+                      </Link>
+                    </TableCell>
+                    <TableCell className="p-4 font-mono text-sm text-muted-foreground">{recipe.shortId}</TableCell>
+                    <TableCell className="p-4 text-sm text-muted-foreground @8xl:table-cell hidden">
+                      {recipe.currentVersion ? recipe.currentVersion.versionId : "No version"}
+                    </TableCell>
+                    <TableCell className="p-4">
+                      {recipe.currentVersion?.tags.length ? (
+                        <div className="flex flex-wrap gap-1">
+                          {recipe.currentVersion.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag.id}
+                              className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
+                              {tag.name}
+                            </span>
+                          ))}
+                          {recipe.currentVersion.tags.length > 3 && (
+                            <span className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
+                              +{recipe.currentVersion.tags.length - 3}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground italic">No tags</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="p-4">
+                      {recipe.currentVersion?.projects.length ? (
+                        <div className="flex flex-wrap gap-1">
+                          {recipe.currentVersion.projects.slice(0, 2).map((project) => (
+                            <span key={project.id} className="px-2 py-1 bg-primary/10 text-primary rounded text-xs">
+                              {project.title}
+                            </span>
+                          ))}
+                          {recipe.currentVersion.projects.length > 2 && (
+                            <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs">
+                              +{recipe.currentVersion.projects.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-sm text-muted-foreground italic">No projects</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="p-4 text-sm text-muted-foreground @8xl:table-cell hidden">
+                      {formatDateOnly(recipe.updatedAt)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <div className="rounded-full bg-muted p-3 mb-4">
