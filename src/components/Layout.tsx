@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { Navigation } from "./Navigation";
 import { ThemeProvider } from "./ThemeProvider";
+import { ThreeBackground } from "./ThreeBackground";
 import { Toaster } from "./ui/sonner";
 
 interface LayoutProps {
@@ -28,10 +29,11 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background relative">
+        <ThreeBackground />
         <Navigation isWide={isWideLayout} onToggleWidth={toggleWidth} />
         <main
-          className={`@container mx-auto py-8 ${
+          className={`@container mx-auto py-8 relative z-10 ${
             isWideLayout ? "px-4 sm:px-6 lg:px-8" : "container px-4 sm:px-6 lg:px-8"
           }`}>
           {children}

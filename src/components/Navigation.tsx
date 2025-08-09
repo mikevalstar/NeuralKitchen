@@ -20,7 +20,7 @@ export function Navigation({ isWide, onToggleWidth }: NavigationProps) {
   ];
 
   return (
-    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 relative z-10">
       <div className={`mx-auto px-4 sm:px-6 lg:px-8 ${isWide ? "" : "container"}`}>
         <div className="flex h-16 items-center justify-between">
           {/* Logo/Title */}
