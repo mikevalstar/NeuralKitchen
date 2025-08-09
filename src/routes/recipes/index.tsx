@@ -1,27 +1,37 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { zodValidator } from "@tanstack/zod-adapter";
 import { BookOpen, Plus, Search } from "lucide-react";
 import { useState } from "react";
+import { TanStackPagination } from "~/components/TanStackPagination";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
 import { Recipes } from "~/lib/data/recipes";
+import { paginationSearchSchema } from "~/lib/dataValidators";
 import { formatDateOnly } from "~/lib/dateUtils";
 
-const getRecipes = createServerFn({ method: "GET" }).handler(async () => {
-  return Recipes.list();
-});
+const getRecipes = createServerFn({ method: "GET" })
+  .validator((data: unknown) => paginationSearchSchema.parse(data))
+  .handler(async ({ data }) => {
+    return Recipes.list({
+      page: data.page ?? 1,
+      pageSize: 25,
+    });
+  });
 
 export const Route = createFileRoute("/recipes/")({
   component: RecipesPage,
-  loader: () => {
-    return getRecipes();
+  validateSearch: zodValidator(paginationSearchSchema),
+  loaderDeps: ({ search: { page } }) => ({ page }),
+  loader: async ({ deps }) => {
+    return getRecipes({ data: deps });
   },
 });
 
 function RecipesPage() {
-  const recipes = Route.useLoaderData();
+  const recipesData = Route.useLoaderData();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -76,11 +86,11 @@ function RecipesPage() {
       {/* Recipes Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Recipes ({recipes.length})</CardTitle>
+          <CardTitle>All Recipes ({recipesData.totalCount})</CardTitle>
           <CardDescription>Manage and view all your AI agent recipes</CardDescription>
         </CardHeader>
         <CardContent>
-          {recipes.length > 0 ? (
+          {recipesData.recipes.length > 0 ? (
             <Table>
               <TableHeader>
                 <TableRow>
@@ -93,7 +103,7 @@ function RecipesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recipes.map((recipe, index) => (
+                {recipesData.recipes.map((recipe, index) => (
                   <TableRow key={recipe.id} className={index % 2 === 0 ? "bg-background/50" : ""}>
                     <TableCell className="p-4 font-medium">
                       <Link
@@ -169,6 +179,13 @@ function RecipesPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Pagination */}
+      {recipesData.totalPages > 1 && (
+        <div className="flex justify-center">
+          <TanStackPagination currentPage={recipesData.currentPage} totalPages={recipesData.totalPages} />
+        </div>
+      )}
     </div>
   );
 }

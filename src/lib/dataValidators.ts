@@ -92,3 +92,10 @@ export const versionRestoreSchema = z.object({
 });
 
 export type VersionRestoreInput = z.infer<typeof versionRestoreSchema>;
+
+// Pagination query params validation schema
+export const paginationSearchSchema = z.object({
+  page: z.number().min(1).optional(),
+});
+
+export type PaginationSearchInput = z.infer<typeof paginationSearchSchema>;

@@ -27,23 +27,60 @@ export namespace Recipes {
   /**
    * Get all non-deleted recipes, ordered by title
    */
-  export async function list() {
-    return prisma.recipe.findMany({
-      where: {
-        deletedAt: null,
-      },
-      include: {
-        currentVersion: {
-          include: {
-            tags: true,
-            projects: true,
-          },
+  export async function list(options?: { page?: number; pageSize?: number }) {
+    const where = {
+      deletedAt: null,
+    };
+
+    const include = {
+      currentVersion: {
+        include: {
+          tags: true,
+          projects: true,
         },
       },
-      orderBy: {
-        title: "asc",
-      },
+    };
+
+    const orderBy = {
+      title: "asc" as const,
+    };
+
+    if (options?.page && options?.pageSize) {
+      const skip = (options.page - 1) * options.pageSize;
+      
+      const [recipes, totalCount] = await Promise.all([
+        prisma.recipe.findMany({
+          where,
+          include,
+          orderBy,
+          skip,
+          take: options.pageSize,
+        }),
+        prisma.recipe.count({ where }),
+      ]);
+
+      return {
+        recipes,
+        totalCount,
+        currentPage: options.page,
+        pageSize: options.pageSize,
+        totalPages: Math.ceil(totalCount / options.pageSize),
+      };
+    }
+
+    const recipes = await prisma.recipe.findMany({
+      where,
+      include,
+      orderBy,
     });
+
+    return {
+      recipes,
+      totalCount: recipes.length,
+      currentPage: 1,
+      pageSize: recipes.length,
+      totalPages: 1,
+    };
   }
 
   /**
