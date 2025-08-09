@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
+import { BackgroundProvider } from "./BackgroundProvider";
 import { Navigation } from "./Navigation";
 import { ThemeProvider } from "./ThemeProvider";
 import { ThreeBackground } from "./ThreeBackground";
@@ -29,17 +30,19 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <ThemeProvider>
-      <div className="min-h-screen bg-background relative">
-        <ThreeBackground />
-        <Navigation isWide={isWideLayout} onToggleWidth={toggleWidth} />
-        <main
-          className={`@container mx-auto py-8 relative z-10 ${
-            isWideLayout ? "px-4 sm:px-6 lg:px-8" : "container px-4 sm:px-6 lg:px-8"
-          }`}>
-          {children}
-        </main>
-        <Toaster />
-      </div>
+      <BackgroundProvider>
+        <div className="min-h-screen bg-background relative">
+          <ThreeBackground />
+          <Navigation isWide={isWideLayout} onToggleWidth={toggleWidth} />
+          <main
+            className={`@container mx-auto py-8 relative z-10 ${
+              isWideLayout ? "px-4 sm:px-6 lg:px-8" : "container px-4 sm:px-6 lg:px-8"
+            }`}>
+            {children}
+          </main>
+          <Toaster />
+        </div>
+      </BackgroundProvider>
     </ThemeProvider>
   );
 }

@@ -1,13 +1,16 @@
 import { useEffect, useRef } from "react";
+import type * as THREE from "three";
+import { useBackground } from "./BackgroundProvider";
 
 export function ThreeBackground() {
+  const { isEnabled } = useBackground();
   const containerRef = useRef<HTMLDivElement>(null);
-  const sceneRef = useRef<any>(null);
-  const rendererRef = useRef<any>(null);
-  const animationFrameRef = useRef<number>();
+  const sceneRef = useRef<THREE.Scene | null>(null);
+  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+  const animationFrameRef = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !isEnabled) return;
 
     // Dynamically import Three.js
     const loadThreeJS = async () => {
@@ -25,20 +28,23 @@ export function ThreeBackground() {
       rendererRef.current = renderer;
 
       // Create neural network nodes
-      const nodeGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+      const nodeGeometry = new THREE.SphereGeometry(0.15, 32, 32); // Reduced from 16x16 to 8x8
       const nodeMaterial = new THREE.MeshBasicMaterial({
         color: 0x667eea,
         transparent: true,
         opacity: 0.6,
       });
 
-      const nodes: any[] = [];
-      const nodeCount = 80;
+      const nodes: THREE.Mesh[] = [];
+      // Detect device performance and adjust node count accordingly
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      const isLowPerformance = navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2;
+      const nodeCount = isMobile || isLowPerformance ? 30 : 50; // Reduced from 80
       const spread = 25;
 
-      // Create nodes
+      // Create nodes - share material instead of cloning for better performance
       for (let i = 0; i < nodeCount; i++) {
-        const node = new THREE.Mesh(nodeGeometry, nodeMaterial.clone());
+        const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
         node.position.x = (Math.random() - 0.5) * spread;
         node.position.y = (Math.random() - 0.5) * spread;
         node.position.z = (Math.random() - 0.5) * spread;
@@ -62,7 +68,14 @@ export function ThreeBackground() {
         opacity: 0.15,
       });
 
-      const connections: any[] = [];
+      interface Connection {
+        line: THREE.Line;
+        start: THREE.Mesh;
+        end: THREE.Mesh;
+        geometry: THREE.BufferGeometry;
+      }
+
+      const connections: Connection[] = [];
       const maxDistance = 5;
 
       for (let i = 0; i < nodes.length; i++) {
@@ -82,11 +95,17 @@ export function ThreeBackground() {
         }
       }
 
+      // Create accent material for glowing nodes
+      const accentMaterial = new THREE.MeshBasicMaterial({
+        color: 0x764ba2,
+        transparent: true,
+        opacity: 0.8,
+      });
+
       // Add some accent nodes that glow more
       for (let i = 0; i < 5; i++) {
         const randomNode = nodes[Math.floor(Math.random() * nodes.length)];
-        randomNode.material.color.setHex(0x764ba2);
-        randomNode.material.opacity = 0.8;
+        randomNode.material = accentMaterial;
       }
 
       camera.position.z = 15;
@@ -102,15 +121,56 @@ export function ThreeBackground() {
 
       document.addEventListener("mousemove", handleMouseMove);
 
+      // Performance tracking
+      let lastTime = 0;
+      let frameCount = 0;
+      let fps = 60;
+      let performanceMode = false;
+
+      // FPS capping variables
+      const targetFPS = 40;
+      const targetFrameTime = 1000 / targetFPS; // 25ms per frame
+      let lastFrameTime = 0;
+
       // Animation
-      const animate = () => {
+      const animate = (currentTime = 0) => {
         animationFrameRef.current = requestAnimationFrame(animate);
+
+        // Pause animation when window doesn't have focus
+        if (!document.hasFocus()) {
+          return;
+        }
+
+        // FPS capping - skip frame if not enough time has passed
+        if (currentTime - lastFrameTime < targetFrameTime) {
+          return;
+        }
+        lastFrameTime = currentTime;
+
+        // Calculate FPS every 60 frames
+        frameCount++;
+        if (frameCount % 60 === 0) {
+          const deltaTime = currentTime - lastTime;
+          fps = 60000 / deltaTime;
+          lastTime = currentTime;
+
+          // Enable performance mode if FPS drops below 45
+          performanceMode = fps < 45;
+        }
 
         const time = Date.now() * 0.001;
 
-        // Animate nodes
+        // Animate nodes with performance optimizations
         nodes.forEach((node) => {
           const userData = node.userData;
+
+          // Distance culling - only animate nodes within view distance
+          const distanceToCamera = camera.position.distanceTo(node.position);
+          if (distanceToCamera > 30) {
+            node.visible = false;
+            return;
+          }
+          node.visible = true;
 
           // Floating animation
           node.position.x =
@@ -120,34 +180,52 @@ export function ThreeBackground() {
           node.position.z =
             userData.originalPos.z + Math.sin(time * userData.speed * 0.5 + userData.phase) * userData.amplitude * 0.5;
 
-          // Pulse effect
-          const scale = 1 + Math.sin(time * 2 + userData.phase) * 0.1;
-          node.scale.set(scale, scale, scale);
+          // Skip pulse effect in performance mode
+          if (!performanceMode) {
+            const scale = 1 + Math.sin(time * 2 + userData.phase) * 0.1;
+            node.scale.set(scale, scale, scale);
+          }
         });
 
-        // Update connections
+        // Update connections with caching and performance optimizations
         connections.forEach((connection) => {
+          // Skip invisible connections
+          if (!connection.start.visible || !connection.end.visible) {
+            connection.line.visible = false;
+            return;
+          }
+          connection.line.visible = true;
+
+          // Update positions only if nodes moved significantly
+          const startPos = connection.start.position;
+          const endPos = connection.end.position;
+
           const positions = new Float32Array(6);
-          positions[0] = connection.start.position.x;
-          positions[1] = connection.start.position.y;
-          positions[2] = connection.start.position.z;
-          positions[3] = connection.end.position.x;
-          positions[4] = connection.end.position.y;
-          positions[5] = connection.end.position.z;
+          positions[0] = startPos.x;
+          positions[1] = startPos.y;
+          positions[2] = startPos.z;
+          positions[3] = endPos.x;
+          positions[4] = endPos.y;
+          positions[5] = endPos.z;
           connection.geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
 
-          // Pulse connection opacity based on distance
-          const distance = connection.start.position.distanceTo(connection.end.position);
-          connection.line.material.opacity = Math.max(0, (1 - distance / maxDistance) * 0.2);
+          // Update opacity less frequently in performance mode
+          if (!performanceMode || frameCount % 3 === 0) {
+            const distance = startPos.distanceTo(endPos);
+            const material = connection.line.material as THREE.LineBasicMaterial;
+            material.opacity = Math.max(0, (1 - distance / maxDistance) * 0.2);
+          }
         });
 
-        // Subtle camera movement based on mouse
-        camera.position.x += (mouseX * 2 - camera.position.x) * 0.02;
-        camera.position.y += (mouseY * 2 - camera.position.y) * 0.02;
+        // Reduce mouse interaction intensity in performance mode
+        const mouseIntensity = performanceMode ? 0.01 : 0.02;
+        camera.position.x += (mouseX * 2 - camera.position.x) * mouseIntensity;
+        camera.position.y += (mouseY * 2 - camera.position.y) * mouseIntensity;
         camera.lookAt(scene.position);
 
-        // Rotate the entire scene slowly
-        scene.rotation.y = time * 0.05;
+        // Reduce scene rotation speed in performance mode
+        const rotationSpeed = performanceMode ? 0.025 : 0.05;
+        scene.rotation.y = time * rotationSpeed;
 
         renderer.render(scene, camera);
       };
@@ -187,7 +265,11 @@ export function ThreeBackground() {
         rendererRef.current.dispose();
       }
     };
-  }, []);
+  }, [isEnabled]);
+
+  if (!isEnabled) {
+    return null;
+  }
 
   return (
     <div

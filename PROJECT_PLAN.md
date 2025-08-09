@@ -14,7 +14,7 @@ Neural Kitchen is a recipe/cookbook management system designed specifically for 
 ### 1.1 Project Philosophy & README
 - [ ] **Comprehensive README**
   - [x] Clear project description and value proposition
-  - [ ] Installation and setup instructions
+  - [x] Installation and setup instructions
   - [ ] Usage examples and screenshots
   - [x] Architecture overview and technology stack
   - [ ] Contributing guidelines and development setup
@@ -37,14 +37,14 @@ Neural Kitchen is a recipe/cookbook management system designed specifically for 
 
 ### 2.1 Deployment & Infrastructure
 - [x] **Docker Container**
-- [ ] **ENV File Documentation**
+- [ ] **ENV File Documentation** - needs auth stuff in there probably
 - [ ] **Production Configuration**
   - [ ] Environment-specific configuration management
 
 ### 2.2 Version Management
 - [ ] **Recipe Version Control**
-  - [ ] Visual diff viewer for recipe versions
-  - [ ] One-click version restoration
+  - [x] Visual diff viewer for recipe versions
+  - [x] One-click version restoration
   - [ ] Version logs / descriptions
 
 ### 2.3 Import/Export System

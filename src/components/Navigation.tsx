@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Activity, BookOpen, FolderOpen, HelpCircle, Search, Tags } from "lucide-react";
+import { BackgroundToggle } from "./BackgroundToggle";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "./ui/button";
 import { WidthToggle } from "./WidthToggle";
@@ -46,9 +47,10 @@ export function Navigation({ isWide, onToggleWidth }: NavigationProps) {
             ))}
           </div>
 
-          {/* Right side - Width Toggle, Theme Toggle and Mobile Menu */}
+          {/* Right side - Width Toggle, Background Toggle, Theme Toggle and Mobile Menu */}
           <div className="flex items-center space-x-2">
             <WidthToggle isWide={isWide} onToggle={onToggleWidth} />
+            <BackgroundToggle />
             <ThemeToggle />
 
             {/* Mobile Menu Button */}
