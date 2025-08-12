@@ -6,7 +6,7 @@
   - Generate BETTER_AUTH_SECRET using CLI
   - _Requirements: 4.4, 5.4_
 
-- [ ] 2. Create BetterAuth server configuration
+- [x] 2. Create BetterAuth server configuration
   - Create `src/lib/auth.ts` with BetterAuth instance
   - Configure Prisma adapter with existing database connection
   - Set up email/password authentication with sign-up disabled
@@ -14,8 +14,8 @@
   - _Requirements: 4.1, 4.4, 5.6_
 
 - [ ] 3. Generate and integrate database schema
-  - Run `npx @better-auth/cli generate` to create BetterAuth tables
-  - Use `prisma db pull` to sync schema with database
+  - Run `npx @better-auth/cli generate` to create BetterAuth tables - Dont by user
+  - Use `prisma db pull` to sync schema with database - Done by user
   - Manually adjust schema to ensure UUID primary keys
   - Run `prisma generate` to update Prisma client
   - Create and run database migration
