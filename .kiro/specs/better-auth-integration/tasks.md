@@ -13,21 +13,21 @@
   - Configure session management and trusted origins
   - _Requirements: 4.1, 4.4, 5.6_
 
-- [ ] 3. Generate and integrate database schema
+- [x] 3. Generate and integrate database schema
   - Run `npx @better-auth/cli generate` to create BetterAuth tables - Dont by user
   - Use `prisma db pull` to sync schema with database - Done by user
-  - Manually adjust schema to ensure UUID primary keys
-  - Run `prisma generate` to update Prisma client
+  - Manually adjust schema to ensure UUID primary keys - not required
+  - Run `prisma generate` to update Prisma client - done by user
   - Create and run database migration
   - _Requirements: 4.2, 4.3, 4.5_
 
-- [ ] 4. Create TanStack Start API route handler
+- [x] 4. Create TanStack Start API route handler
   - Create `src/routes/api/auth/$.ts` catch-all route
   - Integrate BetterAuth handler with TanStack Start
   - Test API endpoints are accessible at `/api/auth/*`
   - _Requirements: 5.1, 5.4_
 
-- [ ] 5. Create client-side authentication setup
+- [x] 5. Create client-side authentication setup
   - Create `src/lib/auth-client.ts` with BetterAuth React client
   - Export commonly used authentication methods
   - Configure client with proper base URL

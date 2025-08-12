@@ -48,10 +48,7 @@ const getPromptStatuses = createServerFn({ method: "GET" }).handler(async (): Pr
 export const Route = createFileRoute("/settings/")({
   component: SettingsPage,
   loader: async () => {
-    const [validation, promptStatuses] = await Promise.all([
-      getSettingsValidation(),
-      getPromptStatuses(),
-    ]);
+    const [validation, promptStatuses] = await Promise.all([getSettingsValidation(), getPromptStatuses()]);
     return { validation, promptStatuses };
   },
 });
@@ -136,11 +133,8 @@ function SettingsPage() {
                     <div className="flex items-center space-x-2 mt-2">
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${
-                          prompt.isUsingDefault
-                            ? "bg-gray-100 text-gray-600"
-                            : "bg-blue-100 text-blue-600"
-                        }`}
-                      >
+                          prompt.isUsingDefault ? "bg-gray-100 text-gray-600" : "bg-blue-100 text-blue-600"
+                        }`}>
                         {prompt.isUsingDefault ? "Using Default" : "Custom"}
                       </span>
                     </div>
