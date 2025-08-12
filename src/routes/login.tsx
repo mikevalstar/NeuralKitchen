@@ -1,8 +1,9 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-
+import { zodValidator } from "@tanstack/zod-adapter";
 import { AlertCircle, Eye, EyeOff, LogIn } from "lucide-react";
 import { useState } from "react";
+import { z } from "zod";
 import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -10,16 +11,18 @@ import { Input } from "~/components/ui/input";
 import { signIn, useSession } from "~/lib/auth-client";
 import { type LoginInput, loginSchema } from "~/lib/dataValidators";
 
+const loginSearchSchema = z.object({
+  redirect: z.string().optional().default("/"),
+});
+
 export const Route = createFileRoute("/login")({
   component: LoginPage,
-  beforeLoad: () => {
-    // If user is already authenticated, redirect to home
-    // This will be handled by the session check in the component
-  },
+  validateSearch: zodValidator(loginSearchSchema),
 });
 
 function LoginPage() {
   const router = useRouter();
+  const { redirect } = Route.useSearch();
   const { data: session } = useSession();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -40,14 +43,14 @@ function LoginPage() {
         const result = await signIn.email({
           email: value.email,
           password: value.password,
-          callbackURL: "/",
+          callbackURL: redirect,
         });
 
         if (result.error) {
           setLoginError("Invalid email or password. Please try again.");
         } else {
-          // Navigate to home page
-          router.navigate({ to: "/" });
+          // Navigate to the redirect URL or home page
+          router.navigate({ to: redirect });
         }
       } catch (error) {
         console.error("Login error:", error);
@@ -60,7 +63,7 @@ function LoginPage() {
 
   // Redirect if already authenticated
   if (session) {
-    router.navigate({ to: "/" });
+    router.navigate({ to: redirect });
     return null;
   }
 

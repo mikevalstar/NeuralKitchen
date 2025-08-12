@@ -8,7 +8,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    disableSignUp: true, // Prevent web-based registration
+    disableSignUp: false, // Allow web-based registration
     requireEmailVerification: false,
     minPasswordLength: 8,
     autoSignIn: true,

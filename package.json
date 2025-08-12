@@ -25,7 +25,10 @@
     "db:migrate:reset": "prisma migrate reset",
     "db:migrate:status": "prisma migrate status",
     "db:studio": "prisma studio",
-    "db:seed": "pnpm seed"
+    "db:seed": "pnpm seed",
+    "user:add": "tsx scripts/manage-users.ts add",
+    "user:list": "tsx scripts/manage-users.ts list",
+    "user:delete": "tsx scripts/manage-users.ts delete"
   },
   "keywords": [],
   "author": "Mike Valstar",

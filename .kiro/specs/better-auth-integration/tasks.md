@@ -33,7 +33,7 @@
   - Configure client with proper base URL
   - _Requirements: 5.3_
 
-- [ ] 6. Create login page and form
+- [x] 6. Create login page and form
   - Create `src/routes/login.tsx` route
   - Implement login form with email and password fields
   - Add form validation using Zod and TanStack Form
@@ -63,7 +63,7 @@
   - Apply middleware to existing protected routes
   - _Requirements: 5.2_
 
-- [ ] 10. Create CLI user management tool
+- [x] 10. Create CLI user management tool
   - Create `scripts/manage-users.ts` CLI script
   - Implement add-user command with email and password
   - Implement list-users command to display all users
