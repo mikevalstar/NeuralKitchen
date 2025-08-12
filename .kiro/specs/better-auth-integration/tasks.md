@@ -1,6 +1,6 @@
 # Implementation Plan
 
-- [ ] 1. Install dependencies and setup environment
+- [x] 1. Install dependencies and setup environment
   - Install `better-auth` package
   - Add required environment variables to `.env` and `.env.example`
   - Generate BETTER_AUTH_SECRET using CLI

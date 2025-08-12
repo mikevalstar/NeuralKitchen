@@ -4,6 +4,8 @@
 
 This design implements BetterAuth authentication integration with our existing TanStack Start and Prisma architecture. The solution provides secure email/password authentication with admin-only user management through a CLI tool, while maintaining consistency with our current tech stack and design patterns.
 
+Better Auth documentation can be found at https://www.better-auth.com/llms.txt
+
 ## Architecture
 
 ### Authentication Flow
