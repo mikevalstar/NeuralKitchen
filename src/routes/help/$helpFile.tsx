@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 import {
@@ -11,6 +11,7 @@ import {
 } from "~/components/ui/breadcrumb";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent } from "~/components/ui/card";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { helpFileSchema } from "~/lib/dataValidators";
 
 interface HelpContent {
@@ -19,12 +20,26 @@ interface HelpContent {
 }
 
 export const Route = createFileRoute("/help/$helpFile")({
-  beforeLoad: ({ params }) => {
+  beforeLoad: async ({ params }) => {
+    // load the user details to check authentication
+    const user = await getUserDetails();
+
     // Validate the helpFile parameter
     const result = helpFileSchema.safeParse({ helpFile: params.helpFile });
     if (!result.success) {
       throw new Error("Invalid help file name");
     }
+
+    return { user };
+  },
+  loader: async ({ context, params }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: `/help/${params.helpFile}` },
+      });
+    }
+    return context?.user;
   },
   component: HelpFile,
 });

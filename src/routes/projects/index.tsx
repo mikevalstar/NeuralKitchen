@@ -77,7 +77,7 @@ function ProjectsPage() {
       (project) =>
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.shortId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase())),
+        project.description?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [projects, searchQuery]);
 

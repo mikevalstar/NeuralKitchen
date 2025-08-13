@@ -167,8 +167,8 @@ function VersionHistory() {
                   versions.map((version, index) => (
                     <Tooltip key={version.id}>
                       <TooltipTrigger asChild>
-                        <div
-                          className={`flex items-center space-x-3 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors ${
+                        <button
+                          className={`flex w-full items-center space-x-3 p-2 rounded-md border cursor-pointer hover:bg-muted/50 transition-colors text-left ${
                             selectedVersions.includes(version.id)
                               ? "bg-muted border-primary"
                               : "hover:border-muted-foreground/30"
@@ -184,7 +184,7 @@ function VersionHistory() {
                               handleVersionSelect(version.id, !isSelected);
                             }
                           }}
-                          role="button"
+                          type="button"
                           tabIndex={0}>
                           {/* Git-style graph line */}
                           <div className="relative flex flex-col items-center">
@@ -216,7 +216,7 @@ function VersionHistory() {
                             </div>
                             <div className="text-xs text-muted-foreground">{formatDateOnly(version.createdAt)}</div>
                           </div>
-                        </div>
+                        </button>
                       </TooltipTrigger>
                       <TooltipContent side="right" className="max-w-sm">
                         <div className="space-y-1">

@@ -2,6 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { AlertTriangle, ArrowLeft, RotateCcw, Save } from "lucide-react";
+import { toast } from "sonner";
 import { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
@@ -124,7 +125,7 @@ function PromptEditPage() {
         navigate({ to: "/settings" });
       } catch (error) {
         console.error("Error saving prompt:", error);
-        alert("Error saving prompt: " + (error instanceof Error ? error.message : "Unknown error"));
+        toast.error(`Error saving prompt: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     },
   });
@@ -135,7 +136,7 @@ function PromptEditPage() {
       navigate({ to: "/settings" });
     } catch (error) {
       console.error("Error resetting prompt:", error);
-      alert("Error resetting prompt: " + (error instanceof Error ? error.message : "Unknown error"));
+      toast.error(`Error resetting prompt: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   };
 
@@ -166,7 +167,7 @@ function PromptEditPage() {
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Recipe summarization accuracy</li>
               <li>AI agent behavior and responses</li>
-              <li>Template variable replacement ({(`{title}`, `{content}`)})</li>
+              <li>Template variable replacement</li>
               <li>Integration with external AI services</li>
             </ul>
           </AlertDescription>
@@ -237,7 +238,9 @@ function PromptEditPage() {
                       className="min-h-[300px] font-mono text-sm"
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-red-600">{field.state.meta.errors[0]}</p>
+                      <p className="text-sm text-red-600">
+                        {field.state.meta.errors.map((error) => error?.message).join(", ")}
+                      </p>
                     )}
                     <p className="text-xs text-muted-foreground">
                       Use placeholders like {`{title}`} and {`{content}`} for template variables.

@@ -4,16 +4,6 @@ import "dotenv/config";
 import { auth } from "../src/lib/auth";
 import prisma from "../src/lib/prisma";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  emailVerified: boolean;
-  image?: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
 class UserManager {
   async addUser(email: string, password: string, name?: string): Promise<void> {
     try {
@@ -46,8 +36,9 @@ class UserManager {
         },
       });
 
-      if (!result || result.error) {
-        throw new Error(result?.error?.message || "Failed to create user");
+      if (!result) {
+        console.error(result);
+        throw new Error("Failed to create user");
       }
 
       console.log(`✅ User created successfully:`);

@@ -3,7 +3,7 @@ import { Expand, Minimize } from "lucide-react";
 import { useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import type { Project, RecipeVersion, Tag } from "~/generated/prisma";
+import type { Project, RecipeVersion, Tag } from "~/generated/prisma/client";
 
 type VersionWithRelations = RecipeVersion & {
   tags: Tag[];
@@ -149,7 +149,7 @@ function FullFileView({ version1, version2 }: { version1: VersionWithRelations; 
             const line = lines1[i] || "";
             const highlight = getLineHighlight(i, line, false);
             return (
-              <div key={`v1-line-${i}`} className={`px-2 py-0.5 ${highlight}`}>
+              <div key={`v1-line-${i}-${line}`} className={`px-2 py-0.5 ${highlight}`}>
                 <span className="select-none text-muted-foreground mr-3 w-8 inline-block text-right">
                   {line ? i + 1 : ""}
                 </span>
@@ -168,7 +168,7 @@ function FullFileView({ version1, version2 }: { version1: VersionWithRelations; 
             const line = lines2[i] || "";
             const highlight = getLineHighlight(i, line, true);
             return (
-              <div key={`v2-line-${i}`} className={`px-2 py-0.5 ${highlight}`}>
+              <div key={`v2-line-${i}-${line}`} className={`px-2 py-0.5 ${highlight}`}>
                 <span className="select-none text-muted-foreground mr-3 w-8 inline-block text-right">
                   {line ? i + 1 : ""}
                 </span>
