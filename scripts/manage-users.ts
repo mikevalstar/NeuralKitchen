@@ -41,9 +41,16 @@ class UserManager {
         throw new Error("Failed to create user");
       }
 
+      // Automatically assign admin role to CLI-created users
+      await prisma.user.update({
+        where: { id: result.user.id },
+        data: { role: "admin" },
+      });
+
       console.log(`✅ User created successfully:`);
       console.log(`   Email: ${result.user.email}`);
       console.log(`   Name: ${result.user.name}`);
+      console.log(`   Role: admin`);
       console.log(`   ID: ${result.user.id}`);
     } catch (error) {
       if (error instanceof Error) {
@@ -63,6 +70,7 @@ class UserManager {
           id: true,
           email: true,
           name: true,
+          role: true,
           emailVerified: true,
           createdAt: true,
           updatedAt: true,
@@ -84,6 +92,7 @@ class UserManager {
       users.forEach((user, index) => {
         console.log(`${index + 1}. ${user.name} (${user.email})`);
         console.log(`   ID: ${user.id}`);
+        console.log(`   Role: ${user.role || "No role assigned"}`);
         console.log(`   Email Verified: ${user.emailVerified ? "✅" : "❌"}`);
         console.log(`   Active Sessions: ${user._count.sessions}`);
         console.log(`   Created: ${user.createdAt.toISOString()}`);

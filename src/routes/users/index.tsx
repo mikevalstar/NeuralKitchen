@@ -347,6 +347,7 @@ function UsersPage() {
                     <tr className="border-b">
                       <th className="text-left p-4 font-medium">Name</th>
                       <th className="text-left p-4 font-medium">Email</th>
+                      <th className="text-left p-4 font-medium">Role</th>
                       <th className="text-left p-4 font-medium">Created</th>
                     </tr>
                   </thead>
@@ -359,6 +360,15 @@ function UsersPage() {
                           {user.name || <span className="italic text-muted-foreground">No name</span>}
                         </td>
                         <td className="p-4 font-mono text-sm text-muted-foreground">{user.email}</td>
+                        <td className="p-4 text-sm">
+                          {user.role ? (
+                            <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30">
+                              {user.role}
+                            </span>
+                          ) : (
+                            <span className="italic text-muted-foreground">No role</span>
+                          )}
+                        </td>
                         <td className="p-4 text-sm text-muted-foreground">{formatDateOnly(user.createdAt)}</td>
                       </tr>
                     ))}
