@@ -1,7 +1,31 @@
-import { type UserNameUpdateInput, userNameUpdateSchema } from "../dataValidators";
+import { auth } from "../auth";
+import {
+  type UserCreateInput,
+  type UserNameUpdateInput,
+  userCreateSchema,
+  userNameUpdateSchema,
+} from "../dataValidators";
 import prisma from "../prisma";
 
 export namespace Users {
+  /**
+   * Get all users, ordered by creation date (newest first)
+   */
+  export async function list() {
+    return prisma.user.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
   /**
    * Get current user by ID
    */
@@ -11,6 +35,37 @@ export namespace Users {
         id: userId,
       },
     });
+  }
+
+  /**
+   * Create a new user
+   */
+  export async function create(data: UserCreateInput) {
+    const validatedData = userCreateSchema.parse(data);
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
+      where: { email: validatedData.email },
+    });
+
+    if (existingUser) {
+      throw new Error(`User with email ${validatedData.email} already exists`);
+    }
+
+    // Use better-auth's built-in signup functionality
+    const result = await auth.api.signUpEmail({
+      body: {
+        email: validatedData.email,
+        password: validatedData.password,
+        name: validatedData.name || validatedData.email.split("@")[0],
+      },
+    });
+
+    if (!result) {
+      throw new Error("Failed to create user");
+    }
+
+    return result.user;
   }
 
   /**

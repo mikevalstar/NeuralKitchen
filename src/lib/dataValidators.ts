@@ -128,3 +128,12 @@ export const passwordChangeSchema = z
   });
 
 export type PasswordChangeInput = z.infer<typeof passwordChangeSchema>;
+
+// User creation validation schema
+export const userCreateSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters").optional(),
+});
+
+export type UserCreateInput = z.infer<typeof userCreateSchema>;

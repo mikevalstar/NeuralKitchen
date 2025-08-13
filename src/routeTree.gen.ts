@@ -17,6 +17,7 @@ import { Route as QueueRouteImport } from './routes/queue'
 import { Route as PreferencesRouteImport } from './routes/preferences'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsersIndexRouteImport } from './routes/users/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as RecipesIndexRouteImport } from './routes/recipes/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
@@ -62,6 +63,11 @@ const LoginRoute = LoginRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersIndexRoute = UsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/projects': typeof ProjectsIndexRoute
   '/recipes': typeof RecipesIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/users': typeof UsersIndexRoute
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/projects': typeof ProjectsIndexRoute
   '/recipes': typeof RecipesIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/users': typeof UsersIndexRoute
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/projects/': typeof ProjectsIndexRoute
   '/recipes/': typeof RecipesIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/users/': typeof UsersIndexRoute
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
@@ -213,6 +222,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/recipes'
     | '/settings'
+    | '/users'
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/recipes'
     | '/settings'
+    | '/users'
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
@@ -253,6 +264,7 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/recipes/'
     | '/settings/'
+    | '/users/'
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
@@ -274,6 +286,7 @@ export interface RootRouteChildren {
   ProjectsIndexRoute: typeof ProjectsIndexRoute
   RecipesIndexRoute: typeof RecipesIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
+  UsersIndexRoute: typeof UsersIndexRoute
   ProjectsProjectIdEditRoute: typeof ProjectsProjectIdEditRoute
   RecipesRecipeIdEditRoute: typeof RecipesRecipeIdEditRoute
   SettingsPromptsPromptKeyRoute: typeof SettingsPromptsPromptKeyRoute
@@ -349,6 +362,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users/': {
+      id: '/users/'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/': {
@@ -469,6 +489,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectsIndexRoute: ProjectsIndexRoute,
   RecipesIndexRoute: RecipesIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
+  UsersIndexRoute: UsersIndexRoute,
   ProjectsProjectIdEditRoute: ProjectsProjectIdEditRoute,
   RecipesRecipeIdEditRoute: RecipesRecipeIdEditRoute,
   SettingsPromptsPromptKeyRoute: SettingsPromptsPromptKeyRoute,
