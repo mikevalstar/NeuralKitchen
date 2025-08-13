@@ -40,13 +40,13 @@ export const Route = createFileRoute("/users/")({
       });
     }
 
-    return getUsers();
+    return { users: await getUsers(), currentUserRole: context?.user?.role };
   },
 });
 
 function UsersPage() {
   const router = useRouter();
-  const users = Route.useLoaderData();
+  const { users, currentUserRole } = Route.useLoaderData();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -102,18 +102,20 @@ function UsersPage() {
       </div>
 
       {/* Create User Button */}
-      <div className="flex justify-center">
-        <Button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          variant={showCreateForm ? "outline" : "default"}
-          className="min-w-[160px]">
-          <Plus className="h-4 w-4 mr-2" />
-          {showCreateForm ? "Cancel" : "Create User"}
-        </Button>
-      </div>
+      {currentUserRole === "admin" && (
+        <div className="flex justify-center">
+          <Button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            variant={showCreateForm ? "outline" : "default"}
+            className="min-w-[160px]">
+            <Plus className="h-4 w-4 mr-2" />
+            {showCreateForm ? "Cancel" : "Create User"}
+          </Button>
+        </div>
+      )}
 
       {/* Add User Form - Collapsible */}
-      {showCreateForm && (
+      {showCreateForm && currentUserRole === "admin" && (
         <div className="max-w-2xl mx-auto">
           <Card>
             <CardHeader>
@@ -383,11 +385,13 @@ function UsersPage() {
                         <td className="p-4 text-sm text-muted-foreground">{formatDateOnly(user.createdAt)}</td>
                         <td className="p-4">
                           <div className="flex items-center space-x-2">
-                            <Link to="/users/$userId/edit" params={{ userId: user.id }}>
-                              <Button variant="outline" size="sm">
-                                <Edit className="h-3 w-3" />
-                              </Button>
-                            </Link>
+                            {currentUserRole === "admin" && (
+                              <Link to="/users/$userId/edit" params={{ userId: user.id }}>
+                                <Button variant="outline" size="sm">
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                              </Link>
+                            )}
                           </div>
                         </td>
                       </tr>

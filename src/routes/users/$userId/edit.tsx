@@ -24,9 +24,13 @@ const getUser = createServerFn({ method: "GET" })
   .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => userIdSchema.parse(data))
   .handler(async (ctx) => {
+    if (ctx.context.user?.role !== "admin") {
+      throw new Error("User not authorized to edit this user");
+    }
+
     const user = await Users.read(ctx.data.userId);
     if (!user) {
-      throw new Error("User not found");
+      throw new Error("User not found or incorrect permissions");
     }
     return user;
   });
@@ -41,6 +45,10 @@ const updateUser = createServerFn({ method: "POST" })
     };
   })
   .handler(async (ctx) => {
+    if (ctx.context.user?.role !== "admin") {
+      throw new Error("User not authorized to edit this user");
+    }
+
     return Users.update(ctx.data.userId, ctx.data.userData);
   });
 
@@ -51,6 +59,10 @@ export const Route = createFileRoute("/users/$userId/edit")({
   },
   component: UserEdit,
   loader: async ({ context, params }) => {
+    if (context?.user?.role !== "admin") {
+      throw new Error("User not authorized to edit this user");
+    }
+
     if (!context?.user?.id) {
       throw redirect({
         to: "/login",

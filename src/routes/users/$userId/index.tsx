@@ -42,12 +42,12 @@ export const Route = createFileRoute("/users/$userId/")({
       });
     }
 
-    return getUser({ data: { userId: params.userId } });
+    return { user: await getUser({ data: { userId: params.userId } }), currentUserRole: context?.user?.role };
   },
 });
 
 function UserDetail() {
-  const user = Route.useLoaderData();
+  const { user, currentUserRole } = Route.useLoaderData();
 
   return (
     <div className="space-y-6">
@@ -74,12 +74,14 @@ function UserDetail() {
         </div>
 
         <div className="flex items-center space-x-2">
-          <Link to="/users/$userId/edit" params={{ userId: user.id }}>
-            <Button variant="outline" size="sm">
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
-            </Button>
-          </Link>
+          {currentUserRole === "admin" && (
+            <Link to="/users/$userId/edit" params={{ userId: user.id }}>
+              <Button variant="outline" size="sm">
+                <Edit className="h-4 w-4 mr-2" />
+                Edit
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
