@@ -41,14 +41,14 @@
   - Redirect to main app after successful login
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 7. Create user avatar component
+- [x] 7. Create user avatar component
   - Create `src/components/UserAvatar.tsx` component
   - Display user email/name with dropdown menu
   - Include logout functionality in dropdown
   - Handle loading and error states
   - _Requirements: 3.1, 3.2, 3.3_
 
-- [ ] 8. Integrate user avatar into navigation
+- [x] 8. Integrate user avatar into navigation
   - Update `src/components/Navigation.tsx` to include UserAvatar
   - Show avatar only when user is authenticated
   - Position avatar in upper right corner

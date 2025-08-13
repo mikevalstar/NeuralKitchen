@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useAtom } from "jotai";
 import { Eye, EyeOff, LogOut, Maximize, Minimize, Monitor, Moon, Settings, Sun, ToggleLeft } from "lucide-react";
 import { isBackgroundEnabledAtom, isWideLayoutAtom, resolvedThemeAtom, type Theme, themeAtom } from "~/lib/atoms/ui";
@@ -15,6 +16,7 @@ import {
 
 export function UserAvatar() {
   const { data: session, isPending } = useSession();
+  const navigate = useNavigate();
 
   // Atoms for toggle states
   const [isWide, setIsWide] = useAtom(isWideLayoutAtom);
@@ -48,6 +50,7 @@ export function UserAvatar() {
 
   const handleSignOut = () => {
     signOut();
+    navigate({ to: "/login" });
   };
 
   const handleWidthToggle = () => {
@@ -130,9 +133,9 @@ export function UserAvatar() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem disabled>
+        <DropdownMenuItem onClick={() => navigate({ to: "/preferences" })}>
           <Settings className="mr-2 h-4 w-4" />
-          <span>Settings</span>
+          <span>Preferences</span>
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
