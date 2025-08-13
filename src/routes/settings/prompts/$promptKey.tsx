@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { AlertTriangle, ArrowLeft, RotateCcw, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -9,6 +9,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Prompts } from "~/lib/data/prompts";
 import { DEFAULT_PROMPTS, PROMPT_METADATA, type PromptKey } from "~/lib/prompts";
 
@@ -27,6 +29,7 @@ const promptEditSchema = z.object({
 });
 
 const getPromptData = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => z.object({ promptKey: z.string() }).parse(data))
   .handler(async (ctx): Promise<PromptEditData> => {
     const key = ctx.data.promptKey as PromptKey;
@@ -53,6 +56,7 @@ const getPromptData = createServerFn({ method: "GET" })
   });
 
 const savePrompt = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => {
     const parsed = data as { promptKey: string; data: unknown };
     return {
@@ -79,6 +83,7 @@ const savePrompt = createServerFn({ method: "POST" })
   });
 
 const resetPrompt = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => z.object({ promptKey: z.string() }).parse(data))
   .handler(async (ctx) => {
     const key = ctx.data.promptKey as PromptKey;
@@ -97,8 +102,19 @@ const resetPrompt = createServerFn({ method: "POST" })
   });
 
 export const Route = createFileRoute("/settings/prompts/$promptKey")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: PromptEditPage,
-  loader: async ({ params }) => {
+  loader: async ({ context, params }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: `/settings/prompts/${params.promptKey}` },
+      });
+    }
+
     console.log("Route params:", params); // Debug log
     if (!params.promptKey) {
       throw new Error("Prompt key parameter is missing");

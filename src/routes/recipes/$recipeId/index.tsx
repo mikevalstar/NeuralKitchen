@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Edit, History, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -22,11 +22,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Recipes } from "~/lib/data/recipes";
 import { recipeIdSchema } from "~/lib/dataValidators";
 import { formatDateTime } from "~/lib/dateUtils";
 
 const getRecipe = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => recipeIdSchema.parse(data))
   .handler(async (ctx) => {
     const recipe = await Recipes.read(ctx.data.recipeId);
@@ -37,14 +40,26 @@ const getRecipe = createServerFn({ method: "GET" })
   });
 
 const deleteRecipe = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => recipeIdSchema.parse(data))
   .handler(async (ctx) => {
     return Recipes.deleteRecipe(ctx.data.recipeId);
   });
 
 export const Route = createFileRoute("/recipes/$recipeId/")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: RecipeDetail,
-  loader: ({ params }) => {
+  loader: async ({ context, params }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: `/recipes/${params.recipeId}` },
+      });
+    }
+
     return getRecipe({ data: { recipeId: params.recipeId } });
   },
 });

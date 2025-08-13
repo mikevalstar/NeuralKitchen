@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Edit, Trash2 } from "lucide-react";
 import { useState } from "react";
@@ -21,11 +21,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/components/ui/dialog";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Projects } from "~/lib/data/projects";
 import { projectIdSchema } from "~/lib/dataValidators";
 import { formatDateTime } from "~/lib/dateUtils";
 
 const getProject = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => projectIdSchema.parse(data))
   .handler(async (ctx) => {
     const project = await Projects.read(ctx.data.projectId);
@@ -36,14 +39,26 @@ const getProject = createServerFn({ method: "GET" })
   });
 
 const deleteProject = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => projectIdSchema.parse(data))
   .handler(async (ctx) => {
     return Projects.deleteProject(ctx.data.projectId);
   });
 
 export const Route = createFileRoute("/projects/$projectId/")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: ProjectDetail,
-  loader: ({ params }) => {
+  loader: async ({ context, params }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: `/projects/${params.projectId}` },
+      });
+    }
+
     return getProject({ data: { projectId: params.projectId } });
   },
 });

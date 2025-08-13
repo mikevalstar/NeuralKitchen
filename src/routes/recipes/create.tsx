@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Save } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -18,21 +18,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Projects } from "~/lib/data/projects";
 import { Recipes } from "~/lib/data/recipes";
 import { Tags } from "~/lib/data/tags";
 import { recipeSchema, recipeVersionSchema } from "~/lib/dataValidators";
 
 // Server functions
-const getTags = createServerFn({ method: "GET" }).handler(async () => {
-  return Tags.list();
-});
+const getTags = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return Tags.list();
+  });
 
-const getProjects = createServerFn({ method: "GET" }).handler(async () => {
-  return Projects.list();
-});
+const getProjects = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return Projects.list();
+  });
 
 const createRecipe = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => {
     const parsed = data as { recipe: unknown; version: unknown };
     return {
@@ -45,8 +52,19 @@ const createRecipe = createServerFn({ method: "POST" })
   });
 
 export const Route = createFileRoute("/recipes/create")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: RecipeCreate,
-  loader: async () => {
+  loader: async ({ context }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: "/recipes/create" },
+      });
+    }
+
     const [tags, projects] = await Promise.all([getTags(), getProjects()]);
     return { tags, projects };
   },

@@ -15,3 +15,21 @@ export const authMiddleware = createMiddleware({ type: "function" }).server(asyn
     },
   });
 });
+
+export const authMiddlewareEnsure = createMiddleware({ type: "function" }).server(async ({ next }) => {
+  const { data: session } = await getSession({ fetchOptions: { headers: getHeaders() as HeadersInit } });
+
+  if (!session?.user?.id) {
+    throw new Error("User not authenticated");
+  }
+
+  return await next({
+    context: {
+      user: {
+        id: session.user.id,
+        email: session.user.email,
+        name: session.user.name,
+      },
+    },
+  });
+});

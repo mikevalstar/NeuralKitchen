@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { ArrowRight, ChevronDown, ChevronUp, Filter, Search } from "lucide-react";
@@ -9,6 +9,8 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Projects } from "~/lib/data/projects";
 import { type SearchResult, SearchService } from "~/lib/services/search";
 
@@ -19,6 +21,7 @@ const searchSchema = z.object({
 });
 
 const searchRecipes = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => searchSchema.parse(data))
   .handler(async ({ data }) => {
     if (!data.q || data.q.trim() === "") {
@@ -28,15 +31,28 @@ const searchRecipes = createServerFn({ method: "GET" })
     return await SearchService.hybridSearch(data.q, data.limit, data.projects);
   });
 
-const getProjects = createServerFn({ method: "GET" }).handler(async () => {
-  return await Projects.list();
-});
+const getProjects = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return await Projects.list();
+  });
 
 export const Route = createFileRoute("/search")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: SearchPage,
   validateSearch: zodValidator(searchSchema),
   loaderDeps: ({ search: { q, limit, projects } }) => ({ q, limit, projects }),
-  loader: async ({ deps }) => {
+  loader: async ({ context, deps }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: "/search" },
+      });
+    }
+
     const projectsData = await getProjects();
 
     if (deps.q) {

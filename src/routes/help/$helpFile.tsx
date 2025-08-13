@@ -33,13 +33,13 @@ export const Route = createFileRoute("/help/$helpFile")({
     return { user };
   },
   loader: async ({ context, params }) => {
+    // check if the user is authenticated, if not, redirect to login
     if (!context?.user?.id) {
       throw redirect({
         to: "/login",
         search: { redirect: `/help/${params.helpFile}` },
       });
     }
-    return context?.user;
   },
   component: HelpFile,
 });
