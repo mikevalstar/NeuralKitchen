@@ -137,3 +137,18 @@ export const userCreateSchema = z.object({
 });
 
 export type UserCreateInput = z.infer<typeof userCreateSchema>;
+
+// User update validation schema
+export const userUpdateSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
+  role: z.enum(["", "admin"]).optional(),
+});
+
+export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
+
+// User ID validation schema
+export const userIdSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
+});
+
+export type UserIdInput = z.infer<typeof userIdSchema>;

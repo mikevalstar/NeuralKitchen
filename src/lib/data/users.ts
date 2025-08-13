@@ -2,8 +2,10 @@ import { auth } from "../auth";
 import {
   type UserCreateInput,
   type UserNameUpdateInput,
+  type UserUpdateInput,
   userCreateSchema,
   userNameUpdateSchema,
+  userUpdateSchema,
 } from "../dataValidators";
 import prisma from "../prisma";
 
@@ -85,6 +87,54 @@ export namespace Users {
       data: {
         name: validatedData.name.trim(),
         updatedAt: new Date(),
+      },
+    });
+  }
+
+  /**
+   * Get user by ID for viewing/editing
+   */
+  export async function read(userId: string) {
+    return prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+  }
+
+  /**
+   * Update user details (name and role)
+   */
+  export async function update(userId: string, data: UserUpdateInput) {
+    const validatedData = userUpdateSchema.parse(data);
+
+    const existingUser = await read(userId);
+    if (!existingUser) {
+      throw new Error("User not found");
+    }
+
+    return prisma.user.update({
+      where: { id: userId },
+      data: {
+        name: validatedData.name.trim(),
+        role: validatedData.role || null,
+        updatedAt: new Date(),
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        role: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
   }

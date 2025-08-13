@@ -1,7 +1,7 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { Eye, EyeOff, Plus, Search, Users as UsersIcon } from "lucide-react";
+import { Edit, Eye, EyeOff, Plus, Search, Users as UsersIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
@@ -349,6 +349,7 @@ function UsersPage() {
                       <th className="text-left p-4 font-medium">Email</th>
                       <th className="text-left p-4 font-medium">Role</th>
                       <th className="text-left p-4 font-medium">Created</th>
+                      <th className="text-left p-4 font-medium">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -357,19 +358,38 @@ function UsersPage() {
                         key={user.id}
                         className={`border-b last:border-b-0 ${index % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
                         <td className="p-4 font-medium">
-                          {user.name || <span className="italic text-muted-foreground">No name</span>}
+                          <Link
+                            to="/users/$userId"
+                            params={{ userId: user.id }}
+                            className="hover:text-blue-600 transition-colors">
+                            {user.name || user.email}
+                          </Link>
+                          {!user.name && (
+                            <div className="text-xs italic text-muted-foreground mt-1">No display name</div>
+                          )}
                         </td>
                         <td className="p-4 font-mono text-sm text-muted-foreground">{user.email}</td>
                         <td className="p-4 text-sm">
                           {user.role ? (
                             <span className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10 dark:bg-blue-400/10 dark:text-blue-400 dark:ring-blue-400/30">
-                              {user.role}
+                              {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
                             </span>
                           ) : (
-                            <span className="italic text-muted-foreground">No role</span>
+                            <span className="inline-flex items-center rounded-full bg-gray-50 px-2 py-1 text-xs font-medium text-gray-700 ring-1 ring-inset ring-gray-700/10 dark:bg-gray-400/10 dark:text-gray-400 dark:ring-gray-400/30">
+                              None
+                            </span>
                           )}
                         </td>
                         <td className="p-4 text-sm text-muted-foreground">{formatDateOnly(user.createdAt)}</td>
+                        <td className="p-4">
+                          <div className="flex items-center space-x-2">
+                            <Link to="/users/$userId/edit" params={{ userId: user.id }}>
+                              <Button variant="outline" size="sm">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </Link>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

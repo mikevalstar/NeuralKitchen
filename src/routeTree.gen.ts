@@ -24,8 +24,10 @@ import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
 import { Route as HelpIndexRouteImport } from './routes/help/index'
 import { Route as RecipesCreateRouteImport } from './routes/recipes/create'
 import { Route as HelpHelpFileRouteImport } from './routes/help/$helpFile'
+import { Route as UsersUserIdIndexRouteImport } from './routes/users/$userId/index'
 import { Route as RecipesRecipeIdIndexRouteImport } from './routes/recipes/$recipeId/index'
 import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects/$projectId/index'
+import { Route as UsersUserIdEditRouteImport } from './routes/users/$userId/edit'
 import { Route as SettingsPromptsPromptKeyRouteImport } from './routes/settings/prompts/$promptKey'
 import { Route as RecipesRecipeIdEditRouteImport } from './routes/recipes/$recipeId/edit'
 import { Route as ProjectsProjectIdEditRouteImport } from './routes/projects/$projectId/edit'
@@ -100,6 +102,11 @@ const HelpHelpFileRoute = HelpHelpFileRouteImport.update({
   path: '/help/$helpFile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersUserIdIndexRoute = UsersUserIdIndexRouteImport.update({
+  id: '/users/$userId/',
+  path: '/users/$userId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecipesRecipeIdIndexRoute = RecipesRecipeIdIndexRouteImport.update({
   id: '/recipes/$recipeId/',
   path: '/recipes/$recipeId/',
@@ -108,6 +115,11 @@ const RecipesRecipeIdIndexRoute = RecipesRecipeIdIndexRouteImport.update({
 const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
   id: '/projects/$projectId/',
   path: '/projects/$projectId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersUserIdEditRoute = UsersUserIdEditRouteImport.update({
+  id: '/users/$userId/edit',
+  path: '/users/$userId/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsPromptsPromptKeyRoute =
@@ -160,8 +172,10 @@ export interface FileRoutesByFullPath {
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
+  '/users/$userId/edit': typeof UsersUserIdEditRoute
   '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
   '/recipes/$recipeId': typeof RecipesRecipeIdIndexRoute
+  '/users/$userId': typeof UsersUserIdIndexRoute
   '/recipes/$recipeId/versions': typeof RecipesRecipeIdVersionsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -181,8 +195,10 @@ export interface FileRoutesByTo {
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
+  '/users/$userId/edit': typeof UsersUserIdEditRoute
   '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
   '/recipes/$recipeId': typeof RecipesRecipeIdIndexRoute
+  '/users/$userId': typeof UsersUserIdIndexRoute
   '/recipes/$recipeId/versions': typeof RecipesRecipeIdVersionsIndexRoute
 }
 export interface FileRoutesById {
@@ -203,8 +219,10 @@ export interface FileRoutesById {
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
+  '/users/$userId/edit': typeof UsersUserIdEditRoute
   '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
   '/recipes/$recipeId/': typeof RecipesRecipeIdIndexRoute
+  '/users/$userId/': typeof UsersUserIdIndexRoute
   '/recipes/$recipeId/versions/': typeof RecipesRecipeIdVersionsIndexRoute
 }
 export interface FileRouteTypes {
@@ -226,8 +244,10 @@ export interface FileRouteTypes {
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
+    | '/users/$userId/edit'
     | '/projects/$projectId'
     | '/recipes/$recipeId'
+    | '/users/$userId'
     | '/recipes/$recipeId/versions'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -247,8 +267,10 @@ export interface FileRouteTypes {
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
+    | '/users/$userId/edit'
     | '/projects/$projectId'
     | '/recipes/$recipeId'
+    | '/users/$userId'
     | '/recipes/$recipeId/versions'
   id:
     | '__root__'
@@ -268,8 +290,10 @@ export interface FileRouteTypes {
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
+    | '/users/$userId/edit'
     | '/projects/$projectId/'
     | '/recipes/$recipeId/'
+    | '/users/$userId/'
     | '/recipes/$recipeId/versions/'
   fileRoutesById: FileRoutesById
 }
@@ -290,8 +314,10 @@ export interface RootRouteChildren {
   ProjectsProjectIdEditRoute: typeof ProjectsProjectIdEditRoute
   RecipesRecipeIdEditRoute: typeof RecipesRecipeIdEditRoute
   SettingsPromptsPromptKeyRoute: typeof SettingsPromptsPromptKeyRoute
+  UsersUserIdEditRoute: typeof UsersUserIdEditRoute
   ProjectsProjectIdIndexRoute: typeof ProjectsProjectIdIndexRoute
   RecipesRecipeIdIndexRoute: typeof RecipesRecipeIdIndexRoute
+  UsersUserIdIndexRoute: typeof UsersUserIdIndexRoute
   RecipesRecipeIdVersionsIndexRoute: typeof RecipesRecipeIdVersionsIndexRoute
 }
 export interface FileServerRoutesByFullPath {
@@ -413,6 +439,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpHelpFileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users/$userId/': {
+      id: '/users/$userId/'
+      path: '/users/$userId'
+      fullPath: '/users/$userId'
+      preLoaderRoute: typeof UsersUserIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recipes/$recipeId/': {
       id: '/recipes/$recipeId/'
       path: '/recipes/$recipeId'
@@ -425,6 +458,13 @@ declare module '@tanstack/react-router' {
       path: '/projects/$projectId'
       fullPath: '/projects/$projectId'
       preLoaderRoute: typeof ProjectsProjectIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users/$userId/edit': {
+      id: '/users/$userId/edit'
+      path: '/users/$userId/edit'
+      fullPath: '/users/$userId/edit'
+      preLoaderRoute: typeof UsersUserIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/prompts/$promptKey': {
@@ -493,8 +533,10 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectsProjectIdEditRoute: ProjectsProjectIdEditRoute,
   RecipesRecipeIdEditRoute: RecipesRecipeIdEditRoute,
   SettingsPromptsPromptKeyRoute: SettingsPromptsPromptKeyRoute,
+  UsersUserIdEditRoute: UsersUserIdEditRoute,
   ProjectsProjectIdIndexRoute: ProjectsProjectIdIndexRoute,
   RecipesRecipeIdIndexRoute: RecipesRecipeIdIndexRoute,
+  UsersUserIdIndexRoute: UsersUserIdIndexRoute,
   RecipesRecipeIdVersionsIndexRoute: RecipesRecipeIdVersionsIndexRoute,
 }
 export const routeTree = rootRouteImport
