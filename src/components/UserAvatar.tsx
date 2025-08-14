@@ -3,6 +3,7 @@ import { useAtom } from "jotai";
 import { Eye, EyeOff, LogOut, Maximize, Minimize, Monitor, Moon, Settings, Sun, ToggleLeft } from "lucide-react";
 import { isBackgroundEnabledAtom, isWideLayoutAtom, resolvedThemeAtom, type Theme, themeAtom } from "~/lib/atoms/ui";
 import { signOut, useSession } from "~/lib/auth-client";
+import { getGravatarUrl } from "~/lib/gravatar";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import {
@@ -87,7 +88,7 @@ export function UserAvatar() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.image || undefined} alt={user.name || "User"} />
+            <AvatarImage src={getGravatarUrl(user.email, 32)} alt={user.name || "User"} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>

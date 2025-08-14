@@ -125,12 +125,7 @@ function Home() {
                         </div>
                         <div className="flex items-center gap-3 ml-4">
                           {recipe.modifiedBy && (
-                            <LazyUserAvatar 
-                              userId={recipe.modifiedBy} 
-                              size="sm" 
-                              showName={true}
-                              className="text-sm"
-                            />
+                            <LazyUserAvatar userId={recipe.modifiedBy} size="sm" showName={true} className="text-sm" />
                           )}
                           <div className="text-sm text-muted-foreground text-right">
                             <div>{formatDateTime(recipe.updatedAt)}</div>

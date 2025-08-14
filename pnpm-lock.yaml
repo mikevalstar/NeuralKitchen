@@ -119,6 +119,9 @@ importers:
       jotai:
         specifier: ^2.13.0
         version: 2.13.0(@babel/core@7.28.0)(@babel/template@7.27.2)(@types/react@19.1.9)(react@19.1.1)
+      js-md5:
+        specifier: ^0.8.3
+        version: 0.8.3
       lucide-react:
         specifier: ^0.536.0
         version: 0.536.0(react@19.1.1)
@@ -3806,6 +3809,9 @@ packages:
         optional: true
       react:
         optional: true
+
+  js-md5@0.8.3:
+    resolution: {integrity: sha512-qR0HB5uP6wCuRMrWPTrkMaev7MJZwJuuw4fnwAzRgP4J4/F8RwtodOKpGp4XpqsLBFzzgqIO42efFAyz2Et6KQ==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -9824,6 +9830,8 @@ snapshots:
       '@babel/template': 7.27.2
       '@types/react': 19.1.9
       react: 19.1.1
+
+  js-md5@0.8.3: {}
 
   js-tokens@4.0.0: {}
 

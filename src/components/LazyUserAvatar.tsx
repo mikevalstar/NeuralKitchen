@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { authMiddlewareEnsure } from "~/lib/auth-middleware";
 import { Users } from "~/lib/data/users";
 import { userIdSchema } from "~/lib/dataValidators";
+import { getGravatarUrl } from "~/lib/gravatar";
 
 const getUser = createServerFn({ method: "GET" })
   .middleware([authMiddlewareEnsure])
@@ -105,11 +106,12 @@ export function LazyUserAvatar({
   }
 
   const initials = getInitials(user.name);
+  const avatarSize = getAvatarSizeNumber(size);
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Avatar className={getAvatarSize(size)}>
-        <AvatarImage src={user.image || undefined} alt={user.name} />
+        <AvatarImage src={getGravatarUrl(user.email, avatarSize)} alt={user.name} />
         <AvatarFallback className="text-xs font-medium">{initials}</AvatarFallback>
       </Avatar>
 
@@ -133,6 +135,19 @@ function getAvatarSize(size: "sm" | "md" | "lg"): string {
       return "h-10 w-10";
     default:
       return "h-6 w-6";
+  }
+}
+
+function getAvatarSizeNumber(size: "sm" | "md" | "lg"): number {
+  switch (size) {
+    case "sm":
+      return 24;
+    case "md":
+      return 32;
+    case "lg":
+      return 40;
+    default:
+      return 24;
   }
 }
 
