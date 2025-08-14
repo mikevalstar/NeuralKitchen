@@ -15,6 +15,10 @@ model Tag {
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
+  createdBy      String?
+  modifiedBy     String?
+  createdByUser  User?           @relation("TagCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?           @relation("TagModifiedBy", fields: [modifiedBy], references: [id])
   recipeVersions RecipeVersion[] @relation("RecipeVersionTags")
 }
 
@@ -26,6 +30,10 @@ model Project {
   updatedAt      DateTime        @updatedAt
   deletedAt      DateTime?
   shortId        String          @unique
+  createdBy      String?
+  modifiedBy     String?
+  createdByUser  User?           @relation("ProjectCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?           @relation("ProjectModifiedBy", fields: [modifiedBy], references: [id])
   recipeVersions RecipeVersion[] @relation("RecipeVersionProjects")
 }
 
@@ -37,6 +45,10 @@ model Recipe {
   updatedAt        DateTime        @updatedAt
   deletedAt        DateTime?
   currentVersionId String?
+  createdBy        String?
+  modifiedBy       String?
+  createdByUser    User?           @relation("RecipeCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser   User?           @relation("RecipeModifiedBy", fields: [modifiedBy], references: [id])
   currentVersion   RecipeVersion?  @relation("CurrentRecipeVersion", fields: [currentVersionId], references: [id])
   versions         RecipeVersion[]
 }
@@ -56,6 +68,10 @@ model RecipeVersion {
   versionNumber     Int
   aiSummary         String?
   comment           String?
+  createdBy         String?
+  modifiedBy        String?
+  createdByUser     User?     @relation("RecipeVersionCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser    User?     @relation("RecipeVersionModifiedBy", fields: [modifiedBy], references: [id])
   currentForRecipes Recipe[]  @relation("CurrentRecipeVersion")
   recipe            Recipe    @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   projects          Project[] @relation("RecipeVersionProjects")
@@ -65,43 +81,57 @@ model RecipeVersion {
 }
 
 model RecipeQueue {
-  id          String    @id @default(uuid())
-  title       String
-  shortid     String
-  versionId   String
-  status      String    @default("pending")
-  createdAt   DateTime  @default(now())
-  completedAt DateTime?
-  deletedAt   DateTime?
-  error       String?
-  updatedAt   DateTime  @updatedAt
+  id             String    @id @default(uuid())
+  title          String
+  shortid        String
+  versionId      String
+  status         String    @default("pending")
+  createdAt      DateTime  @default(now())
+  completedAt    DateTime?
+  deletedAt      DateTime?
+  error          String?
+  updatedAt      DateTime  @updatedAt
+  createdBy      String?
+  modifiedBy     String?
+  createdByUser  User?     @relation("RecipeQueueCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?     @relation("RecipeQueueModifiedBy", fields: [modifiedBy], references: [id])
 }
 
 model VecDocument {
-  id        Int                    @id @default(autoincrement())
-  title     String
-  shortid   String                 @unique
-  embedding Unsupported("vector")?
-  createdat DateTime?              @default(now()) @db.Timestamptz(6)
-  updatedat DateTime?              @default(now()) @db.Timestamptz(6)
-  deletedat DateTime?              @db.Timestamptz(6)
-  versionId String?
-  recipeId  String?
-  isCurrent Boolean                @default(false)
+  id             Int                    @id @default(autoincrement())
+  title          String
+  shortid        String                 @unique
+  embedding      Unsupported("vector")?
+  createdat      DateTime?              @default(now()) @db.Timestamptz(6)
+  updatedat      DateTime?              @default(now()) @db.Timestamptz(6)
+  deletedat      DateTime?              @db.Timestamptz(6)
+  versionId      String?
+  recipeId       String?
+  isCurrent      Boolean                @default(false)
+  createdBy      String?
+  modifiedBy     String?
+  createdByUser  User?                  @relation("VecDocumentCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?                  @relation("VecDocumentModifiedBy", fields: [modifiedBy], references: [id])
 
   @@index([embedding])
 }
 
 model Prompt {
-  id          String    @id @default(uuid())
-  key         String    @unique
-  name        String
-  description String?
-  content     String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id             String    @id @default(uuid())
+  key            String    @unique
+  name           String
+  description    String?
+  content        String
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdBy      String?
+  modifiedBy     String?
+  createdByUser  User?     @relation("PromptCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?     @relation("PromptModifiedBy", fields: [modifiedBy], references: [id])
 }
+
+// User management table
 
 model User {
   id            String    @id
@@ -118,6 +148,22 @@ model User {
   banned     Boolean?
   banReason  String?
   banExpires DateTime?
+
+  // Created/Modified relations
+  tagsCreated             Tag[]           @relation("TagCreatedBy")
+  tagsModified            Tag[]           @relation("TagModifiedBy")
+  projectsCreated         Project[]       @relation("ProjectCreatedBy")
+  projectsModified        Project[]       @relation("ProjectModifiedBy")
+  recipesCreated          Recipe[]        @relation("RecipeCreatedBy")
+  recipesModified         Recipe[]        @relation("RecipeModifiedBy")
+  recipeVersionsCreated   RecipeVersion[] @relation("RecipeVersionCreatedBy")
+  recipeVersionsModified  RecipeVersion[] @relation("RecipeVersionModifiedBy")
+  recipeQueuesCreated     RecipeQueue[]   @relation("RecipeQueueCreatedBy")
+  recipeQueuesModified    RecipeQueue[]   @relation("RecipeQueueModifiedBy")
+  vecDocumentsCreated     VecDocument[]   @relation("VecDocumentCreatedBy")
+  vecDocumentsModified    VecDocument[]   @relation("VecDocumentModifiedBy")
+  promptsCreated          Prompt[]        @relation("PromptCreatedBy")
+  promptsModified         Prompt[]        @relation("PromptModifiedBy")
 
   @@unique([email])
   @@map("user")
