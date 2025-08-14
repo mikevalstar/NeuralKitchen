@@ -40,19 +40,23 @@ Content:
 export const PROMPT_METADATA = {
   RECIPE_SUMMARY_SYSTEM: {
     title: "Recipe Summary System Prompt",
-    description: "System instructions for AI when generating recipe summaries. Controls the format, length, and focus of auto-generated summaries.",
+    description:
+      "System instructions for AI when generating recipe summaries. Controls the format, length, and focus of auto-generated summaries.",
   },
   RECIPE_SUMMARY_USER: {
     title: "Recipe Summary User Prompt",
-    description: "Template for the user message sent to AI for recipe summarization. Uses {title} and {content} placeholders.",
+    description:
+      "Template for the user message sent to AI for recipe summarization. Uses {title} and {content} placeholders.",
   },
   MCP_SERVER_DESCRIPTION: {
     title: "MCP Server Description",
-    description: "Description text shown to AI agents when they connect to the MCP server. Explains what Neural Kitchen provides.",
+    description:
+      "Description text shown to AI agents when they connect to the MCP server. Explains what Neural Kitchen provides.",
   },
   MCP_SERVER_INSTRUCTIONS: {
     title: "MCP Server Instructions",
-    description: "Detailed instructions for AI agents on how to use Neural Kitchen recipes effectively through the MCP interface.",
+    description:
+      "Detailed instructions for AI agents on how to use Neural Kitchen recipes effectively through the MCP interface.",
   },
 } as const;
 

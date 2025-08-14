@@ -1,24 +1,29 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { AlertCircle, CheckCircle, Clock, RefreshCw, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Queue } from "~/lib/data/queue";
 import { formatDateTime } from "~/lib/dateUtils";
 
 // Server functions
-const getQueueItems = createServerFn({ method: "GET" }).handler(async () => {
-  const [errors, pending, completed] = await Promise.all([
-    Queue.getRecentErrors(10),
-    Queue.getPending(20),
-    Queue.getRecentCompleted(10),
-  ]);
-  return { errors, pending, completed };
-});
+const getQueueItems = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    const [errors, pending, completed] = await Promise.all([
+      Queue.getRecentErrors(10),
+      Queue.getPending(20),
+      Queue.getRecentCompleted(10),
+    ]);
+    return { errors, pending, completed };
+  });
 
 const retryQueueItem = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => {
     const parsed = data as { id: string };
     return { id: parsed.id };
@@ -27,13 +32,26 @@ const retryQueueItem = createServerFn({ method: "POST" })
     return Queue.retry(data.id);
   });
 
-const retryAllErrors = createServerFn({ method: "POST" }).handler(async () => {
-  return Queue.retryAllErrors();
-});
+const retryAllErrors = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return Queue.retryAllErrors();
+  });
 
 export const Route = createFileRoute("/queue")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: QueuePage,
-  loader: async () => {
+  loader: async ({ context }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: "/queue" },
+      });
+    }
+
     return getQueueItems();
   },
 });

@@ -1,17 +1,18 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
 import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createServerFn } from "@tanstack/react-start";
 import { AlertTriangle, ArrowLeft, RotateCcw, Save } from "lucide-react";
+import { toast } from "sonner";
+import { z } from "zod";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
 import { Textarea } from "~/components/ui/textarea";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Prompts } from "~/lib/data/prompts";
 import { DEFAULT_PROMPTS, PROMPT_METADATA, type PromptKey } from "~/lib/prompts";
-import { z } from "zod";
 
 interface PromptEditData {
   key: PromptKey;
@@ -28,10 +29,11 @@ const promptEditSchema = z.object({
 });
 
 const getPromptData = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => z.object({ promptKey: z.string() }).parse(data))
   .handler(async (ctx): Promise<PromptEditData> => {
     const key = ctx.data.promptKey as PromptKey;
-    
+
     // Check if the key exists in the constants (not the database)
     if (!(key in DEFAULT_PROMPTS)) {
       throw new Error(`Invalid prompt key: ${ctx.data.promptKey}`);
@@ -54,6 +56,7 @@ const getPromptData = createServerFn({ method: "GET" })
   });
 
 const savePrompt = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => {
     const parsed = data as { promptKey: string; data: unknown };
     return {
@@ -63,7 +66,7 @@ const savePrompt = createServerFn({ method: "POST" })
   })
   .handler(async (ctx) => {
     const key = ctx.data.promptKey as PromptKey;
-    
+
     // Check if the key exists in the constants (not the database)
     if (!(key in DEFAULT_PROMPTS)) {
       throw new Error(`Invalid prompt key: ${ctx.data.promptKey}`);
@@ -80,10 +83,11 @@ const savePrompt = createServerFn({ method: "POST" })
   });
 
 const resetPrompt = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => z.object({ promptKey: z.string() }).parse(data))
   .handler(async (ctx) => {
     const key = ctx.data.promptKey as PromptKey;
-    
+
     // Check if the key exists in the constants (not the database)
     if (!(key in DEFAULT_PROMPTS)) {
       throw new Error(`Invalid prompt key: ${ctx.data.promptKey}`);
@@ -98,8 +102,19 @@ const resetPrompt = createServerFn({ method: "POST" })
   });
 
 export const Route = createFileRoute("/settings/prompts/$promptKey")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: PromptEditPage,
-  loader: async ({ params }) => {
+  loader: async ({ context, params }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: `/settings/prompts/${params.promptKey}` },
+      });
+    }
+
     console.log("Route params:", params); // Debug log
     if (!params.promptKey) {
       throw new Error("Prompt key parameter is missing");
@@ -117,17 +132,16 @@ function PromptEditPage() {
     defaultValues: {
       content: promptData.currentContent,
     },
-    validatorAdapter: zodValidator(),
     validators: {
       onChange: promptEditSchema,
     },
     onSubmit: async ({ value }) => {
       try {
         await savePrompt({ data: { promptKey: params.promptKey, data: value } });
-        navigate({ to: "/settings/" });
+        navigate({ to: "/settings" });
       } catch (error) {
         console.error("Error saving prompt:", error);
-        alert("Error saving prompt: " + (error instanceof Error ? error.message : "Unknown error"));
+        toast.error(`Error saving prompt: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     },
   });
@@ -135,10 +149,10 @@ function PromptEditPage() {
   const handleReset = async () => {
     try {
       await resetPrompt({ data: { promptKey: params.promptKey } });
-      navigate({ to: "/settings/" });
+      navigate({ to: "/settings" });
     } catch (error) {
       console.error("Error resetting prompt:", error);
-      alert("Error resetting prompt: " + (error instanceof Error ? error.message : "Unknown error"));
+      toast.error(`Error resetting prompt: ${error instanceof Error ? error.message : "Unknown error"}`);
     }
   };
 
@@ -164,12 +178,12 @@ function PromptEditPage() {
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Warning: Critical System Component</AlertTitle>
           <AlertDescription>
-            This prompt is used by AI features throughout the application. Modifying it may break functionality
-            if not done carefully. Test your changes thoroughly and consider the impact on:
+            This prompt is used by AI features throughout the application. Modifying it may break functionality if not
+            done carefully. Test your changes thoroughly and consider the impact on:
             <ul className="list-disc list-inside mt-2 space-y-1">
               <li>Recipe summarization accuracy</li>
               <li>AI agent behavior and responses</li>
-              <li>Template variable replacement ({`{title}`, `{content}`})</li>
+              <li>Template variable replacement</li>
               <li>Integration with external AI services</li>
             </ul>
           </AlertDescription>
@@ -182,11 +196,8 @@ function PromptEditPage() {
               <span className="font-medium">Current Status:</span>
               <span
                 className={`text-xs px-2 py-1 rounded-full ${
-                  promptData.isUsingDefault
-                    ? "bg-gray-100 text-gray-600"
-                    : "bg-blue-100 text-blue-600"
-                }`}
-              >
+                  promptData.isUsingDefault ? "bg-gray-100 text-gray-600" : "bg-blue-100 text-blue-600"
+                }`}>
                 {promptData.isUsingDefault ? "Using Default" : "Custom"}
               </span>
             </div>
@@ -200,9 +211,7 @@ function PromptEditPage() {
         <Card>
           <CardHeader>
             <CardTitle>Edit Prompt Content</CardTitle>
-            <CardDescription>
-              Customize the prompt content. Leave blank or reset to use the default.
-            </CardDescription>
+            <CardDescription>Customize the prompt content. Leave blank or reset to use the default.</CardDescription>
           </CardHeader>
           <CardContent>
             <form
@@ -211,14 +220,11 @@ function PromptEditPage() {
                 e.stopPropagation();
                 form.handleSubmit();
               }}
-              className="space-y-6"
-            >
+              className="space-y-6">
               {/* Display Name (Read-only) */}
               <div className="space-y-2">
                 <Label>Display Name</Label>
-                <div className="px-3 py-2 bg-muted rounded-md text-sm">
-                  {promptData.title}
-                </div>
+                <div className="px-3 py-2 bg-muted rounded-md text-sm">{promptData.title}</div>
               </div>
 
               {/* Description (Read-only) */}
@@ -230,9 +236,8 @@ function PromptEditPage() {
               </div>
 
               {/* Content Field */}
-              <form.Field
-                name="content"
-                children={(field) => (
+              <form.Field name="content">
+                {(field) => (
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <Label htmlFor={field.name}>Prompt Content</Label>
@@ -249,14 +254,16 @@ function PromptEditPage() {
                       className="min-h-[300px] font-mono text-sm"
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-red-600">{field.state.meta.errors[0]}</p>
+                      <p className="text-sm text-red-600">
+                        {field.state.meta.errors.map((error) => error?.message).join(", ")}
+                      </p>
                     )}
                     <p className="text-xs text-muted-foreground">
                       Use placeholders like {`{title}`} and {`{content}`} for template variables.
                     </p>
                   </div>
                 )}
-              />
+              </form.Field>
 
               {/* Action Buttons */}
               <div className="flex justify-between pt-4">
@@ -269,17 +276,10 @@ function PromptEditPage() {
                   )}
                 </div>
                 <div className="flex space-x-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => navigate({ to: "/settings/" })}
-                  >
+                  <Button type="button" variant="outline" onClick={() => navigate({ to: "/settings/" })}>
                     Cancel
                   </Button>
-                  <Button
-                    type="submit"
-                    disabled={form.state.isSubmitting}
-                  >
+                  <Button type="submit" disabled={form.state.isSubmitting}>
                     <Save className="h-4 w-4 mr-2" />
                     {form.state.isSubmitting ? "Saving..." : "Save Changes"}
                   </Button>
@@ -293,9 +293,7 @@ function PromptEditPage() {
         <Card>
           <CardHeader>
             <CardTitle>Default Content</CardTitle>
-            <CardDescription>
-              This is the original default content for reference.
-            </CardDescription>
+            <CardDescription>This is the original default content for reference.</CardDescription>
           </CardHeader>
           <CardContent>
             <pre className="bg-muted p-4 rounded-md text-sm font-mono whitespace-pre-wrap overflow-x-auto">

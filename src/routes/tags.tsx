@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Plus, Search, Tag } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -8,22 +8,38 @@ import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Tags } from "~/lib/data/tags";
 import { tagSchema } from "~/lib/dataValidators";
 
-const getTags = createServerFn({ method: "GET" }).handler(async () => {
-  return Tags.list();
-});
+const getTags = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return Tags.list();
+  });
 
 const createTag = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => tagSchema.parse(data))
   .handler(async (ctx) => {
     return Tags.create(ctx.data);
   });
 
 export const Route = createFileRoute("/tags")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: TagsPage,
-  loader: () => {
+  loader: async ({ context }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: "/tags" },
+      });
+    }
+
     return getTags();
   },
 });

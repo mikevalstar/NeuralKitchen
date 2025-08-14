@@ -1,23 +1,40 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { authMiddlewareEnsure } from "../lib/auth-middleware";
+import { getUserDetails } from "../lib/auth-server-user";
 import { Recipes } from "../lib/data/recipes";
 import { formatDateTime } from "../lib/dateUtils";
 import prisma from "../lib/prisma";
 
-const getTags = createServerFn({ method: "GET" }).handler(async () => {
-  return prisma.tag.findMany({});
-});
+const getTags = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return prisma.tag.findMany({});
+  });
 
-const getRecentRecipes = createServerFn({ method: "GET" }).handler(async () => {
-  return Recipes.getRecentlyUpdated(20);
-});
+const getRecentRecipes = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return Recipes.getRecentlyUpdated(20);
+  });
 
 export const Route = createFileRoute("/")({
-  component: Home,
-  loader: async () => {
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
+  loader: async ({ context }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: "/" },
+      });
+    }
+
     const [tags, recentRecipes] = await Promise.all([getTags(), getRecentRecipes()]);
     return { tags, recentRecipes };
   },
+  component: Home,
 });
 
 function Home() {

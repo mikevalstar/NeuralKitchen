@@ -8,23 +8,34 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createServerRootRoute } from '@tanstack/react-start/server'
+
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TagsRouteImport } from './routes/tags'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as QueueRouteImport } from './routes/queue'
+import { Route as PreferencesRouteImport } from './routes/preferences'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UsersIndexRouteImport } from './routes/users/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as RecipesIndexRouteImport } from './routes/recipes/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
 import { Route as HelpIndexRouteImport } from './routes/help/index'
 import { Route as RecipesCreateRouteImport } from './routes/recipes/create'
 import { Route as HelpHelpFileRouteImport } from './routes/help/$helpFile'
+import { Route as UsersUserIdIndexRouteImport } from './routes/users/$userId/index'
 import { Route as RecipesRecipeIdIndexRouteImport } from './routes/recipes/$recipeId/index'
 import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects/$projectId/index'
+import { Route as UsersUserIdEditRouteImport } from './routes/users/$userId/edit'
 import { Route as SettingsPromptsPromptKeyRouteImport } from './routes/settings/prompts/$promptKey'
 import { Route as RecipesRecipeIdEditRouteImport } from './routes/recipes/$recipeId/edit'
 import { Route as ProjectsProjectIdEditRouteImport } from './routes/projects/$projectId/edit'
 import { Route as RecipesRecipeIdVersionsIndexRouteImport } from './routes/recipes/$recipeId/versions/index'
+import { ServerRoute as ApiLogoutServerRouteImport } from './routes/api/logout'
+import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/$'
+
+const rootServerRouteImport = createServerRootRoute()
 
 const TagsRoute = TagsRouteImport.update({
   id: '/tags',
@@ -41,9 +52,24 @@ const QueueRoute = QueueRouteImport.update({
   path: '/queue',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PreferencesRoute = PreferencesRouteImport.update({
+  id: '/preferences',
+  path: '/preferences',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersIndexRoute = UsersIndexRouteImport.update({
+  id: '/users/',
+  path: '/users/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
@@ -76,6 +102,11 @@ const HelpHelpFileRoute = HelpHelpFileRouteImport.update({
   path: '/help/$helpFile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const UsersUserIdIndexRoute = UsersUserIdIndexRouteImport.update({
+  id: '/users/$userId/',
+  path: '/users/$userId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecipesRecipeIdIndexRoute = RecipesRecipeIdIndexRouteImport.update({
   id: '/recipes/$recipeId/',
   path: '/recipes/$recipeId/',
@@ -84,6 +115,11 @@ const RecipesRecipeIdIndexRoute = RecipesRecipeIdIndexRouteImport.update({
 const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
   id: '/projects/$projectId/',
   path: '/projects/$projectId/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UsersUserIdEditRoute = UsersUserIdEditRouteImport.update({
+  id: '/users/$userId/edit',
+  path: '/users/$userId/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsPromptsPromptKeyRoute =
@@ -108,9 +144,21 @@ const RecipesRecipeIdVersionsIndexRoute =
     path: '/recipes/$recipeId/versions/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiLogoutServerRoute = ApiLogoutServerRouteImport.update({
+  id: '/api/logout',
+  path: '/api/logout',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
+const ApiAuthSplatServerRoute = ApiAuthSplatServerRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/preferences': typeof PreferencesRoute
   '/queue': typeof QueueRoute
   '/search': typeof SearchRoute
   '/tags': typeof TagsRoute
@@ -120,15 +168,20 @@ export interface FileRoutesByFullPath {
   '/projects': typeof ProjectsIndexRoute
   '/recipes': typeof RecipesIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/users': typeof UsersIndexRoute
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
+  '/users/$userId/edit': typeof UsersUserIdEditRoute
   '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
   '/recipes/$recipeId': typeof RecipesRecipeIdIndexRoute
+  '/users/$userId': typeof UsersUserIdIndexRoute
   '/recipes/$recipeId/versions': typeof RecipesRecipeIdVersionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/preferences': typeof PreferencesRoute
   '/queue': typeof QueueRoute
   '/search': typeof SearchRoute
   '/tags': typeof TagsRoute
@@ -138,16 +191,21 @@ export interface FileRoutesByTo {
   '/projects': typeof ProjectsIndexRoute
   '/recipes': typeof RecipesIndexRoute
   '/settings': typeof SettingsIndexRoute
+  '/users': typeof UsersIndexRoute
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
+  '/users/$userId/edit': typeof UsersUserIdEditRoute
   '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
   '/recipes/$recipeId': typeof RecipesRecipeIdIndexRoute
+  '/users/$userId': typeof UsersUserIdIndexRoute
   '/recipes/$recipeId/versions': typeof RecipesRecipeIdVersionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/preferences': typeof PreferencesRoute
   '/queue': typeof QueueRoute
   '/search': typeof SearchRoute
   '/tags': typeof TagsRoute
@@ -157,17 +215,22 @@ export interface FileRoutesById {
   '/projects/': typeof ProjectsIndexRoute
   '/recipes/': typeof RecipesIndexRoute
   '/settings/': typeof SettingsIndexRoute
+  '/users/': typeof UsersIndexRoute
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
+  '/users/$userId/edit': typeof UsersUserIdEditRoute
   '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
   '/recipes/$recipeId/': typeof RecipesRecipeIdIndexRoute
+  '/users/$userId/': typeof UsersUserIdIndexRoute
   '/recipes/$recipeId/versions/': typeof RecipesRecipeIdVersionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/login'
+    | '/preferences'
     | '/queue'
     | '/search'
     | '/tags'
@@ -177,15 +240,20 @@ export interface FileRouteTypes {
     | '/projects'
     | '/recipes'
     | '/settings'
+    | '/users'
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
+    | '/users/$userId/edit'
     | '/projects/$projectId'
     | '/recipes/$recipeId'
+    | '/users/$userId'
     | '/recipes/$recipeId/versions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/login'
+    | '/preferences'
     | '/queue'
     | '/search'
     | '/tags'
@@ -195,15 +263,20 @@ export interface FileRouteTypes {
     | '/projects'
     | '/recipes'
     | '/settings'
+    | '/users'
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
+    | '/users/$userId/edit'
     | '/projects/$projectId'
     | '/recipes/$recipeId'
+    | '/users/$userId'
     | '/recipes/$recipeId/versions'
   id:
     | '__root__'
     | '/'
+    | '/login'
+    | '/preferences'
     | '/queue'
     | '/search'
     | '/tags'
@@ -213,16 +286,21 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/recipes/'
     | '/settings/'
+    | '/users/'
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
+    | '/users/$userId/edit'
     | '/projects/$projectId/'
     | '/recipes/$recipeId/'
+    | '/users/$userId/'
     | '/recipes/$recipeId/versions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  PreferencesRoute: typeof PreferencesRoute
   QueueRoute: typeof QueueRoute
   SearchRoute: typeof SearchRoute
   TagsRoute: typeof TagsRoute
@@ -232,12 +310,40 @@ export interface RootRouteChildren {
   ProjectsIndexRoute: typeof ProjectsIndexRoute
   RecipesIndexRoute: typeof RecipesIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
+  UsersIndexRoute: typeof UsersIndexRoute
   ProjectsProjectIdEditRoute: typeof ProjectsProjectIdEditRoute
   RecipesRecipeIdEditRoute: typeof RecipesRecipeIdEditRoute
   SettingsPromptsPromptKeyRoute: typeof SettingsPromptsPromptKeyRoute
+  UsersUserIdEditRoute: typeof UsersUserIdEditRoute
   ProjectsProjectIdIndexRoute: typeof ProjectsProjectIdIndexRoute
   RecipesRecipeIdIndexRoute: typeof RecipesRecipeIdIndexRoute
+  UsersUserIdIndexRoute: typeof UsersUserIdIndexRoute
   RecipesRecipeIdVersionsIndexRoute: typeof RecipesRecipeIdVersionsIndexRoute
+}
+export interface FileServerRoutesByFullPath {
+  '/api/logout': typeof ApiLogoutServerRoute
+  '/api/auth/$': typeof ApiAuthSplatServerRoute
+}
+export interface FileServerRoutesByTo {
+  '/api/logout': typeof ApiLogoutServerRoute
+  '/api/auth/$': typeof ApiAuthSplatServerRoute
+}
+export interface FileServerRoutesById {
+  __root__: typeof rootServerRouteImport
+  '/api/logout': typeof ApiLogoutServerRoute
+  '/api/auth/$': typeof ApiAuthSplatServerRoute
+}
+export interface FileServerRouteTypes {
+  fileServerRoutesByFullPath: FileServerRoutesByFullPath
+  fullPaths: '/api/logout' | '/api/auth/$'
+  fileServerRoutesByTo: FileServerRoutesByTo
+  to: '/api/logout' | '/api/auth/$'
+  id: '__root__' | '/api/logout' | '/api/auth/$'
+  fileServerRoutesById: FileServerRoutesById
+}
+export interface RootServerRouteChildren {
+  ApiLogoutServerRoute: typeof ApiLogoutServerRoute
+  ApiAuthSplatServerRoute: typeof ApiAuthSplatServerRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -263,11 +369,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QueueRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/preferences': {
+      id: '/preferences'
+      path: '/preferences'
+      fullPath: '/preferences'
+      preLoaderRoute: typeof PreferencesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users/': {
+      id: '/users/'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof UsersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/': {
@@ -312,6 +439,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpHelpFileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/users/$userId/': {
+      id: '/users/$userId/'
+      path: '/users/$userId'
+      fullPath: '/users/$userId'
+      preLoaderRoute: typeof UsersUserIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recipes/$recipeId/': {
       id: '/recipes/$recipeId/'
       path: '/recipes/$recipeId'
@@ -324,6 +458,13 @@ declare module '@tanstack/react-router' {
       path: '/projects/$projectId'
       fullPath: '/projects/$projectId'
       preLoaderRoute: typeof ProjectsProjectIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/users/$userId/edit': {
+      id: '/users/$userId/edit'
+      path: '/users/$userId/edit'
+      fullPath: '/users/$userId/edit'
+      preLoaderRoute: typeof UsersUserIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings/prompts/$promptKey': {
@@ -356,9 +497,29 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+declare module '@tanstack/react-start/server' {
+  interface ServerFileRoutesByPath {
+    '/api/logout': {
+      id: '/api/logout'
+      path: '/api/logout'
+      fullPath: '/api/logout'
+      preLoaderRoute: typeof ApiLogoutServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+  }
+}
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  PreferencesRoute: PreferencesRoute,
   QueueRoute: QueueRoute,
   SearchRoute: SearchRoute,
   TagsRoute: TagsRoute,
@@ -368,13 +529,23 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectsIndexRoute: ProjectsIndexRoute,
   RecipesIndexRoute: RecipesIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
+  UsersIndexRoute: UsersIndexRoute,
   ProjectsProjectIdEditRoute: ProjectsProjectIdEditRoute,
   RecipesRecipeIdEditRoute: RecipesRecipeIdEditRoute,
   SettingsPromptsPromptKeyRoute: SettingsPromptsPromptKeyRoute,
+  UsersUserIdEditRoute: UsersUserIdEditRoute,
   ProjectsProjectIdIndexRoute: ProjectsProjectIdIndexRoute,
   RecipesRecipeIdIndexRoute: RecipesRecipeIdIndexRoute,
+  UsersUserIdIndexRoute: UsersUserIdIndexRoute,
   RecipesRecipeIdVersionsIndexRoute: RecipesRecipeIdVersionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+const rootServerRouteChildren: RootServerRouteChildren = {
+  ApiLogoutServerRoute: ApiLogoutServerRoute,
+  ApiAuthSplatServerRoute: ApiAuthSplatServerRoute,
+}
+export const serverRouteTree = rootServerRouteImport
+  ._addFileChildren(rootServerRouteChildren)
+  ._addFileTypes<FileServerRouteTypes>()

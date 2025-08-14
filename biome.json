@@ -7,7 +7,20 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**/*.tsx", "**/*.ts", "**/*.js", "**/*.jsx", "**/*.json", "!**/routeTree.gen.ts", "!**/generated/**"]
+    "includes": [
+      "**/*.tsx",
+      "**/*.ts",
+      "**/*.js",
+      "**/*.jsx",
+      "**/*.json",
+      "**/*.mjs",
+      "!**/routeTree.gen.ts",
+      "!**/generated/**",
+      "!**/node_modules/**",
+      "!.output/**",
+      "!.tanstack/**",
+      "!.nitro/**"
+    ]
   },
   "formatter": {
     "enabled": true,

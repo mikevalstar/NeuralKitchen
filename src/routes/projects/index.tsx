@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { FolderOpen, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -8,23 +8,39 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Projects } from "~/lib/data/projects";
 import { projectSchema } from "~/lib/dataValidators";
 import { formatDateOnly } from "~/lib/dateUtils";
 
-const getProjects = createServerFn({ method: "GET" }).handler(async () => {
-  return Projects.list();
-});
+const getProjects = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return Projects.list();
+  });
 
 const createProject = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => projectSchema.parse(data))
   .handler(async (ctx) => {
     return Projects.create(ctx.data);
   });
 
 export const Route = createFileRoute("/projects/")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: ProjectsPage,
-  loader: () => {
+  loader: async ({ context }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: "/projects" },
+      });
+    }
+
     return getProjects();
   },
 });
@@ -77,7 +93,7 @@ function ProjectsPage() {
       (project) =>
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.shortId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase())),
+        project.description?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [projects, searchQuery]);
 

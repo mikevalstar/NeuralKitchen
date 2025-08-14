@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { BookOpen, Plus, Search } from "lucide-react";
@@ -8,11 +8,14 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Recipes } from "~/lib/data/recipes";
 import { paginationSearchSchema } from "~/lib/dataValidators";
 import { formatDateOnly } from "~/lib/dateUtils";
 
 const getRecipes = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => paginationSearchSchema.parse(data))
   .handler(async ({ data }) => {
     return Recipes.list({
@@ -22,10 +25,21 @@ const getRecipes = createServerFn({ method: "GET" })
   });
 
 export const Route = createFileRoute("/recipes/")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: RecipesPage,
   validateSearch: zodValidator(paginationSearchSchema),
   loaderDeps: ({ search: { page } }) => ({ page }),
-  loader: async ({ deps }) => {
+  loader: async ({ context, deps }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: "/recipes" },
+      });
+    }
+
     return getRecipes({ data: deps });
   },
 });

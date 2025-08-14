@@ -1,9 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { AlertTriangle, CheckCircle, Edit, MessageSquare, Settings } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Prompts } from "~/lib/data/prompts";
 import { DEFAULT_PROMPTS, PROMPT_METADATA, type PromptKey } from "~/lib/prompts";
 
@@ -19,39 +21,51 @@ interface PromptStatus {
   isUsingDefault: boolean;
 }
 
-const getSettingsValidation = createServerFn({ method: "GET" }).handler(async (): Promise<SettingsValidation> => {
-  return {
-    openaiApiKey: !!process.env.OPENAI_API_KEY,
-  };
-});
+const getSettingsValidation = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async (): Promise<SettingsValidation> => {
+    return {
+      openaiApiKey: !!process.env.OPENAI_API_KEY,
+    };
+  });
 
-const getPromptStatuses = createServerFn({ method: "GET" }).handler(async (): Promise<PromptStatus[]> => {
-  const promptKeys = Object.keys(DEFAULT_PROMPTS) as PromptKey[];
-  const statuses: PromptStatus[] = [];
+const getPromptStatuses = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async (): Promise<PromptStatus[]> => {
+    const promptKeys = Object.keys(DEFAULT_PROMPTS) as PromptKey[];
+    const statuses: PromptStatus[] = [];
 
-  for (const key of promptKeys) {
-    const record = await Prompts.getRecordByKey(key);
-    const metadata = PROMPT_METADATA[key];
+    for (const key of promptKeys) {
+      const record = await Prompts.getRecordByKey(key);
+      const metadata = PROMPT_METADATA[key];
 
-    statuses.push({
-      key,
-      title: metadata.title,
-      description: metadata.description,
-      hasCustomValue: !!record,
-      isUsingDefault: !record || !record.content.trim(),
-    });
-  }
+      statuses.push({
+        key,
+        title: metadata.title,
+        description: metadata.description,
+        hasCustomValue: !!record,
+        isUsingDefault: !record || !record.content.trim(),
+      });
+    }
 
-  return statuses;
-});
+    return statuses;
+  });
 
 export const Route = createFileRoute("/settings/")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: SettingsPage,
-  loader: async () => {
-    const [validation, promptStatuses] = await Promise.all([
-      getSettingsValidation(),
-      getPromptStatuses(),
-    ]);
+  loader: async ({ context }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: "/settings" },
+      });
+    }
+
+    const [validation, promptStatuses] = await Promise.all([getSettingsValidation(), getPromptStatuses()]);
     return { validation, promptStatuses };
   },
 });
@@ -136,11 +150,8 @@ function SettingsPage() {
                     <div className="flex items-center space-x-2 mt-2">
                       <span
                         className={`text-xs px-2 py-1 rounded-full ${
-                          prompt.isUsingDefault
-                            ? "bg-gray-100 text-gray-600"
-                            : "bg-blue-100 text-blue-600"
-                        }`}
-                      >
+                          prompt.isUsingDefault ? "bg-gray-100 text-gray-600" : "bg-blue-100 text-blue-600"
+                        }`}>
                         {prompt.isUsingDefault ? "Using Default" : "Custom"}
                       </span>
                     </div>

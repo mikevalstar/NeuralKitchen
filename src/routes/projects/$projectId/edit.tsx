@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Save } from "lucide-react";
 import { useState } from "react";
@@ -16,10 +16,13 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Projects } from "~/lib/data/projects";
 import { projectIdSchema, projectSchema } from "~/lib/dataValidators";
 
 const getProject = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => projectIdSchema.parse(data))
   .handler(async (ctx) => {
     const project = await Projects.read(ctx.data.projectId);
@@ -30,6 +33,7 @@ const getProject = createServerFn({ method: "GET" })
   });
 
 const updateProject = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => {
     const parsed = data as { projectId: string; projectData: unknown };
     return {
@@ -42,8 +46,19 @@ const updateProject = createServerFn({ method: "POST" })
   });
 
 export const Route = createFileRoute("/projects/$projectId/edit")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: ProjectEdit,
-  loader: ({ params }) => {
+  loader: async ({ context, params }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: `/projects/${params.projectId}/edit` },
+      });
+    }
+
     return getProject({ data: { projectId: params.projectId } });
   },
 });

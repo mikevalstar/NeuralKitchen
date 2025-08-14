@@ -1,7 +1,7 @@
 import "dotenv/config";
-import { readdirSync, readFileSync } from "fs";
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import matter from "gray-matter";
-import { join } from "path";
 import { PrismaClient } from "../src/generated/prisma/client.js";
 import { Projects } from "../src/lib/data/projects.js";
 import { Recipes } from "../src/lib/data/recipes.js";
@@ -97,6 +97,7 @@ async function processMarkdownFiles() {
           processedTags.set(tagName, tag);
           console.log(`    ✅ Tag: ${tagName}`);
         } catch (error) {
+          console.error(error);
           console.log(`    ⚠️  Failed to create tag: ${tagName}`);
           continue;
         }
@@ -116,6 +117,7 @@ async function processMarkdownFiles() {
           processedProjects.set(projectKey, project);
           console.log(`    ✅ Project: ${projectTitle}`);
         } catch (error) {
+          console.error(error);
           console.log(`    ⚠️  Failed to create project: ${projectTitle}`);
           continue;
         }
@@ -138,6 +140,7 @@ async function processMarkdownFiles() {
       createdRecipes.push(recipe);
       console.log(`    ✅ Created recipe: ${title}`);
     } catch (error) {
+      console.error(error);
       console.log(`    ⚠️  Recipe "${title}" might already exist or failed to create`);
       console.log(`    Error: ${error}`);
     }

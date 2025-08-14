@@ -1,11 +1,9 @@
 import { Link } from "@tanstack/react-router";
 import { useAtom } from "jotai";
-import { Activity, BookOpen, FolderOpen, HelpCircle, Search, Settings, Tags } from "lucide-react";
+import { Activity, BookOpen, FolderOpen, HelpCircle, Search, Settings, Tags, Users2 } from "lucide-react";
 import { isWideLayoutAtom } from "~/lib/atoms/ui";
-import { BackgroundToggle } from "./BackgroundToggle";
-import { ThemeToggle } from "./ThemeToggle";
+import { UserAvatar } from "./UserAvatar";
 import { Button } from "./ui/button";
-import { WidthToggle } from "./WidthToggle";
 
 export function Navigation() {
   const [isWide] = useAtom(isWideLayoutAtom);
@@ -15,6 +13,7 @@ export function Navigation() {
     { href: "/search", label: "Search", icon: Search },
     { href: "/projects", label: "Projects", icon: FolderOpen },
     { href: "/tags", label: "Tags", icon: Tags },
+    { href: "/users", label: "Users", icon: Users2 },
     { href: "/queue", label: "Queue", icon: Activity },
     { href: "/settings", label: "Settings", icon: Settings },
     { href: "/help", label: "Help", icon: HelpCircle },
@@ -47,11 +46,9 @@ export function Navigation() {
             ))}
           </div>
 
-          {/* Right side - Width Toggle, Background Toggle, Theme Toggle and Mobile Menu */}
+          {/* Right side - User Avatar and Mobile Menu */}
           <div className="flex items-center space-x-2">
-            <WidthToggle />
-            <BackgroundToggle />
-            <ThemeToggle />
+            <UserAvatar />
 
             {/* Mobile Menu Button */}
             <div className="md:hidden">

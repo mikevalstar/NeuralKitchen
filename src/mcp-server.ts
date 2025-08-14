@@ -11,9 +11,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import express, { type Request, type Response } from "express";
 import { z } from "zod";
+import { Prompts } from "./lib/data/prompts.js";
 import { Recipes } from "./lib/data/recipes.js";
 import { SearchService } from "./lib/services/search.js";
-import { Prompts } from "./lib/data/prompts.js";
 
 class StandaloneMcpServer {
   private server: McpServer | null = null;

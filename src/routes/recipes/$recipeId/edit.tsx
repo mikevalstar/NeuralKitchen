@@ -1,5 +1,5 @@
 import { useForm } from "@tanstack/react-form";
-import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Save } from "lucide-react";
 import { useCallback, useState } from "react";
@@ -18,6 +18,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+import { getUserDetails } from "~/lib/auth-server-user";
 import { Projects } from "~/lib/data/projects";
 import { Recipes } from "~/lib/data/recipes";
 import { Tags } from "~/lib/data/tags";
@@ -25,6 +27,7 @@ import { recipeIdSchema, recipeSchema, recipeVersionSchema } from "~/lib/dataVal
 
 // Server functions
 const getRecipe = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => recipeIdSchema.parse(data))
   .handler(async (ctx) => {
     const recipe = await Recipes.read(ctx.data.recipeId);
@@ -34,15 +37,20 @@ const getRecipe = createServerFn({ method: "GET" })
     return recipe;
   });
 
-const getTags = createServerFn({ method: "GET" }).handler(async () => {
-  return Tags.list();
-});
+const getTags = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return Tags.list();
+  });
 
-const getProjects = createServerFn({ method: "GET" }).handler(async () => {
-  return Projects.list();
-});
+const getProjects = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async () => {
+    return Projects.list();
+  });
 
 const updateRecipe = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => {
     const parsed = data as { recipeId: string; recipe: unknown; version: unknown };
     return {
@@ -66,8 +74,19 @@ const updateRecipe = createServerFn({ method: "POST" })
   });
 
 export const Route = createFileRoute("/recipes/$recipeId/edit")({
+  beforeLoad: async () => {
+    const user = await getUserDetails();
+    return { user };
+  },
   component: RecipeEdit,
-  loader: async ({ params }) => {
+  loader: async ({ context, params }) => {
+    if (!context?.user?.id) {
+      throw redirect({
+        to: "/login",
+        search: { redirect: `/recipes/${params.recipeId}/edit` },
+      });
+    }
+
     const [recipe, tags, projects] = await Promise.all([
       getRecipe({ data: { recipeId: params.recipeId } }),
       getTags(),

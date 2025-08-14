@@ -99,3 +99,69 @@ export const paginationSearchSchema = z.object({
 });
 
 export type PaginationSearchInput = z.infer<typeof paginationSearchSchema>;
+
+// Login validation schema
+export const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
+  password: z.string().min(1, "Password is required").min(8, "Password must be at least 8 characters"),
+});
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+// User name update validation schema
+export const userNameUpdateSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
+});
+
+export type UserNameUpdateInput = z.infer<typeof userNameUpdateSchema>;
+
+// Password change validation schema
+export const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Current password is required"),
+    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Password confirmation is required"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+export type PasswordChangeInput = z.infer<typeof passwordChangeSchema>;
+
+// User creation validation schema
+export const userCreateSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters").optional(),
+});
+
+export type UserCreateInput = z.infer<typeof userCreateSchema>;
+
+// User update validation schema
+export const userUpdateSchema = z.object({
+  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
+  role: z.enum(["", "admin"]).optional(),
+});
+
+export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
+
+// User ID validation schema
+export const userIdSchema = z.object({
+  userId: z.string().min(1, "User ID is required"),
+});
+
+export type UserIdInput = z.infer<typeof userIdSchema>;
+
+// Admin password set validation schema
+export const adminPasswordSetSchema = z
+  .object({
+    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Password confirmation is required"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+export type AdminPasswordSetInput = z.infer<typeof adminPasswordSetSchema>;
