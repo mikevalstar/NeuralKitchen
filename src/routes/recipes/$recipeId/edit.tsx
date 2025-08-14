@@ -66,7 +66,7 @@ const updateRecipe = createServerFn({ method: "POST" })
     }
 
     // Save new version (this automatically creates a new version and sets it as current)
-    const newVersion = await Recipes.save(ctx.data.recipeId, ctx.data.version);
+    const newVersion = await Recipes.save(ctx.data.recipeId, ctx.data.version, ctx.context.user?.id);
 
     // Return the updated recipe
     const updatedRecipe = await Recipes.read(ctx.data.recipeId);

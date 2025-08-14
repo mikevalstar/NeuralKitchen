@@ -73,11 +73,15 @@ const savePrompt = createServerFn({ method: "POST" })
     }
 
     const metadata = PROMPT_METADATA[key];
-    await Prompts.upsert(key, {
-      name: metadata.title,
-      description: metadata.description,
-      content: ctx.data.data.content,
-    });
+    await Prompts.upsert(
+      key,
+      {
+        name: metadata.title,
+        description: metadata.description,
+        content: ctx.data.data.content,
+      },
+      ctx.context.user?.id,
+    );
 
     return { success: true };
   });

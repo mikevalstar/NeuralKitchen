@@ -42,7 +42,7 @@ const updateProject = createServerFn({ method: "POST" })
     };
   })
   .handler(async (ctx) => {
-    return Projects.update(ctx.data.projectId, ctx.data.projectData);
+    return Projects.update(ctx.data.projectId, ctx.data.projectData, ctx.context.user?.id);
   });
 
 export const Route = createFileRoute("/projects/$projectId/edit")({
