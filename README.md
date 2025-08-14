@@ -12,6 +12,18 @@
 
 Neural Kitchen helps developers create and organize structured guidance for AI agents working on software projects. Think of it as a knowledge base that captures institutional knowledge, coding patterns, and step-by-step workflows that AI agents can follow.
 
+## Screenshots
+
+<div align="center">
+  <a href="docs/images/recipe.png">
+    <img src="docs/images/recipe.png" alt="Recipe Management Interface" width="45%" />
+  </a>
+  &nbsp;&nbsp;
+  <a href="docs/images/homepage.png">
+    <img src="docs/images/homepage.png" alt="Neural Kitchen Homepage" width="45%" />
+  </a>
+</div>
+
 ## The Problem
 
 AI agents often struggle with:
@@ -90,6 +102,12 @@ Neural Kitchen provides:
    docker-compose exec app pnpm db:seed  # Optional: add sample data
    ```
 
+5. **Create an admin user**
+   ```bash
+   # Create your first admin user to access the application
+   docker-compose exec app pnpm user:add admin@example.com mypassword123 "Admin User"
+   ```
+
 The application will be available at:
 - Web UI: http://localhost:3000
 
@@ -113,7 +131,13 @@ The application will be available at:
    pnpm db:seed
    ```
 
-4. **Start development**
+4. **Create an admin user**
+   ```bash
+   # Create your first admin user to access the application
+   pnpm user:add admin@example.com mypassword123 "Admin User"
+   ```
+
+5. **Start development**
    ```bash
    pnpm dev
    ```
@@ -124,6 +148,11 @@ The application will be available at:
 - `pnpm build` - Build for production
 - `pnpm check` - Run linting and formatting
 - `pnpm db:studio` - Open database GUI
+
+### User Management
+- `pnpm user:add <email> <password> [name]` - Create a new admin user
+- `pnpm user:list` - List all users
+- `pnpm user:delete <email>` - Delete a user
 
 See [CLAUDE.md](./CLAUDE.md) for detailed AI development guidance.
 
