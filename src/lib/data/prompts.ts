@@ -71,7 +71,7 @@ export namespace Prompts {
   /**
    * Create a new prompt
    */
-  export async function create(data: PromptInput) {
+  export async function create(data: PromptInput, userId?: string) {
     // Check if key already exists
     const existing = await prisma.prompt.findFirst({
       where: {
@@ -90,6 +90,8 @@ export namespace Prompts {
         name: data.name,
         description: data.description,
         content: data.content,
+        createdBy: userId,
+        modifiedBy: userId,
       },
     });
   }
@@ -97,7 +99,7 @@ export namespace Prompts {
   /**
    * Update an existing prompt
    */
-  export async function update(id: string, data: Partial<PromptInput>) {
+  export async function update(id: string, data: Partial<PromptInput>, userId?: string) {
     const existing = await read(id);
     if (!existing) {
       throw new Error("Prompt not found");
@@ -122,6 +124,7 @@ export namespace Prompts {
       where: { id },
       data: {
         ...data,
+        modifiedBy: userId,
         updatedAt: new Date(),
       },
     });
@@ -130,7 +133,7 @@ export namespace Prompts {
   /**
    * Soft delete a prompt
    */
-  export async function deletePrompt(id: string) {
+  export async function deletePrompt(id: string, userId?: string) {
     const existing = await read(id);
     if (!existing) {
       throw new Error("Prompt not found");
@@ -140,6 +143,7 @@ export namespace Prompts {
       where: { id },
       data: {
         deletedAt: new Date(),
+        modifiedBy: userId,
       },
     });
   }
@@ -147,11 +151,12 @@ export namespace Prompts {
   /**
    * Restore a soft-deleted prompt
    */
-  export async function restore(id: string) {
+  export async function restore(id: string, userId?: string) {
     return prisma.prompt.update({
       where: { id },
       data: {
         deletedAt: null,
+        modifiedBy: userId,
         updatedAt: new Date(),
       },
     });
@@ -160,13 +165,13 @@ export namespace Prompts {
   /**
    * Upsert a prompt - create if doesn't exist, update if it does
    */
-  export async function upsert(key: string, data: Omit<PromptInput, "key">) {
+  export async function upsert(key: string, data: Omit<PromptInput, "key">, userId?: string) {
     const existing = await getRecordByKey(key);
 
     if (existing) {
-      return update(existing.id, data);
+      return update(existing.id, data, userId);
     }
 
-    return create({ ...data, key });
+    return create({ ...data, key }, userId);
   }
 }

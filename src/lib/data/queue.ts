@@ -47,7 +47,7 @@ export namespace Queue {
   /**
    * Add a new item to the queue
    */
-  export async function add(data: QueueItemInput) {
+  export async function add(data: QueueItemInput, userId?: string) {
     // Validate the input
     const validatedData = queueItemSchema.parse(data);
 
@@ -73,6 +73,8 @@ export namespace Queue {
         shortid: validatedData.shortid,
         versionId: validatedData.versionId,
         status: validatedData.status || "pending",
+        createdBy: userId,
+        modifiedBy: userId,
       },
     });
   }
@@ -80,12 +82,13 @@ export namespace Queue {
   /**
    * Mark an item as completed
    */
-  export async function markCompleted(id: string) {
+  export async function markCompleted(id: string, userId?: string) {
     return prisma.recipeQueue.update({
       where: { id },
       data: {
         status: "completed",
         completedAt: new Date(),
+        modifiedBy: userId,
       },
     });
   }
@@ -93,13 +96,14 @@ export namespace Queue {
   /**
    * Mark an item as failed
    */
-  export async function markFailed(id: string, error?: string) {
+  export async function markFailed(id: string, error?: string, userId?: string) {
     return prisma.recipeQueue.update({
       where: { id },
       data: {
         status: "failed",
         completedAt: new Date(),
         error: error || null,
+        modifiedBy: userId,
       },
     });
   }
@@ -107,11 +111,12 @@ export namespace Queue {
   /**
    * Soft delete a queue item
    */
-  export async function remove(id: string) {
+  export async function remove(id: string, userId?: string) {
     return prisma.recipeQueue.update({
       where: { id },
       data: {
         deletedAt: new Date(),
+        modifiedBy: userId,
       },
     });
   }
@@ -261,13 +266,14 @@ export namespace Queue {
   /**
    * Retry a failed queue item
    */
-  export async function retry(id: string) {
+  export async function retry(id: string, userId?: string) {
     return prisma.recipeQueue.update({
       where: { id },
       data: {
         status: "pending",
         error: null,
         completedAt: null,
+        modifiedBy: userId,
       },
     });
   }

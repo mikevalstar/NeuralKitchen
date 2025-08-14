@@ -31,7 +31,7 @@ export namespace Tags {
   /**
    * Create a new tag
    */
-  export async function create(data: TagInput) {
+  export async function create(data: TagInput, userId?: string) {
     // Validate the input
     const validatedData = tagSchema.parse(data);
 
@@ -53,6 +53,8 @@ export namespace Tags {
     return prisma.tag.create({
       data: {
         name: validatedData.name.trim(),
+        createdBy: userId,
+        modifiedBy: userId,
       },
     });
   }
@@ -60,7 +62,7 @@ export namespace Tags {
   /**
    * Update an existing tag
    */
-  export async function update(id: string, data: TagInput) {
+  export async function update(id: string, data: TagInput, userId?: string) {
     // Validate the input
     const validatedData = tagSchema.parse(data);
 
@@ -92,6 +94,7 @@ export namespace Tags {
       where: { id },
       data: {
         name: validatedData.name.trim(),
+        modifiedBy: userId,
         updatedAt: new Date(),
       },
     });
@@ -100,7 +103,7 @@ export namespace Tags {
   /**
    * Soft delete a tag by setting deletedAt timestamp
    */
-  export async function deleteTag(id: string) {
+  export async function deleteTag(id: string, userId?: string) {
     // Check if the tag exists and is not already deleted
     const existingTag = await read(id);
     if (!existingTag) {
@@ -111,6 +114,7 @@ export namespace Tags {
       where: { id },
       data: {
         deletedAt: new Date(),
+        modifiedBy: userId,
         updatedAt: new Date(),
       },
     });
@@ -128,11 +132,12 @@ export namespace Tags {
   /**
    * Restore a soft-deleted tag
    */
-  export async function restore(id: string) {
+  export async function restore(id: string, userId?: string) {
     return prisma.tag.update({
       where: { id },
       data: {
         deletedAt: null,
+        modifiedBy: userId,
         updatedAt: new Date(),
       },
     });

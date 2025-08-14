@@ -43,7 +43,7 @@ export namespace Projects {
   /**
    * Create a new project
    */
-  export async function create(data: ProjectInput) {
+  export async function create(data: ProjectInput, userId?: string) {
     // Validate the input
     const validatedData = projectSchema.parse(data);
 
@@ -82,6 +82,8 @@ export namespace Projects {
         title: validatedData.title.trim(),
         shortId: validatedData.shortId.trim(),
         description: validatedData.description?.trim() || null,
+        createdBy: userId,
+        modifiedBy: userId,
       },
     });
   }
@@ -89,7 +91,7 @@ export namespace Projects {
   /**
    * Update an existing project
    */
-  export async function update(id: string, data: ProjectInput) {
+  export async function update(id: string, data: ProjectInput, userId?: string) {
     // Validate the input
     const validatedData = projectSchema.parse(data);
 
@@ -141,6 +143,7 @@ export namespace Projects {
         title: validatedData.title.trim(),
         shortId: validatedData.shortId.trim(),
         description: validatedData.description?.trim() || null,
+        modifiedBy: userId,
         updatedAt: new Date(),
       },
     });
@@ -149,7 +152,7 @@ export namespace Projects {
   /**
    * Soft delete a project by setting deletedAt timestamp
    */
-  export async function deleteProject(id: string) {
+  export async function deleteProject(id: string, userId?: string) {
     // Check if the project exists and is not already deleted
     const existingProject = await read(id);
     if (!existingProject) {
@@ -160,6 +163,7 @@ export namespace Projects {
       where: { id },
       data: {
         deletedAt: new Date(),
+        modifiedBy: userId,
         updatedAt: new Date(),
       },
     });
@@ -177,11 +181,12 @@ export namespace Projects {
   /**
    * Restore a soft-deleted project
    */
-  export async function restore(id: string) {
+  export async function restore(id: string, userId?: string) {
     return prisma.project.update({
       where: { id },
       data: {
         deletedAt: null,
+        modifiedBy: userId,
         updatedAt: new Date(),
       },
     });

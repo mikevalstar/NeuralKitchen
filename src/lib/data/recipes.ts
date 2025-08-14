@@ -149,7 +149,7 @@ export namespace Recipes {
   /**
    * Create a new recipe with initial version
    */
-  export async function create(recipeData: RecipeInput, versionData: RecipeVersionInput) {
+  export async function create(recipeData: RecipeInput, versionData: RecipeVersionInput, userId?: string) {
     // Validate inputs
     const validatedRecipe = recipeSchema.parse(recipeData);
     const validatedVersion = recipeVersionSchema.parse(versionData);
@@ -183,6 +183,8 @@ export namespace Recipes {
         data: {
           title: validatedRecipe.title.trim(),
           shortId: validatedRecipe.shortId.trim(),
+          createdBy: userId,
+          modifiedBy: userId,
         },
       });
 
@@ -198,6 +200,8 @@ export namespace Recipes {
           contentHash,
           comment: validatedVersion.comment,
           recipeId: recipe.id,
+          createdBy: userId,
+          modifiedBy: userId,
           tags: {
             connect: validatedVersion.tagIds.map((id) => ({ id })),
           },
@@ -214,17 +218,23 @@ export namespace Recipes {
       // Update recipe to reference this version as current
       await tx.recipe.update({
         where: { id: recipe.id },
-        data: { currentVersionId: version.id },
+        data: {
+          currentVersionId: version.id,
+          modifiedBy: userId,
+        },
       });
 
       // Add to queue for processing (summarization and embedding)
       try {
-        await Queue.add({
-          title: version.title,
-          shortid: version.shortId,
-          versionId: version.id,
-          status: "pending",
-        });
+        await Queue.add(
+          {
+            title: version.title,
+            shortid: version.shortId,
+            versionId: version.id,
+            status: "pending",
+          },
+          userId,
+        );
       } catch (error) {
         // Log error but don't fail the recipe creation
         console.error("Failed to add recipe version to queue:", error);
@@ -242,7 +252,7 @@ export namespace Recipes {
    * Automatically creates a new version and sets it as current
    * Compares content to avoid duplicate versions
    */
-  export async function save(recipeId: string, versionData: RecipeVersionInput) {
+  export async function save(recipeId: string, versionData: RecipeVersionInput, userId?: string) {
     // Validate input
     const validatedVersion = recipeVersionSchema.parse(versionData);
 
@@ -296,7 +306,10 @@ export namespace Recipes {
       if (recipe.currentVersionId) {
         await tx.recipeVersion.update({
           where: { id: recipe.currentVersionId },
-          data: { isCurrent: false },
+          data: {
+            isCurrent: false,
+            modifiedBy: userId,
+          },
         });
       }
 
@@ -312,6 +325,8 @@ export namespace Recipes {
           contentHash: newContentHash,
           comment: validatedVersion.comment,
           recipeId: recipe.id,
+          createdBy: userId,
+          modifiedBy: userId,
           tags: {
             connect: validatedVersion.tagIds.map((id) => ({ id })),
           },
@@ -331,17 +346,21 @@ export namespace Recipes {
         data: {
           title: validatedVersion.title.trim(),
           currentVersionId: newVersion.id,
+          modifiedBy: userId,
         },
       });
 
       // Add to queue for processing (summarization and embedding)
       try {
-        await Queue.add({
-          title: newVersion.title,
-          shortid: newVersion.shortId,
-          versionId: newVersion.id,
-          status: "pending",
-        });
+        await Queue.add(
+          {
+            title: newVersion.title,
+            shortid: newVersion.shortId,
+            versionId: newVersion.id,
+            status: "pending",
+          },
+          userId,
+        );
       } catch (error) {
         // Log error but don't fail the save operation
         console.error("Failed to add recipe version to queue:", error);
@@ -415,7 +434,7 @@ export namespace Recipes {
   /**
    * Revert to a previous version (creates a new version with old content)
    */
-  export async function revertToVersion(recipeId: string, targetVersionNumber: number) {
+  export async function revertToVersion(recipeId: string, targetVersionNumber: number, userId?: string) {
     // Get the target version
     const targetVersion = await getVersionByNumber(recipeId, targetVersionNumber);
     if (!targetVersion) {
@@ -427,19 +446,23 @@ export namespace Recipes {
 
     // Save it as a new version (this will create a new version with the old content)
     // Note: The save() function will automatically add the new version to the queue
-    return save(recipeId, {
-      title: targetVersion.title,
-      content: targetVersion.content,
-      tagIds: targetVersion.tags.map((tag) => tag.id),
-      projectIds: targetVersion.projects.map((project) => project.id),
-      comment: restoreComment,
-    });
+    return save(
+      recipeId,
+      {
+        title: targetVersion.title,
+        content: targetVersion.content,
+        tagIds: targetVersion.tags.map((tag) => tag.id),
+        projectIds: targetVersion.projects.map((project) => project.id),
+        comment: restoreComment,
+      },
+      userId,
+    );
   }
 
   /**
    * Update recipe metadata (title, shortId) without creating new version
    */
-  export async function updateMetadata(recipeId: string, data: RecipeInput) {
+  export async function updateMetadata(recipeId: string, data: RecipeInput, userId?: string) {
     const validatedData = recipeSchema.parse(data);
 
     const existingRecipe = await prisma.recipe.findFirst({
@@ -471,6 +494,7 @@ export namespace Recipes {
       data: {
         title: validatedData.title.trim(),
         shortId: validatedData.shortId.trim(),
+        modifiedBy: userId,
       },
     });
   }
@@ -478,7 +502,7 @@ export namespace Recipes {
   /**
    * Soft delete a recipe and all its versions
    */
-  export async function deleteRecipe(recipeId: string) {
+  export async function deleteRecipe(recipeId: string, userId?: string) {
     const existingRecipe = await prisma.recipe.findFirst({
       where: { id: recipeId, deletedAt: null },
     });
@@ -491,7 +515,10 @@ export namespace Recipes {
       // Soft delete all versions
       await tx.recipeVersion.updateMany({
         where: { recipeId },
-        data: { deletedAt: new Date() },
+        data: {
+          deletedAt: new Date(),
+          modifiedBy: userId,
+        },
       });
 
       // Soft delete the recipe
@@ -500,6 +527,7 @@ export namespace Recipes {
         data: {
           deletedAt: new Date(),
           currentVersionId: null,
+          modifiedBy: userId,
         },
       });
 
@@ -515,18 +543,24 @@ export namespace Recipes {
   /**
    * Restore a soft-deleted recipe
    */
-  export async function restore(recipeId: string) {
+  export async function restore(recipeId: string, userId?: string) {
     return prisma.$transaction(async (tx) => {
       // Restore the recipe
       await tx.recipe.update({
         where: { id: recipeId },
-        data: { deletedAt: null },
+        data: {
+          deletedAt: null,
+          modifiedBy: userId,
+        },
       });
 
       // Restore all versions
       await tx.recipeVersion.updateMany({
         where: { recipeId },
-        data: { deletedAt: null },
+        data: {
+          deletedAt: null,
+          modifiedBy: userId,
+        },
       });
 
       // Restore all vector documents for this recipe

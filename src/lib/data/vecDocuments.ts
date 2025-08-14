@@ -12,10 +12,11 @@ export namespace VecDocuments {
     versionId: string,
     recipeId: string,
     isCurrent = true,
+    userId?: string,
   ) {
     // First, mark any existing document for this recipe as not current
     if (isCurrent) {
-      await markRecipeVersionsAsNotCurrent(recipeId);
+      await markRecipeVersionsAsNotCurrent(recipeId, userId);
     }
 
     // Check if a document already exists for this version
@@ -35,13 +36,14 @@ export namespace VecDocuments {
           shortid = ${shortid},
           embedding = ${JSON.stringify(embedding)}::vector,
           updatedat = NOW(),
-          "isCurrent" = ${isCurrent}
+          "isCurrent" = ${isCurrent},
+          "modifiedBy" = ${userId}
         WHERE id = ${existingDoc.id}
       `;
     } else {
       // Create new document
       return prisma.$executeRaw`
-        INSERT INTO "VecDocument" (title, shortid, embedding, "versionId", "recipeId", "isCurrent", createdat, updatedat)
+        INSERT INTO "VecDocument" (title, shortid, embedding, "versionId", "recipeId", "isCurrent", createdat, updatedat, "createdBy", "modifiedBy")
         VALUES (
           ${title},
           ${shortid}, 
@@ -50,7 +52,9 @@ export namespace VecDocuments {
           ${recipeId},
           ${isCurrent},
           NOW(),
-          NOW()
+          NOW(),
+          ${userId},
+          ${userId}
         )
       `;
     }
@@ -59,10 +63,10 @@ export namespace VecDocuments {
   /**
    * Mark all vector documents for a recipe as not current
    */
-  export async function markRecipeVersionsAsNotCurrent(recipeId: string) {
+  export async function markRecipeVersionsAsNotCurrent(recipeId: string, userId?: string) {
     return prisma.$executeRaw`
       UPDATE "VecDocument" 
-      SET "isCurrent" = false, updatedat = NOW()
+      SET "isCurrent" = false, updatedat = NOW(), "modifiedBy" = ${userId}
       WHERE "recipeId" = ${recipeId} AND deletedat IS NULL
     `;
   }
@@ -70,10 +74,10 @@ export namespace VecDocuments {
   /**
    * Soft delete a vector document
    */
-  export async function softDelete(versionId: string) {
+  export async function softDelete(versionId: string, userId?: string) {
     return prisma.$executeRaw`
       UPDATE "VecDocument" 
-      SET deletedat = NOW(), updatedat = NOW()
+      SET deletedat = NOW(), updatedat = NOW(), "modifiedBy" = ${userId}
       WHERE "versionId" = ${versionId}
     `;
   }
