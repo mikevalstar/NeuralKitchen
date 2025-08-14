@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { Edit, History, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { LazyUserAvatar } from "~/components/LazyUserAvatar";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 import {
   Breadcrumb,
@@ -171,11 +172,17 @@ function RecipeDetail() {
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Created</div>
-                  <p className="text-sm">{formatDateTime(recipe.createdAt)}</p>
+                  <div className="flex items-center gap-2 text-sm">
+                    <LazyUserAvatar userId={recipe.createdBy} size="sm" showName />
+                    <span>{formatDateTime(recipe.createdAt)}</span>
+                  </div>
                 </div>
                 <div>
                   <div className="text-sm font-medium text-muted-foreground">Last Updated</div>
-                  <p className="text-sm">{formatDateTime(recipe.updatedAt)}</p>
+                  <div className="flex items-center gap-2 text-sm">
+                    <LazyUserAvatar userId={recipe.modifiedBy} size="sm" showName />
+                    <span>{formatDateTime(recipe.updatedAt)}</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>

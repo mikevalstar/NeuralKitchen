@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { zodValidator } from "@tanstack/zod-adapter";
 import { BookOpen, Plus, Search } from "lucide-react";
 import { useState } from "react";
+import { LazyUserAvatar } from "~/components/LazyUserAvatar";
 import { TanStackPagination } from "~/components/TanStackPagination";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -170,7 +171,10 @@ function RecipesPage() {
                       )}
                     </TableCell>
                     <TableCell className="p-4 text-sm text-muted-foreground @8xl:table-cell hidden">
-                      {formatDateOnly(recipe.updatedAt)}
+                      <div className="flex items-center gap-2">
+                        <LazyUserAvatar userId={recipe.modifiedBy} size="sm" />
+                        <span>{formatDateOnly(recipe.updatedAt)}</span>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}

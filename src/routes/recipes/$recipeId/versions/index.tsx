@@ -3,6 +3,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import { DiffView } from "~/components/DiffView";
+import { LazyUserAvatar } from "~/components/LazyUserAvatar";
 import { MarkdownRenderer } from "~/components/MarkdownRenderer";
 import {
   AlertDialog,
@@ -230,7 +231,10 @@ function VersionHistory() {
                                 {version.isCurrent && <span className="text-xs text-primary">(Current)</span>}
                               </span>
                             </div>
-                            <div className="text-xs text-muted-foreground">{formatDateOnly(version.createdAt)}</div>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <LazyUserAvatar userId={version.createdBy} size="sm" />
+                              <span>{formatDateOnly(version.createdAt)}</span>
+                            </div>
                           </div>
                         </button>
                       </TooltipTrigger>
@@ -239,7 +243,10 @@ function VersionHistory() {
                           <div className="font-medium">
                             {version.versionId}: {version.title}
                           </div>
-                          <div className="text-xs text-foreground/70">{formatDateTime(version.createdAt)}</div>
+                          <div className="flex items-center gap-2 text-xs text-foreground/70">
+                            <LazyUserAvatar userId={version.createdBy} size="sm" showName />
+                            <span>{formatDateTime(version.createdAt)}</span>
+                          </div>
                           {version.comment && <div className="text-xs italic">"{version.comment}"</div>}
                         </div>
                       </TooltipContent>
@@ -344,8 +351,12 @@ function SingleVersionView({
               {version.versionId}: {version.title}
             </CardTitle>
             <CardDescription>
-              Created {formatDateTime(version.createdAt)}
-              {version.isCurrent && " • Current Version"}
+              <div className="flex items-center gap-2">
+                <span>Created by</span>
+                <LazyUserAvatar userId={version.createdBy} size="sm" showName />
+                <span>{formatDateTime(version.createdAt)}</span>
+                {version.isCurrent && <span>• Current Version</span>}
+              </div>
             </CardDescription>
           </div>
           {!version.isCurrent && (

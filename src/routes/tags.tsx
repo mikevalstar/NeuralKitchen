@@ -23,7 +23,7 @@ const createTag = createServerFn({ method: "POST" })
   .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => tagSchema.parse(data))
   .handler(async (ctx) => {
-    return Tags.create(ctx.data);
+    return Tags.create(ctx.data, ctx.context.user.id);
   });
 
 export const Route = createFileRoute("/tags")({

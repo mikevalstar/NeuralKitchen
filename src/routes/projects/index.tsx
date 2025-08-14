@@ -4,6 +4,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { FolderOpen, Plus, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { LazyUserAvatar } from "~/components/LazyUserAvatar";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -24,7 +25,7 @@ const createProject = createServerFn({ method: "POST" })
   .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => projectSchema.parse(data))
   .handler(async (ctx) => {
-    return Projects.create(ctx.data);
+    return Projects.create(ctx.data, ctx.context.user.id);
   });
 
 export const Route = createFileRoute("/projects/")({
@@ -371,7 +372,12 @@ function ProjectsPage() {
                             <span className="italic">No description</span>
                           )}
                         </td>
-                        <td className="p-4 text-sm text-muted-foreground">{formatDateOnly(project.createdAt)}</td>
+                        <td className="p-4 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <LazyUserAvatar userId={project.createdBy} size="sm" />
+                            <span>{formatDateOnly(project.createdAt)}</span>
+                          </div>
+                        </td>
                       </tr>
                     ))}
                   </tbody>

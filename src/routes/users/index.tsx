@@ -4,6 +4,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { Edit, Eye, EyeOff, Plus, Search, Users as UsersIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { LazyUserAvatar } from "~/components/LazyUserAvatar";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -360,15 +361,20 @@ function UsersPage() {
                         key={user.id}
                         className={`border-b last:border-b-0 ${index % 2 === 0 ? "bg-background" : "bg-muted/20"}`}>
                         <td className="p-4 font-medium">
-                          <Link
-                            to="/users/$userId"
-                            params={{ userId: user.id }}
-                            className="hover:text-blue-600 transition-colors">
-                            {user.name || user.email}
-                          </Link>
-                          {!user.name && (
-                            <div className="text-xs italic text-muted-foreground mt-1">No display name</div>
-                          )}
+                          <div className="flex items-center gap-3">
+                            <LazyUserAvatar userId={user.id} size="md" />
+                            <div>
+                              <Link
+                                to="/users/$userId"
+                                params={{ userId: user.id }}
+                                className="hover:text-blue-600 transition-colors">
+                                {user.name || user.email}
+                              </Link>
+                              {!user.name && (
+                                <div className="text-xs italic text-muted-foreground mt-1">No display name</div>
+                              )}
+                            </div>
+                          </div>
                         </td>
                         <td className="p-4 font-mono text-sm text-muted-foreground">{user.email}</td>
                         <td className="p-4 text-sm">

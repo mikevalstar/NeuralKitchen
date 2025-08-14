@@ -48,7 +48,7 @@ const createRecipe = createServerFn({ method: "POST" })
     };
   })
   .handler(async (ctx) => {
-    return Recipes.create(ctx.data.recipe, ctx.data.version);
+    return Recipes.create(ctx.data.recipe, ctx.data.version, ctx.context.user.id);
   });
 
 export const Route = createFileRoute("/recipes/create")({
