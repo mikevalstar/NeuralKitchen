@@ -163,6 +163,156 @@ The MCP server (`src/mcp-server.ts`) provides AI agents with recipe access:
 - Graceful shutdown handling with SIGINT/SIGTERM
 - Development: runs in watch mode alongside main app via `pnpm dev`
 
+### Authentication System
+The application uses Better Auth for authentication with role-based access control:
+
+#### Authentication Stack
+- **Library**: Better Auth with Prisma adapter for PostgreSQL
+- **Session Management**: 7-day session expiration with 1-day update interval
+- **Admin Plugin**: Enabled for user management capabilities
+- **Email/Password**: Enabled with web-based registration (8 character minimum password)
+
+#### User Model
+Users have a flexible role system stored as a string field:
+- **Standard User**: Empty string or no role (default)
+- **Admin**: "admin" role with elevated permissions
+- **Ban System**: Optional `banned`, `banReason`, and `banExpires` fields for user moderation
+
+#### Middleware Pattern
+Two middleware functions provide authentication context:
+
+**`authMiddleware`** - Soft authentication (optional user context):
+```typescript
+import { authMiddleware } from "~/lib/auth-middleware";
+
+const serverFn = createServerFn({ method: "GET" })
+  .middleware([authMiddleware])
+  .handler(async ({ context }) => {
+    // context.user may be undefined if not authenticated
+    return context.user;
+  });
+```
+
+**`authMiddlewareEnsure`** - Hard authentication (required user context):
+```typescript
+import { authMiddlewareEnsure } from "~/lib/auth-middleware";
+
+const serverFn = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async ({ context }) => {
+    // context.user is guaranteed to exist or middleware throws error
+    return context.user;
+  });
+```
+
+#### Role-Based Access Control
+Admin-only operations check the user's role explicitly:
+```typescript
+// Example from user edit functionality
+const editUser = createServerFn({ method: "POST" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async (ctx) => {
+    if (ctx.context.user?.role !== "admin") {
+      throw new Error("User not authorized");
+    }
+    // Admin-only logic here
+  });
+```
+
+#### Client-Side Authentication
+Better Auth provides React hooks and methods for client-side authentication:
+
+**Session Management**:
+```typescript
+import { useSession, getSession } from "~/lib/auth-client";
+
+// React hook for session state with loading state
+const { data: session, isPending } = useSession();
+
+// Server-side session retrieval
+const { data: session } = await getSession({ 
+  fetchOptions: { headers: getHeaders() as HeadersInit } 
+});
+
+// Session data structure
+// session.user = { id, email, name, role }
+```
+
+**Authentication Actions**:
+```typescript
+import { signIn, signOut, changePassword } from "~/lib/auth-client";
+
+// Email/password sign in
+const result = await signIn.email({
+  email: "user@example.com",
+  password: "password123"
+});
+
+if (result.error) {
+  // Handle authentication error
+  console.error("Login failed:", result.error);
+}
+
+// Sign out user
+await signOut();
+
+// Change password for authenticated user
+await changePassword({
+  currentPassword: "oldPassword",
+  newPassword: "newPassword"
+});
+```
+
+**Admin Operations** (requires admin role):
+```typescript
+import { admin } from "~/lib/auth-client";
+
+// Create user as admin
+await admin.createUser({
+  email: "newuser@example.com",
+  password: "password123",
+  name: "New User"
+});
+
+// Update user role
+await admin.updateUser({
+  userId: "user-id",
+  role: "admin"
+});
+```
+
+**Common Usage Patterns**:
+```typescript
+// Component with authentication state
+function MyComponent() {
+  const { data: session, isPending } = useSession();
+  
+  if (isPending) return <LoadingSpinner />;
+  if (!session) return <LoginPrompt />;
+  
+  const isAdmin = session.user?.role === "admin";
+  
+  return (
+    <div>
+      <p>Welcome, {session.user.name}!</p>
+      {isAdmin && <AdminPanel />}
+    </div>
+  );
+}
+
+// Redirect handling after login
+const result = await signIn.email({ email, password });
+if (!result.error) {
+  router.navigate({ to: redirectUrl || "/" });
+}
+```
+
+#### Current Usage Pattern
+- Most routes use `authMiddlewareEnsure` requiring authenticated users
+- User management features (edit, list users) require admin role
+- CLI user creation script automatically assigns admin role
+- Role validation defined in Zod schema: `z.enum(["", "admin"]).optional()`
+
 ### AI Integration Services
 Background processing handles AI operations:
 - Queue system manages summarization and embedding jobs
