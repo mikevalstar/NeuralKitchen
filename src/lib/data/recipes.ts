@@ -33,6 +33,7 @@ export namespace Recipes {
         deletedAt: null,
       },
       include: {
+        modifiedByUser: true,
         currentVersion: {
           include: {
             tags: true,

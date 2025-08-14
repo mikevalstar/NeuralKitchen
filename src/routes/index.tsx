@@ -1,5 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { LazyUserAvatar } from "../components/LazyUserAvatar";
 import { authMiddlewareEnsure } from "../lib/auth-middleware";
 import { getUserDetails } from "../lib/auth-server-user";
 import { Recipes } from "../lib/data/recipes";
@@ -122,8 +123,18 @@ function Home() {
                             </div>
                           )}
                         </div>
-                        <div className="text-sm text-muted-foreground ml-4 text-right">
-                          <div>{formatDateTime(recipe.updatedAt)}</div>
+                        <div className="flex items-center gap-3 ml-4">
+                          {recipe.modifiedBy && (
+                            <LazyUserAvatar 
+                              userId={recipe.modifiedBy} 
+                              size="sm" 
+                              showName={true}
+                              className="text-sm"
+                            />
+                          )}
+                          <div className="text-sm text-muted-foreground text-right">
+                            <div>{formatDateTime(recipe.updatedAt)}</div>
+                          </div>
                         </div>
                       </div>
                     </div>
