@@ -152,3 +152,16 @@ export const userIdSchema = z.object({
 });
 
 export type UserIdInput = z.infer<typeof userIdSchema>;
+
+// Admin password set validation schema
+export const adminPasswordSetSchema = z
+  .object({
+    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Password confirmation is required"),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
+export type AdminPasswordSetInput = z.infer<typeof adminPasswordSetSchema>;
