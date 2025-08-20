@@ -10,6 +10,12 @@ The core problem this solves: AI agents often lack context about project convent
 
 This project is in early development with plans to expand into a comprehensive AI agent guidance system.
 
+## Dev Notes
+
+The developer is always running the project with `pnpm dev` so you don't have to compile or restart the services.
+
+If you feel like we are making a mistake in design or how something is being implemented, stop and ask the user to confirm. Be cautious.
+
 ## Current Plan
 The file `PROJECT_PLAN.md` hs the current project plan, and is useful to reference. 
 
