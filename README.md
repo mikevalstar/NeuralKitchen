@@ -126,8 +126,30 @@ The application will be available at:
 
 3. **Set up the database**
    ```bash
+   # Start a psql shell as the postgres superuser
+   psql postgres
+
+   # Inside the psql shell, run:
+   CREATE USER neuralkitchen WITH PASSWORD 'yourpassword' CREATEDB SUPERUSER ;
+   CREATE DATABASE neuralkitchen OWNER neuralkitchen;
+   \q
+
+   # Your DATABASE_URL for .env will look like:
+   # DATABASE_URL="postgresql://neuralkitchen:yourpassword@localhost:5432/neuralkitchen"
+   ```
+
+   Install pgvector if not already installed
+
+   ```sql
+   CREATE EXTENSION vector;
+
+   -- confirm
+   SELECT * FROM pg_extension WHERE extname = 'vector';
+   ```
+
+   ```bash
    # Configure your DATABASE_URL in .env, and seed (optional)
-   pnpm db:push
+   pnpm db:migrate
    pnpm db:seed
    ```
 
