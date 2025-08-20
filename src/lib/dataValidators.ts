@@ -165,3 +165,13 @@ export const adminPasswordSetSchema = z
   });
 
 export type AdminPasswordSetInput = z.infer<typeof adminPasswordSetSchema>;
+
+// App setting validation schema
+export const appSettingSchema = z.object({
+  key: z.string().min(1, "Setting key is required").max(100, "Setting key must be less than 100 characters"),
+  value: z.string().max(10000, "Setting value must be less than 10,000 characters").optional(),
+  description: z.string().max(500, "Setting description must be less than 500 characters").optional(),
+  type: z.enum(["string", "number", "boolean", "json"]).optional().default("string"),
+});
+
+export type AppSettingInput = z.infer<typeof appSettingSchema>;

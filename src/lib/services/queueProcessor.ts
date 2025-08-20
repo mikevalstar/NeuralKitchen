@@ -1,5 +1,6 @@
 import { Queue } from "../data/queue";
 import { Recipes } from "../data/recipes";
+import { Settings } from "../data/settings";
 
 export class QueueProcessor {
   private intervalId: NodeJS.Timeout | null = null;
@@ -17,9 +18,9 @@ export class QueueProcessor {
       return;
     }
 
-    // Check for required environment variable
-    if (!process.env.OPENAI_API_KEY) {
-      console.error("OPENAI_API_KEY environment variable is required but not set. Queue processor will not start.");
+    // Check for required OpenAI API key setting
+    if (!Settings.get("OPENAI_API_KEY")) {
+      console.error("OPENAI_API_KEY setting is not configured. Queue processor will not start.");
       return;
     }
 

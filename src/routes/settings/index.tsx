@@ -1,12 +1,14 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { AlertTriangle, CheckCircle, Edit, MessageSquare, Settings } from "lucide-react";
+import { type AppSettingInfo, SettingEditor } from "~/components/SettingEditor";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { authMiddlewareEnsure } from "~/lib/auth-middleware";
 import { getUserDetails } from "~/lib/auth-server-user";
 import { Prompts } from "~/lib/data/prompts";
+import { Settings as AppSettings, type SettingsConfig, settingsConfigSchema } from "~/lib/data/settings";
 import { DEFAULT_PROMPTS, PROMPT_METADATA, type PromptKey } from "~/lib/prompts";
 
 interface SettingsValidation {
@@ -25,7 +27,7 @@ const getSettingsValidation = createServerFn({ method: "GET" })
   .middleware([authMiddlewareEnsure])
   .handler(async (): Promise<SettingsValidation> => {
     return {
-      openaiApiKey: !!process.env.OPENAI_API_KEY,
+      openaiApiKey: !!AppSettings.get("OPENAI_API_KEY"),
     };
   });
 
@@ -51,6 +53,29 @@ const getPromptStatuses = createServerFn({ method: "GET" })
     return statuses;
   });
 
+const getAppSettings = createServerFn({ method: "GET" })
+  .middleware([authMiddlewareEnsure])
+  .handler(async (): Promise<AppSettingInfo[]> => {
+    const allSettings = AppSettings.getSettings();
+    const schema = settingsConfigSchema.shape;
+
+    const settings: AppSettingInfo[] = [];
+
+    for (const [key, value] of Object.entries(allSettings)) {
+      const fieldSchema = schema[key as keyof SettingsConfig];
+      const description = fieldSchema?.description || `Setting: ${key}`;
+
+      settings.push({
+        key: key as keyof SettingsConfig,
+        value: String(value),
+        description,
+        type: typeof value === "boolean" ? "boolean" : typeof value === "number" ? "number" : "string",
+      });
+    }
+
+    return settings;
+  });
+
 export const Route = createFileRoute("/settings/")({
   beforeLoad: async () => {
     const user = await getUserDetails();
@@ -65,13 +90,17 @@ export const Route = createFileRoute("/settings/")({
       });
     }
 
-    const [validation, promptStatuses] = await Promise.all([getSettingsValidation(), getPromptStatuses()]);
-    return { validation, promptStatuses };
+    const [validation, promptStatuses, appSettings] = await Promise.all([
+      getSettingsValidation(),
+      getPromptStatuses(),
+      getAppSettings(),
+    ]);
+    return { validation, promptStatuses, appSettings };
   },
 });
 
 function SettingsPage() {
-  const { validation, promptStatuses } = Route.useLoaderData();
+  const { validation, promptStatuses, appSettings } = Route.useLoaderData();
 
   return (
     <div className="space-y-8">
@@ -98,13 +127,13 @@ function SettingsPage() {
                 <AlertTriangle className="h-4 w-4" />
                 <AlertTitle>OpenAI API Key Missing</AlertTitle>
                 <AlertDescription>
-                  The OPENAI_API_KEY environment variable is not set. This will disable:
+                  The OPENAI_API_KEY setting is not configured. This will disable:
                   <ul className="list-disc list-inside mt-2 space-y-1">
                     <li>AI-generated recipe summaries</li>
                     <li>Vector embeddings for semantic search</li>
                     <li>Enhanced search functionality</li>
                   </ul>
-                  Please set the OPENAI_API_KEY environment variable to enable these features.
+                  Please configure the OPENAI_API_KEY setting to enable these features.
                 </AlertDescription>
               </Alert>
             )}
@@ -114,7 +143,7 @@ function SettingsPage() {
                 <CheckCircle className="h-4 w-4" />
                 <AlertTitle>Environment Configuration Valid</AlertTitle>
                 <AlertDescription>
-                  All required environment variables are properly configured. AI features are enabled.
+                  All required settings are properly configured. AI features are enabled.
                 </AlertDescription>
               </Alert>
             )}
@@ -172,13 +201,15 @@ function SettingsPage() {
           <CardHeader>
             <CardTitle className="flex items-center space-x-2">
               <Settings className="h-5 w-5" />
-              <span>General Settings</span>
+              <span>Application Settings</span>
             </CardTitle>
-            <CardDescription>Configure your general preferences</CardDescription>
+            <CardDescription>Configure core application settings</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <p className="text-muted-foreground">Settings configuration coming soon...</p>
+              {appSettings.map((setting) => (
+                <SettingEditor key={setting.key} setting={setting} />
+              ))}
             </div>
           </CardContent>
         </Card>

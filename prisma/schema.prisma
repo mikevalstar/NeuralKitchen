@@ -131,6 +131,21 @@ model Prompt {
   modifiedByUser User?     @relation("PromptModifiedBy", fields: [modifiedBy], references: [id])
 }
 
+model AppSetting {
+  id             String    @id @default(uuid())
+  key            String    @unique
+  value          String?
+  description    String?
+  type           String    @default("string") // string, number, boolean, json
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
+  createdBy      String?
+  modifiedBy     String?
+  createdByUser  User?     @relation("AppSettingCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?     @relation("AppSettingModifiedBy", fields: [modifiedBy], references: [id])
+}
+
 // User management table
 
 model User {
@@ -164,6 +179,8 @@ model User {
   vecDocumentsModified    VecDocument[]   @relation("VecDocumentModifiedBy")
   promptsCreated          Prompt[]        @relation("PromptCreatedBy")
   promptsModified         Prompt[]        @relation("PromptModifiedBy")
+  appSettingsCreated      AppSetting[]    @relation("AppSettingCreatedBy")
+  appSettingsModified     AppSetting[]    @relation("AppSettingModifiedBy")
 
   @@unique([email])
   @@map("user")

@@ -1,21 +1,29 @@
 import OpenAI from "openai";
 import { Prompts } from "../data/prompts";
+import { Settings } from "../data/settings";
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy-initialized OpenAI client
+let openai: OpenAI | null = null;
+
+function getOpenAIClient(): OpenAI {
+  if (!openai) {
+    const apiKey = Settings.get("OPENAI_API_KEY");
+    if (!apiKey) {
+      throw new Error("OPENAI_API_KEY setting is not configured");
+    }
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
 
 export namespace OpenAIService {
   /**
    * Summarize a recipe document using GPT-4o-mini
    */
   export async function summarizeRecipe(title: string, content: string): Promise<string> {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY environment variable is not set");
-    }
-
     try {
+      const client = getOpenAIClient();
+
       // Get prompts from database with fallback to constants
       const [systemPrompt, userPromptTemplate] = await Promise.all([
         Prompts.getByKey("RECIPE_SUMMARY_SYSTEM"),
@@ -25,7 +33,7 @@ export namespace OpenAIService {
       // Replace placeholders in user prompt
       const userPrompt = userPromptTemplate.replace("{title}", title).replace("{content}", content);
 
-      const response = await openai.chat.completions.create({
+      const response = await client.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [
           {
@@ -92,15 +100,13 @@ export namespace OpenAIService {
    * Using text-embedding-3-small for cost efficiency
    */
   export async function generateEmbedding(text: string): Promise<number[]> {
-    if (!process.env.OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY environment variable is not set");
-    }
-
     try {
+      const client = getOpenAIClient();
+
       // Truncate text to approximately 6000 tokens to stay well within the 8192 token limit
       const truncatedText = truncateToTokens(text, 6000);
 
-      const response = await openai.embeddings.create({
+      const response = await client.embeddings.create({
         model: "text-embedding-3-small",
         input: truncatedText,
       });

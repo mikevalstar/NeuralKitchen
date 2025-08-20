@@ -2,9 +2,20 @@
 // This project developed with AI assistance (Cursor/Claude)
 // Human review and testing applied to all AI-generated code
 
+import { Settings } from "./lib/data/settings";
 import { queueProcessor } from "./lib/services/queueProcessor";
 
 console.log("Starting background tasks...");
+
+// Initialize settings cache
+Settings.loadSettings()
+  .then(() => {
+    console.log("Settings loaded successfully");
+  })
+  .catch((error) => {
+    console.error("Failed to load settings:", error);
+  });
+
 queueProcessor.start();
 
 // Graceful shutdown handling
