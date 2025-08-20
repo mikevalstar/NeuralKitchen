@@ -2,21 +2,18 @@
 // This project developed with AI assistance (Cursor/Claude)
 // Human review and testing applied to all AI-generated code
 
+import "dotenv/config";
 import { Settings } from "./lib/data/settings";
 import { queueProcessor } from "./lib/services/queueProcessor";
 
 console.log("Starting background tasks...");
 
-// Initialize settings cache
-Settings.loadSettings()
-  .then(() => {
-    console.log("Settings loaded successfully");
-  })
-  .catch((error) => {
-    console.error("Failed to load settings:", error);
-  });
+async function main() {
+  // Initialize settings cache
+  await Settings.loadSettings();
 
-queueProcessor.start();
+  queueProcessor.start();
+}
 
 // Graceful shutdown handling
 process.on("SIGINT", () => {
@@ -30,3 +27,5 @@ process.on("SIGTERM", () => {
   queueProcessor.stop();
   process.exit(0);
 });
+
+main();
