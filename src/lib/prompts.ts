@@ -27,14 +27,16 @@ Content:
 
   MCP_SERVER_INSTRUCTIONS: `This provides a list of reusable tasks and procedures also known as cookbooks or recipes for use in determining next steps on a task and prescriptive instructions.
 
-      The recipe, cookbook, or procedure is a list of steps to complete a task.
-      The recipe, cookbook, or procedure is written in markdown format.
-      The recipe, cookbook, or procedure is written in a way that is easy to understand and follow.
+The recipe, cookbook, or procedure is a list of steps to complete a task.
+The recipe, cookbook, or procedure is written in markdown format.
+The recipe, cookbook, or procedure is written in a way that is easy to understand and follow.
 
-      When you know the name of the recipe, cookbook, or procedure you want to use, you can use the read_recipe tool to read the recipe, cookbook, or procedure.
+**CRITICAL: Before starting ANY task, you MUST search for existing recipes first using the search_recipes tool. Only proceed with custom
+  implementation if no relevant recipe exists.**
 
-      You should follow these recipes when there is one available, it will help you complete the task, always search for a recipe before starting a new task.
-      `,
+When you know the name of the recipe, cookbook, or procedure you want to use, you can use the get_recipe tool to read the recipe, cookbook, or procedure.
+
+You should follow these recipes when there is one available, it will help you complete the task. Always search for a recipe before starting a new task.`,
 } as const;
 
 export const PROMPT_METADATA = {
