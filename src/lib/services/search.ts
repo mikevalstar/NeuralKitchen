@@ -1,6 +1,6 @@
 import { Prisma } from "~/generated/prisma/client";
 import { VecDocuments } from "../data/vecDocuments";
-import { OpenAIService } from "./openai";
+import { AIService } from "./ai";
 
 export interface SearchResult {
   id: number;
@@ -28,7 +28,7 @@ export namespace SearchService {
 
     try {
       // Generate embedding for the search query
-      const queryEmbedding = await OpenAIService.generateEmbedding(query);
+      const queryEmbedding = await AIService.generateEmbedding(query);
 
       // Perform vector similarity search
       const results = await VecDocuments.similaritySearch(queryEmbedding, limit, threshold, projectIds);

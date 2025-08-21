@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
 import { type RecipeInput, type RecipeVersionInput, recipeSchema, recipeVersionSchema } from "../dataValidators";
 import prisma from "../prisma";
-import { OpenAIService } from "../services/openai";
+import { AIService } from "../services/ai";
 import { Queue } from "./queue";
 import { VecDocuments } from "./vecDocuments";
 
@@ -591,7 +591,7 @@ export namespace Recipes {
 
     try {
       // Generate summary using OpenAI
-      const summary = await OpenAIService.summarizeRecipe(version.title, version.content);
+      const summary = await AIService.summarizeRecipe(version.title, version.content);
 
       // Update the version with the summary
       await prisma.recipeVersion.update({
@@ -630,7 +630,7 @@ export namespace Recipes {
       const textToEmbed = `${version.title}\n\n${version.content}`;
 
       // Generate embedding using OpenAI
-      const embedding = await OpenAIService.generateEmbedding(textToEmbed);
+      const embedding = await AIService.generateEmbedding(textToEmbed);
 
       // Store in VecDocument table
       await VecDocuments.upsert(
