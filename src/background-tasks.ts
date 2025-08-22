@@ -3,28 +3,53 @@
 // Human review and testing applied to all AI-generated code
 
 import "dotenv/config";
+import { logger } from "./lib/logger.js";
 import { Settings } from "./lib/data/settings";
 import { queueProcessor } from "./lib/services/queueProcessor";
 
-console.log("Starting background tasks...");
+logger.tasks.info("Starting background tasks processor");
 
 async function main() {
-  // Initialize settings cache
-  await Settings.loadSettings();
-
-  queueProcessor.start();
+  const startupTimer = logger.createTimer("tasks", "background_tasks_startup");
+  
+  try {
+    // Initialize settings cache
+    logger.tasks.info("Loading application settings");
+    await Settings.loadSettings();
+    
+    logger.tasks.info("Starting queue processor");
+    queueProcessor.start();
+    
+    startupTimer.end({ success: true });
+    logger.tasks.info("Background tasks processor started successfully");
+  } catch (error) {
+    logger.tasks.error("Failed to start background tasks", {
+      error: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined
+    });
+    startupTimer.end({ success: false, error: error instanceof Error ? error.message : "Unknown error" });
+    process.exit(1);
+  }
 }
 
 // Graceful shutdown handling
 process.on("SIGINT", () => {
-  console.log("Received SIGINT, shutting down background tasks...");
+  logger.tasks.info("Received SIGINT signal, initiating graceful shutdown");
+  const shutdownTimer = logger.createTimer("tasks", "background_tasks_shutdown");
+  
   queueProcessor.stop();
+  shutdownTimer.end({ success: true, signal: "SIGINT" });
+  logger.tasks.info("Background tasks processor stopped successfully");
   process.exit(0);
 });
 
 process.on("SIGTERM", () => {
-  console.log("Received SIGTERM, shutting down background tasks...");
+  logger.tasks.info("Received SIGTERM signal, initiating graceful shutdown");
+  const shutdownTimer = logger.createTimer("tasks", "background_tasks_shutdown");
+  
   queueProcessor.stop();
+  shutdownTimer.end({ success: true, signal: "SIGTERM" });
+  logger.tasks.info("Background tasks processor stopped successfully");
   process.exit(0);
 });
 

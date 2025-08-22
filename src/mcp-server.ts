@@ -34,61 +34,92 @@ class StandaloneMcpServer {
     logger.mcp.info("Starting standalone MCP server", { port: this.port });
     const startupTimer = logger.createTimer("mcp", "server_startup");
 
-    // Get prompts from database with fallback to constants
-    const [description, instructions] = await Promise.all([
-      Prompts.getByKey("MCP_SERVER_DESCRIPTION"),
-      Prompts.getByKey("MCP_SERVER_INSTRUCTIONS"),
-    ]);
+    try {
+      // Get prompts from database with fallback to constants
+      logger.mcp.debug("Loading MCP server configuration from database");
+      const [description, instructions] = await Promise.all([
+        Prompts.getByKey("MCP_SERVER_DESCRIPTION"),
+        Prompts.getByKey("MCP_SERVER_INSTRUCTIONS"),
+      ]);
 
-    // Create the MCP server
-    this.server = new McpServer(
-      {
-        name: "Neural Kitchen",
+      // Create the MCP server
+      logger.mcp.debug("Creating MCP server instance", { 
+        name: "Neural Kitchen", 
         version: "0.1.0",
-        description,
-      },
-      {
-        instructions,
-      },
-    );
+        hasDescription: !!description,
+        hasInstructions: !!instructions 
+      });
+      
+      this.server = new McpServer(
+        {
+          name: "Neural Kitchen",
+          version: "0.1.0",
+          description,
+        },
+        {
+          instructions,
+        },
+      );
 
-    // Register tools
-    this.registerTools();
+      // Register tools
+      logger.mcp.debug("Registering MCP tools");
+      this.registerTools();
 
-    // Create Express app
-    this.app = express();
-    this.app.use(express.json());
+      // Create Express app
+      logger.mcp.debug("Setting up Express application");
+      this.app = express();
+      this.app.use(express.json());
 
-    // Register routes
-    this.registerRoutes();
+      // Register routes
+      logger.mcp.debug("Registering HTTP routes");
+      this.registerRoutes();
 
-    // Start the HTTP server
-    this.httpServer = this.app.listen(this.port, (error?: Error) => {
-      if (error) {
-        console.error("Failed to start MCP server:", error);
-        process.exit(1);
-      }
-      console.log(`🚀 MCP Stateless Streamable HTTP Server listening on port ${this.port}`);
-    });
+      // Start the HTTP server
+      this.httpServer = this.app.listen(this.port, (error?: Error) => {
+        if (error) {
+          logger.mcp.error("Failed to start MCP server", { error: error.message, port: this.port });
+          startupTimer.end({ success: false, error: error.message });
+          process.exit(1);
+        }
+        
+        logger.mcp.info("MCP server started successfully", { port: this.port });
+        startupTimer.end({ success: true, port: this.port });
+      });
 
-    // Handle graceful shutdown
-    this.setupGracefulShutdown();
+      // Handle graceful shutdown
+      this.setupGracefulShutdown();
+      
+    } catch (error) {
+      logger.mcp.error("Error during MCP server startup", { 
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      startupTimer.end({ success: false, error: error instanceof Error ? error.message : "Unknown error" });
+      throw error;
+    }
   }
 
   /**
    * Stop the MCP server
    */
   stop() {
+    logger.mcp.info("Stopping MCP server", { port: this.port });
+    const shutdownTimer = logger.createTimer("mcp", "server_shutdown");
+    
     if (this.httpServer) {
       this.httpServer.close();
       this.httpServer = null;
-      console.log("MCP server stopped");
+      logger.mcp.debug("HTTP server closed");
     }
 
     if (this.server) {
       this.server.close();
       this.server = null;
+      logger.mcp.debug("MCP server instance closed");
     }
+    
+    shutdownTimer.end({ success: true });
+    logger.mcp.info("MCP server stopped successfully");
   }
 
   /**
@@ -109,8 +140,18 @@ class StandaloneMcpServer {
         },
       },
       async (args, extra) => {
+        const requestId = logger.generateRequestId();
+        const timer = logger.createTimer("mcp", "get_recipe_tool");
+        
+        logger.mcp.info("Tool execution started", {
+          requestId,
+          tool: "get_recipe",
+          identifier: args.identifier,
+          projects: args.projects || null,
+          sessionId: extra?.sessionId || null
+        });
+        
         try {
-          console.log("get_recipe", args, extra);
           const { identifier, projects } = args;
 
           // Try to get recipe by ID first, then by shortId
@@ -120,6 +161,9 @@ class StandaloneMcpServer {
           }
 
           if (!recipe || !recipe.currentVersion) {
+            logger.mcp.warn("Recipe not found", { requestId, identifier, tool: "get_recipe" });
+            timer.end({ success: false, reason: "recipe_not_found", identifier });
+            
             return {
               content: [
                 {
@@ -145,6 +189,23 @@ class StandaloneMcpServer {
           }
 
           // Return full recipe content
+          logger.mcp.info("Recipe retrieved successfully", {
+            requestId,
+            tool: "get_recipe", 
+            recipeId: recipe.id,
+            shortId: recipe.shortId,
+            title: recipe.currentVersion.title,
+            hasProjectFilter: !!(projects && projects.length > 0),
+            projectCount: recipe.currentVersion.projects?.length || 0
+          });
+          
+          timer.end({ 
+            success: true, 
+            recipeId: recipe.id, 
+            shortId: recipe.shortId,
+            title: recipe.currentVersion.title 
+          });
+
           return {
             content: [
               {
@@ -154,7 +215,16 @@ class StandaloneMcpServer {
             ],
           };
         } catch (error) {
-          console.error("Error in get_recipe:", error);
+          logger.mcp.error("Error in get_recipe tool", { 
+            requestId,
+            tool: "get_recipe",
+            identifier,
+            error: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined
+          });
+          
+          timer.end({ success: false, error: error instanceof Error ? error.message : "Unknown error" });
+          
           return {
             content: [
               {
@@ -179,15 +249,33 @@ class StandaloneMcpServer {
         },
       },
       async (args) => {
+        const requestId = logger.generateRequestId();
+        const timer = logger.createTimer("mcp", "search_recipes_tool");
+        
+        logger.mcp.info("Tool execution started", {
+          requestId,
+          tool: "search_recipes",
+          query: args.query,
+          projects: args.projects || null
+        });
+        
         try {
           const limit = 10;
           const { query, projects } = args;
-          console.info("search_recipes", args);
 
           // Use hybrid search (vector + text fallback)
           const results = await SearchService.hybridSearch(query, limit, projects);
 
           if (results.length === 0) {
+            logger.mcp.info("Search completed with no results", { 
+              requestId, 
+              tool: "search_recipes",
+              query,
+              resultsCount: 0 
+            });
+            
+            timer.end({ success: true, query, resultsCount: 0 });
+            
             return {
               content: [
                 {
@@ -209,6 +297,21 @@ class StandaloneMcpServer {
             })
             .join("\n\n");
 
+          logger.mcp.info("Search completed successfully", {
+            requestId,
+            tool: "search_recipes",
+            query,
+            resultsCount: results.length,
+            topResults: results.slice(0, 3).map(r => ({ shortId: r.shortid, title: r.title }))
+          });
+          
+          timer.end({ 
+            success: true, 
+            query, 
+            resultsCount: results.length,
+            hasProjects: !!(projects && projects.length > 0)
+          });
+
           return {
             content: [
               {
@@ -218,7 +321,16 @@ class StandaloneMcpServer {
             ],
           };
         } catch (error) {
-          console.error("Error in search_recipes:", error);
+          logger.mcp.error("Error in search_recipes tool", {
+            requestId,
+            tool: "search_recipes",
+            query,
+            error: error instanceof Error ? error.message : "Unknown error",
+            stack: error instanceof Error ? error.stack : undefined
+          });
+          
+          timer.end({ success: false, query, error: error instanceof Error ? error.message : "Unknown error" });
+          
           return {
             content: [
               {
@@ -240,6 +352,7 @@ class StandaloneMcpServer {
 
     // Health check endpoint
     this.app.get("/health", (_req: Request, res: Response) => {
+      logger.mcp.debug("Health check requested");
       res.json({
         status: "healthy",
         server: "Neural Kitchen MCP Server",
@@ -250,15 +363,29 @@ class StandaloneMcpServer {
 
     // POST /mcp - Handle MCP requests
     this.app.post("/mcp", async (req: Request, res: Response) => {
+      const requestId = logger.generateRequestId();
+      const timer = logger.createTimer("mcp", "handle_mcp_request");
+      
+      logger.mcp.info("MCP request received", {
+        requestId,
+        method: req.method,
+        path: req.path,
+        queryParams: req.query,
+        hasBody: !!req.body,
+        bodyMethod: req.body?.method || null,
+        bodyId: req.body?.id || null
+      });
+      
       try {
         const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
           sessionIdGenerator: undefined,
         });
 
-        console.info("Query params", req.query.projects);
-
+        // Handle projects parameter injection
         if (req.query.projects && req.body?.params?.arguments) {
           const projectsParam = req.query.projects;
+          logger.mcp.debug("Injecting projects parameter", { requestId, projectsParam });
+          
           if (typeof projectsParam === "string") {
             req.body.params.arguments.projects = projectsParam.split(",");
           } else if (Array.isArray(projectsParam)) {
@@ -266,20 +393,33 @@ class StandaloneMcpServer {
           }
         }
 
-        console.info("Body", req.body);
-
         res.on("close", () => {
-          console.log("Request closed");
+          logger.mcp.debug("MCP request connection closed", { requestId });
           transport.close();
           this.server?.close();
         });
 
+        logger.mcp.debug("Connecting MCP server to transport", { requestId });
         if (this.server) {
           await this.server.connect(transport);
         }
+        
+        logger.mcp.debug("Handling MCP request", { requestId });
         await transport.handleRequest(req, res, req.body);
+        
+        timer.end({ success: true, method: req.body?.method || "unknown" });
+        logger.mcp.info("MCP request completed successfully", { requestId });
+        
       } catch (error) {
-        console.error("Error handling MCP request:", error);
+        logger.mcp.error("Error handling MCP request", {
+          requestId,
+          error: error instanceof Error ? error.message : "Unknown error",
+          stack: error instanceof Error ? error.stack : undefined,
+          method: req.body?.method || "unknown"
+        });
+        
+        timer.end({ success: false, error: error instanceof Error ? error.message : "Unknown error" });
+        
         if (!res.headersSent) {
           res.status(500).json({
             jsonrpc: "2.0",
@@ -295,7 +435,7 @@ class StandaloneMcpServer {
 
     // GET /mcp - Not supported in stateless mode
     this.app.get("/mcp", async (_req: Request, res: Response) => {
-      console.log("Received GET MCP request");
+      logger.mcp.warn("GET request to /mcp - method not allowed");
       res.writeHead(405).end(
         JSON.stringify({
           jsonrpc: "2.0",
@@ -310,7 +450,7 @@ class StandaloneMcpServer {
 
     // DELETE /mcp - Not needed in stateless mode
     this.app.delete("/mcp", async (_req: Request, res: Response) => {
-      console.log("Received DELETE MCP request");
+      logger.mcp.warn("DELETE request to /mcp - method not allowed");
       res.writeHead(405).end(
         JSON.stringify({
           jsonrpc: "2.0",
@@ -328,14 +468,16 @@ class StandaloneMcpServer {
    * Setup graceful shutdown handlers
    */
   private setupGracefulShutdown() {
-    const shutdown = () => {
-      console.log("\n🛑 Shutting down MCP server gracefully...");
+    const shutdown = (signal: string) => {
+      logger.mcp.info("Received shutdown signal", { signal });
       this.stop();
       process.exit(0);
     };
 
-    process.on("SIGINT", shutdown);
-    process.on("SIGTERM", shutdown);
+    process.on("SIGINT", () => shutdown("SIGINT"));
+    process.on("SIGTERM", () => shutdown("SIGTERM"));
+    
+    logger.mcp.debug("Graceful shutdown handlers registered");
   }
 
   /**

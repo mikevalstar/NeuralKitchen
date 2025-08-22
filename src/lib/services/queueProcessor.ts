@@ -1,3 +1,4 @@
+import { logger } from "../logger.js";
 import { Queue } from "../data/queue";
 import { Recipes } from "../data/recipes";
 import { Settings } from "../data/settings";
@@ -14,23 +15,30 @@ export class QueueProcessor {
    */
   start() {
     if (this.intervalId) {
-      console.log("Queue processor is already running");
+      logger.tasks.warn("Queue processor start requested but already running", { 
+        intervalMs: this.intervalMs 
+      });
       return;
     }
 
     // Check for required OpenAI API key setting
     if (!Settings.get("OPENAI_API_KEY")) {
-      console.error("OPENAI_API_KEY setting is not configured. Queue processor will not start.");
+      logger.tasks.error("OPENAI_API_KEY setting not configured, queue processor cannot start");
       return;
     }
 
-    console.log("Starting queue processor...");
+    logger.tasks.info("Queue processor starting", { 
+      intervalMs: this.intervalMs,
+      intervalSeconds: this.intervalMs / 1000 
+    });
+    
     this.intervalId = setInterval(() => {
       this.processNext();
     }, this.intervalMs);
 
     // Process immediately on start
     this.processNext();
+    logger.tasks.info("Queue processor started and processing first batch");
   }
 
   /**
@@ -38,9 +46,12 @@ export class QueueProcessor {
    */
   stop() {
     if (this.intervalId) {
+      logger.tasks.info("Stopping queue processor");
       clearInterval(this.intervalId);
       this.intervalId = null;
-      console.log("Queue processor stopped");
+      logger.tasks.info("Queue processor stopped successfully");
+    } else {
+      logger.tasks.debug("Queue processor stop requested but not running");
     }
   }
 

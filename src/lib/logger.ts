@@ -96,7 +96,7 @@ class Logger {
             target: "pino-pretty",
             options: {
               colorize: true,
-              translateTime: "SYS:standard",
+              translateTime: "HH:MM:ss",
               ignore: "pid,hostname",
               messageFormat: "[{component}] {msg}",
             },
@@ -156,7 +156,7 @@ class Logger {
             target: "pino-pretty",
             options: {
               colorize: true,
-              translateTime: "SYS:standard",
+              translateTime: "HH:MM:ss",
               ignore: "pid,hostname",
               messageFormat: `[${component.toUpperCase()}] {msg}`,
             },
