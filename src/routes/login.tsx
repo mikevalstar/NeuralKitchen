@@ -11,6 +11,8 @@ import { Input } from "~/components/ui/input";
 import { signIn, useSession } from "~/lib/auth-client";
 import { type LoginInput, loginSchema } from "~/lib/dataValidators";
 
+// Browser-side logging using console
+
 const loginSearchSchema = z.object({
   redirect: z.string().optional().default("/"),
 });
@@ -39,6 +41,13 @@ function LoginPage() {
     onSubmit: async ({ value }) => {
       setIsSubmitting(true);
       setLoginError(null);
+
+      console.info("[AUTH] Login attempt started", {
+        email: value.email,
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+        redirectTo: redirect,
+      });
+
       try {
         const result = await signIn.email({
           email: value.email,
@@ -46,12 +55,28 @@ function LoginPage() {
         });
 
         if (result.error) {
+          console.warn("[AUTH] Login attempt failed", {
+            email: value.email,
+            error: result.error.message || "Invalid credentials",
+            userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+          });
           setLoginError("Invalid email or password. Please try again.");
         } else {
+          console.info("[AUTH] Login successful", {
+            email: value.email,
+            redirectTo: redirect,
+            userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+          });
           // Navigate to the redirect URL or home page
           router.navigate({ to: redirect });
         }
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : "Unknown error";
+        console.error("[AUTH] Login error occurred", {
+          email: value.email,
+          error: errorMessage,
+          userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+        });
         console.error("Login error:", error);
         setLoginError("An error occurred during login. Please try again.");
       } finally {

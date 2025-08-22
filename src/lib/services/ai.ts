@@ -59,11 +59,11 @@ export namespace AIService {
   export async function generateEmbedding(text: string): Promise<number[]> {
     const timer = logger.createTimer("tasks", "ai_generate_embedding");
     const requestId = logger.generateRequestId();
-    
+
     logger.tasks.info("Starting embedding generation", {
       requestId,
       textLength: text.length,
-      model: "text-embedding-3-small"
+      model: "text-embedding-3-small",
     });
 
     try {
@@ -78,7 +78,7 @@ export namespace AIService {
           requestId,
           originalLength: text.length,
           truncatedLength: truncatedText.length,
-          estimatedTokens: estimateTokens(truncatedText)
+          estimatedTokens: estimateTokens(truncatedText),
         });
       }
 
@@ -97,21 +97,21 @@ export namespace AIService {
         requestId,
         embeddingDimensions: embedding.length,
         duration,
-        wasTruncated
+        wasTruncated,
       });
 
       return embedding;
     } catch (error) {
       const duration = timer.end();
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      
+
       logger.tasks.error("Embedding generation failed", {
         requestId,
         error: errorMessage,
         duration,
-        textLength: text.length
+        textLength: text.length,
       });
-      
+
       throw new Error(`Failed to generate embedding: ${errorMessage}`);
     }
   }
@@ -122,12 +122,12 @@ export namespace AIService {
   export async function summarizeRecipe(title: string, content: string): Promise<string> {
     const timer = logger.createTimer("tasks", "ai_summarize_recipe");
     const requestId = logger.generateRequestId();
-    
+
     logger.tasks.info("Starting recipe summarization", {
       requestId,
       title,
       contentLength: content.length,
-      model: "gpt-4o-mini"
+      model: "gpt-4o-mini",
     });
 
     try {
@@ -142,11 +142,11 @@ export namespace AIService {
 
       // Replace placeholders in user prompt
       const userPrompt = userPromptTemplate.replace("{title}", title).replace("{content}", content);
-      
+
       logger.tasks.debug("Prompts prepared", {
         requestId,
         systemPromptLength: systemPrompt.length,
-        userPromptLength: userPrompt.length
+        userPromptLength: userPrompt.length,
       });
 
       const { text } = await generateText({
@@ -164,27 +164,27 @@ export namespace AIService {
 
       const summary = text.trim();
       const duration = timer.end();
-      
+
       logger.tasks.info("Recipe summarization completed", {
         requestId,
         title,
         summaryLength: summary.length,
-        duration
+        duration,
       });
 
       return summary;
     } catch (error) {
       const duration = timer.end();
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      
+
       logger.tasks.error("Recipe summarization failed", {
         requestId,
         title,
         error: errorMessage,
         duration,
-        contentLength: content.length
+        contentLength: content.length,
       });
-      
+
       throw new Error(`Failed to summarize recipe: ${errorMessage}`);
     }
   }

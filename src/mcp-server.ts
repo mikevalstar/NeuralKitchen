@@ -11,9 +11,9 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import express, { type Request, type Response } from "express";
 import { z } from "zod";
-import { logger } from "./lib/logger.js";
 import { Prompts } from "./lib/data/prompts.js";
 import { Recipes } from "./lib/data/recipes.js";
+import { logger } from "./lib/logger.js";
 import { SearchService } from "./lib/services/search.js";
 
 class StandaloneMcpServer {
@@ -43,13 +43,13 @@ class StandaloneMcpServer {
       ]);
 
       // Create the MCP server
-      logger.mcp.debug("Creating MCP server instance", { 
-        name: "Neural Kitchen", 
+      logger.mcp.debug("Creating MCP server instance", {
+        name: "Neural Kitchen",
         version: "0.1.0",
         hasDescription: !!description,
-        hasInstructions: !!instructions 
+        hasInstructions: !!instructions,
       });
-      
+
       this.server = new McpServer(
         {
           name: "Neural Kitchen",
@@ -81,18 +81,17 @@ class StandaloneMcpServer {
           startupTimer.end({ success: false, error: error.message });
           process.exit(1);
         }
-        
+
         logger.mcp.info("MCP server started successfully", { port: this.port });
         startupTimer.end({ success: true, port: this.port });
       });
 
       // Handle graceful shutdown
       this.setupGracefulShutdown();
-      
     } catch (error) {
-      logger.mcp.error("Error during MCP server startup", { 
+      logger.mcp.error("Error during MCP server startup", {
         error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
       });
       startupTimer.end({ success: false, error: error instanceof Error ? error.message : "Unknown error" });
       throw error;
@@ -105,7 +104,7 @@ class StandaloneMcpServer {
   stop() {
     logger.mcp.info("Stopping MCP server", { port: this.port });
     const shutdownTimer = logger.createTimer("mcp", "server_shutdown");
-    
+
     if (this.httpServer) {
       this.httpServer.close();
       this.httpServer = null;
@@ -117,7 +116,7 @@ class StandaloneMcpServer {
       this.server = null;
       logger.mcp.debug("MCP server instance closed");
     }
-    
+
     shutdownTimer.end({ success: true });
     logger.mcp.info("MCP server stopped successfully");
   }
@@ -142,15 +141,15 @@ class StandaloneMcpServer {
       async (args, extra) => {
         const requestId = logger.generateRequestId();
         const timer = logger.createTimer("mcp", "get_recipe_tool");
-        
+
         logger.mcp.info("Tool execution started", {
           requestId,
           tool: "get_recipe",
           identifier: args.identifier,
           projects: args.projects || null,
-          sessionId: extra?.sessionId || null
+          sessionId: extra?.sessionId || null,
         });
-        
+
         try {
           const { identifier, projects } = args;
 
@@ -163,7 +162,7 @@ class StandaloneMcpServer {
           if (!recipe || !recipe.currentVersion) {
             logger.mcp.warn("Recipe not found", { requestId, identifier, tool: "get_recipe" });
             timer.end({ success: false, reason: "recipe_not_found", identifier });
-            
+
             return {
               content: [
                 {
@@ -191,19 +190,19 @@ class StandaloneMcpServer {
           // Return full recipe content
           logger.mcp.info("Recipe retrieved successfully", {
             requestId,
-            tool: "get_recipe", 
+            tool: "get_recipe",
             recipeId: recipe.id,
             shortId: recipe.shortId,
             title: recipe.currentVersion.title,
             hasProjectFilter: !!(projects && projects.length > 0),
-            projectCount: recipe.currentVersion.projects?.length || 0
+            projectCount: recipe.currentVersion.projects?.length || 0,
           });
-          
-          timer.end({ 
-            success: true, 
-            recipeId: recipe.id, 
+
+          timer.end({
+            success: true,
+            recipeId: recipe.id,
             shortId: recipe.shortId,
-            title: recipe.currentVersion.title 
+            title: recipe.currentVersion.title,
           });
 
           return {
@@ -215,16 +214,16 @@ class StandaloneMcpServer {
             ],
           };
         } catch (error) {
-          logger.mcp.error("Error in get_recipe tool", { 
+          logger.mcp.error("Error in get_recipe tool", {
             requestId,
             tool: "get_recipe",
             identifier,
             error: error instanceof Error ? error.message : "Unknown error",
-            stack: error instanceof Error ? error.stack : undefined
+            stack: error instanceof Error ? error.stack : undefined,
           });
-          
+
           timer.end({ success: false, error: error instanceof Error ? error.message : "Unknown error" });
-          
+
           return {
             content: [
               {
@@ -251,14 +250,14 @@ class StandaloneMcpServer {
       async (args) => {
         const requestId = logger.generateRequestId();
         const timer = logger.createTimer("mcp", "search_recipes_tool");
-        
+
         logger.mcp.info("Tool execution started", {
           requestId,
           tool: "search_recipes",
           query: args.query,
-          projects: args.projects || null
+          projects: args.projects || null,
         });
-        
+
         try {
           const limit = 10;
           const { query, projects } = args;
@@ -267,15 +266,15 @@ class StandaloneMcpServer {
           const results = await SearchService.hybridSearch(query, limit, projects);
 
           if (results.length === 0) {
-            logger.mcp.info("Search completed with no results", { 
-              requestId, 
+            logger.mcp.info("Search completed with no results", {
+              requestId,
               tool: "search_recipes",
               query,
-              resultsCount: 0 
+              resultsCount: 0,
             });
-            
+
             timer.end({ success: true, query, resultsCount: 0 });
-            
+
             return {
               content: [
                 {
@@ -302,14 +301,14 @@ class StandaloneMcpServer {
             tool: "search_recipes",
             query,
             resultsCount: results.length,
-            topResults: results.slice(0, 3).map(r => ({ shortId: r.shortid, title: r.title }))
+            topResults: results.slice(0, 3).map((r) => ({ shortId: r.shortid, title: r.title })),
           });
-          
-          timer.end({ 
-            success: true, 
-            query, 
+
+          timer.end({
+            success: true,
+            query,
             resultsCount: results.length,
-            hasProjects: !!(projects && projects.length > 0)
+            hasProjects: !!(projects && projects.length > 0),
           });
 
           return {
@@ -326,11 +325,11 @@ class StandaloneMcpServer {
             tool: "search_recipes",
             query,
             error: error instanceof Error ? error.message : "Unknown error",
-            stack: error instanceof Error ? error.stack : undefined
+            stack: error instanceof Error ? error.stack : undefined,
           });
-          
+
           timer.end({ success: false, query, error: error instanceof Error ? error.message : "Unknown error" });
-          
+
           return {
             content: [
               {
@@ -365,7 +364,7 @@ class StandaloneMcpServer {
     this.app.post("/mcp", async (req: Request, res: Response) => {
       const requestId = logger.generateRequestId();
       const timer = logger.createTimer("mcp", "handle_mcp_request");
-      
+
       logger.mcp.info("MCP request received", {
         requestId,
         method: req.method,
@@ -373,9 +372,9 @@ class StandaloneMcpServer {
         queryParams: req.query,
         hasBody: !!req.body,
         bodyMethod: req.body?.method || null,
-        bodyId: req.body?.id || null
+        bodyId: req.body?.id || null,
       });
-      
+
       try {
         const transport: StreamableHTTPServerTransport = new StreamableHTTPServerTransport({
           sessionIdGenerator: undefined,
@@ -385,7 +384,7 @@ class StandaloneMcpServer {
         if (req.query.projects && req.body?.params?.arguments) {
           const projectsParam = req.query.projects;
           logger.mcp.debug("Injecting projects parameter", { requestId, projectsParam });
-          
+
           if (typeof projectsParam === "string") {
             req.body.params.arguments.projects = projectsParam.split(",");
           } else if (Array.isArray(projectsParam)) {
@@ -403,23 +402,22 @@ class StandaloneMcpServer {
         if (this.server) {
           await this.server.connect(transport);
         }
-        
+
         logger.mcp.debug("Handling MCP request", { requestId });
         await transport.handleRequest(req, res, req.body);
-        
+
         timer.end({ success: true, method: req.body?.method || "unknown" });
         logger.mcp.info("MCP request completed successfully", { requestId });
-        
       } catch (error) {
         logger.mcp.error("Error handling MCP request", {
           requestId,
           error: error instanceof Error ? error.message : "Unknown error",
           stack: error instanceof Error ? error.stack : undefined,
-          method: req.body?.method || "unknown"
+          method: req.body?.method || "unknown",
         });
-        
+
         timer.end({ success: false, error: error instanceof Error ? error.message : "Unknown error" });
-        
+
         if (!res.headersSent) {
           res.status(500).json({
             jsonrpc: "2.0",
@@ -476,7 +474,7 @@ class StandaloneMcpServer {
 
     process.on("SIGINT", () => shutdown("SIGINT"));
     process.on("SIGTERM", () => shutdown("SIGTERM"));
-    
+
     logger.mcp.debug("Graceful shutdown handlers registered");
   }
 

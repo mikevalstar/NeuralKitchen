@@ -1,7 +1,7 @@
-import { logger } from "../logger.js";
 import { Queue } from "../data/queue";
 import { Recipes } from "../data/recipes";
 import { Settings } from "../data/settings";
+import { logger } from "../logger.js";
 
 export class QueueProcessor {
   private intervalId: NodeJS.Timeout | null = null;
@@ -15,8 +15,8 @@ export class QueueProcessor {
    */
   start() {
     if (this.intervalId) {
-      logger.tasks.warn("Queue processor start requested but already running", { 
-        intervalMs: this.intervalMs 
+      logger.tasks.warn("Queue processor start requested but already running", {
+        intervalMs: this.intervalMs,
       });
       return;
     }
@@ -27,11 +27,11 @@ export class QueueProcessor {
       return;
     }
 
-    logger.tasks.info("Queue processor starting", { 
+    logger.tasks.info("Queue processor starting", {
       intervalMs: this.intervalMs,
-      intervalSeconds: this.intervalMs / 1000 
+      intervalSeconds: this.intervalMs / 1000,
     });
-    
+
     this.intervalId = setInterval(() => {
       this.processNext();
     }, this.intervalMs);
@@ -79,7 +79,7 @@ export class QueueProcessor {
         queueItemId: item.id,
         title: item.title,
         versionId: item.versionId,
-        type: "recipe_processing"
+        type: "recipe_processing",
       });
 
       try {
@@ -91,28 +91,28 @@ export class QueueProcessor {
         logger.tasks.info("Queue item processing completed", {
           queueItemId: item.id,
           title: item.title,
-          versionId: item.versionId
+          versionId: item.versionId,
         });
       } catch (processError) {
         const errorMessage = processError instanceof Error ? processError.message : String(processError);
-        
+
         logger.tasks.error("Queue item processing failed", {
           queueItemId: item.id,
           title: item.title,
           versionId: item.versionId,
           error: errorMessage,
-          errorType: processError instanceof Error ? processError.constructor.name : "Unknown"
+          errorType: processError instanceof Error ? processError.constructor.name : "Unknown",
         });
-        
+
         await Queue.markFailed(item.id, errorMessage);
         throw processError;
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
+
       logger.tasks.error("Unexpected error in queue processing cycle", {
         error: errorMessage,
-        errorType: error instanceof Error ? error.constructor.name : "Unknown"
+        errorType: error instanceof Error ? error.constructor.name : "Unknown",
       });
 
       // If we have an item reference, mark it as failed

@@ -86,7 +86,7 @@ class Logger {
   constructor() {
     this.config = getConfig();
 
-    const streams: any[] = [];
+    const streams: pino.DestinationStream[] = [];
 
     // Console transport
     if (this.config.toConsole) {
@@ -146,7 +146,7 @@ class Logger {
       if (logger) return logger;
     }
 
-    const streams: any[] = [];
+    const streams: pino.DestinationStream[] = [];
 
     // Console transport
     if (this.config.toConsole) {
@@ -263,20 +263,40 @@ class Logger {
   }
 
   // Convenience methods for general logging (same as logger.general.*)
-  info(msg: string, obj?: any) {
-    this.general.info(obj, msg);
+  info(msg: string, obj?: Record<string, unknown>) {
+    if (obj) {
+      this.general.info(obj, msg);
+    } else {
+      this.general.info(msg);
+    }
   }
-  error(msg: string, obj?: any) {
-    this.general.error(obj, msg);
+  error(msg: string, obj?: Record<string, unknown>) {
+    if (obj) {
+      this.general.error(obj, msg);
+    } else {
+      this.general.error(msg);
+    }
   }
-  warn(msg: string, obj?: any) {
-    this.general.warn(obj, msg);
+  warn(msg: string, obj?: Record<string, unknown>) {
+    if (obj) {
+      this.general.warn(obj, msg);
+    } else {
+      this.general.warn(msg);
+    }
   }
-  debug(msg: string, obj?: any) {
-    this.general.debug(obj, msg);
+  debug(msg: string, obj?: Record<string, unknown>) {
+    if (obj) {
+      this.general.debug(obj, msg);
+    } else {
+      this.general.debug(msg);
+    }
   }
-  trace(msg: string, obj?: any) {
-    this.general.trace(obj, msg);
+  trace(msg: string, obj?: Record<string, unknown>) {
+    if (obj) {
+      this.general.trace(obj, msg);
+    } else {
+      this.general.trace(msg);
+    }
   }
 
   /**
@@ -312,7 +332,7 @@ class Logger {
 
     return {
       requestId,
-      end: (metadata?: any) => {
+      end: (metadata?: Record<string, unknown>) => {
         const endTime = process.hrtime.bigint();
         const duration = Number(endTime - startTime) / 1000000; // Convert to milliseconds
 
