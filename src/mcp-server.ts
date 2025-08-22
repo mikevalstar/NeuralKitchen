@@ -11,6 +11,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import express, { type Request, type Response } from "express";
 import { z } from "zod";
+import { logger } from "./lib/logger.js";
 import { Prompts } from "./lib/data/prompts.js";
 import { Recipes } from "./lib/data/recipes.js";
 import { SearchService } from "./lib/services/search.js";
@@ -26,11 +27,12 @@ class StandaloneMcpServer {
    */
   async start() {
     if (this.httpServer) {
-      console.log("MCP server is already running");
+      logger.mcp.warn("MCP server start requested but already running", { port: this.port });
       return;
     }
 
-    console.log("Starting standalone MCP server...");
+    logger.mcp.info("Starting standalone MCP server", { port: this.port });
+    const startupTimer = logger.createTimer("mcp", "server_startup");
 
     // Get prompts from database with fallback to constants
     const [description, instructions] = await Promise.all([
