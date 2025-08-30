@@ -1,6 +1,8 @@
+import { DataSourceSyncJobs } from "../data/dataSources";
 import { Queue } from "../data/queue";
 import { Recipes } from "../data/recipes";
 import { Settings } from "../data/settings";
+import type { RecipeQueue } from "../generated/prisma/client";
 import { logger } from "../logger.js";
 
 export class QueueProcessor {
@@ -8,7 +10,7 @@ export class QueueProcessor {
   private isProcessing = false;
   private readonly intervalMs = process.env.QUEUE_PROCESSOR_INTERVAL_MS
     ? parseInt(process.env.QUEUE_PROCESSOR_INTERVAL_MS)
-    : 500000; // 5000 seconds default
+    : 5000; // 5 seconds default (fixed from 500000)
 
   /**
    * Start the queue processor
@@ -67,46 +69,27 @@ export class QueueProcessor {
     try {
       this.isProcessing = true;
 
-      // Get the next item from the queue
-      const item = await Queue.popNext();
-
-      if (!item) {
-        // No items to process
+      // Try to process recipe queue items first
+      const recipeItem = await Queue.popNext();
+      if (recipeItem) {
+        await this.processRecipeItem(recipeItem);
         return;
       }
 
-      logger.tasks.info("Processing queue item", {
-        queueItemId: item.id,
-        title: item.title,
-        versionId: item.versionId,
-        type: "recipe_processing",
-      });
-
-      try {
-        // Process the recipe version (generate AI summary and embedding)
-        await Recipes.processRecipeVersion(item.versionId);
-
-        // Mark the queue item as completed
-        await Queue.markCompleted(item.id);
-        logger.tasks.info("Queue item processing completed", {
-          queueItemId: item.id,
-          title: item.title,
-          versionId: item.versionId,
-        });
-      } catch (processError) {
-        const errorMessage = processError instanceof Error ? processError.message : String(processError);
-
-        logger.tasks.error("Queue item processing failed", {
-          queueItemId: item.id,
-          title: item.title,
-          versionId: item.versionId,
-          error: errorMessage,
-          errorType: processError instanceof Error ? processError.constructor.name : "Unknown",
-        });
-
-        await Queue.markFailed(item.id, errorMessage);
-        throw processError;
+      // Try to process data source sync jobs
+      const syncJobs = await DataSourceSyncJobs.getRunning();
+      if (syncJobs.length === 0) {
+        // No items to process in either queue
+        return;
       }
+
+      // Process the first running sync job (this would be expanded with actual sync logic in Phase 4)
+      const syncJob = syncJobs[0];
+      logger.tasks.info("Data source sync job found but sync logic not implemented yet", {
+        syncJobId: syncJob.id,
+        dataSourceId: syncJob.dataSourceId,
+        status: syncJob.status,
+      });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
@@ -114,11 +97,46 @@ export class QueueProcessor {
         error: errorMessage,
         errorType: error instanceof Error ? error.constructor.name : "Unknown",
       });
-
-      // If we have an item reference, mark it as failed
-      // This is a simplified error handling - in practice we'd want more robust retry logic
     } finally {
       this.isProcessing = false;
+    }
+  }
+
+  /**
+   * Process a recipe queue item
+   */
+  private async processRecipeItem(item: RecipeQueue) {
+    logger.tasks.info("Processing recipe queue item", {
+      queueItemId: item.id,
+      title: item.title,
+      versionId: item.versionId,
+      type: "recipe_processing",
+    });
+
+    try {
+      // Process the recipe version (generate AI summary and embedding)
+      await Recipes.processRecipeVersion(item.versionId);
+
+      // Mark the queue item as completed
+      await Queue.markCompleted(item.id);
+      logger.tasks.info("Recipe queue item processing completed", {
+        queueItemId: item.id,
+        title: item.title,
+        versionId: item.versionId,
+      });
+    } catch (processError) {
+      const errorMessage = processError instanceof Error ? processError.message : String(processError);
+
+      logger.tasks.error("Recipe queue item processing failed", {
+        queueItemId: item.id,
+        title: item.title,
+        versionId: item.versionId,
+        error: errorMessage,
+        errorType: processError instanceof Error ? processError.constructor.name : "Unknown",
+      });
+
+      await Queue.markFailed(item.id, errorMessage);
+      throw processError;
     }
   }
 

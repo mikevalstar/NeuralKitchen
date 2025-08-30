@@ -139,19 +139,71 @@ export const userCreateSchema = z.object({
 export type UserCreateInput = z.infer<typeof userCreateSchema>;
 
 // User update validation schema
-export const userUpdateSchema = z.object({
-  name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
+// User validation schema
+export const userSchema = z.object({
+  name: z.string().min(1, "User name is required").max(100, "User name must be less than 100 characters"),
+  email: z.string().email("Invalid email address"),
   role: z.enum(["", "admin"]).optional(),
 });
 
-export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
+export type UserInput = z.infer<typeof userSchema>;
 
-// User ID validation schema
+// User ID validation schema for server routes
 export const userIdSchema = z.object({
   userId: z.string().min(1, "User ID is required"),
 });
 
 export type UserIdInput = z.infer<typeof userIdSchema>;
+
+// Data Source validation schema
+export const dataSourceInputSchema = z.object({
+  name: z.string().min(1, "Data source name is required").max(100, "Data source name must be less than 100 characters"),
+  type: z.enum(["git", "confluence"], { message: "Data source type must be 'git' or 'confluence'" }),
+  syncIntervalMinutes: z
+    .number()
+    .min(5, "Sync interval must be at least 5 minutes")
+    .max(1440, "Sync interval must be at most 24 hours")
+    .default(60),
+  config: z
+    .object({
+      // Git specific config
+      repositoryUrl: z.string().url("Invalid repository URL").optional(),
+      branch: z.string().min(1, "Branch name is required").default("main").optional(),
+      // Extensible for other types
+    })
+    .passthrough(), // Allow additional properties for extensibility
+  sshPrivateKey: z.string().optional(),
+  sshPublicKey: z.string().optional(),
+  isActive: z.boolean().default(true).optional(),
+});
+
+export type DataSourceInput = z.infer<typeof dataSourceInputSchema>;
+
+// Data Source Project validation schema
+export const dataSourceProjectInputSchema = z.object({
+  dataSourceId: z.string().min(1, "Data source ID is required"),
+  projectId: z.string().min(1, "Project ID is required"),
+  includeGlobs: z.string().min(1, "Include globs are required"),
+  excludeGlobs: z.string().optional().default(""),
+  isActive: z.boolean().default(true),
+});
+
+export type DataSourceProjectInput = z.infer<typeof dataSourceProjectInputSchema>;
+
+// Data Source Sync Job validation schema
+export const dataSourceSyncJobInputSchema = z.object({
+  dataSourceId: z.string().min(1, "Data source ID is required"),
+  status: z
+    .enum(["pending", "running", "completed", "failed"], { message: "Invalid sync job status" })
+    .default("pending"),
+  error: z.string().optional(),
+  filesFound: z.number().int().min(0).optional(),
+  filesImported: z.number().int().min(0).optional(),
+  filesUpdated: z.number().int().min(0).optional(),
+  filesSkipped: z.number().int().min(0).optional(),
+});
+
+export type DataSourceSyncJobInput = z.infer<typeof dataSourceSyncJobInputSchema>;
 
 // Admin password set validation schema
 export const adminPasswordSetSchema = z

@@ -1,4 +1,3 @@
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -23,18 +22,19 @@ model Tag {
 }
 
 model Project {
-  id             String          @id @default(uuid())
+  id             String              @id @default(uuid())
   title          String
-  description    String?         @db.VarChar(300)
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  description    String?             @db.VarChar(300)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
   deletedAt      DateTime?
-  shortId        String          @unique
+  shortId        String              @unique
   createdBy      String?
   modifiedBy     String?
-  createdByUser  User?           @relation("ProjectCreatedBy", fields: [createdBy], references: [id])
-  modifiedByUser User?           @relation("ProjectModifiedBy", fields: [modifiedBy], references: [id])
-  recipeVersions RecipeVersion[] @relation("RecipeVersionProjects")
+  createdByUser  User?               @relation("ProjectCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?               @relation("ProjectModifiedBy", fields: [modifiedBy], references: [id])
+  recipeVersions RecipeVersion[]     @relation("RecipeVersionProjects")
+  dataSources    DataSourceProject[]
 }
 
 model Recipe {
@@ -165,22 +165,28 @@ model User {
   banExpires DateTime?
 
   // Created/Modified relations
-  tagsCreated             Tag[]           @relation("TagCreatedBy")
-  tagsModified            Tag[]           @relation("TagModifiedBy")
-  projectsCreated         Project[]       @relation("ProjectCreatedBy")
-  projectsModified        Project[]       @relation("ProjectModifiedBy")
-  recipesCreated          Recipe[]        @relation("RecipeCreatedBy")
-  recipesModified         Recipe[]        @relation("RecipeModifiedBy")
-  recipeVersionsCreated   RecipeVersion[] @relation("RecipeVersionCreatedBy")
-  recipeVersionsModified  RecipeVersion[] @relation("RecipeVersionModifiedBy")
-  recipeQueuesCreated     RecipeQueue[]   @relation("RecipeQueueCreatedBy")
-  recipeQueuesModified    RecipeQueue[]   @relation("RecipeQueueModifiedBy")
-  vecDocumentsCreated     VecDocument[]   @relation("VecDocumentCreatedBy")
-  vecDocumentsModified    VecDocument[]   @relation("VecDocumentModifiedBy")
-  promptsCreated          Prompt[]        @relation("PromptCreatedBy")
-  promptsModified         Prompt[]        @relation("PromptModifiedBy")
-  appSettingsCreated      AppSetting[]    @relation("AppSettingCreatedBy")
-  appSettingsModified     AppSetting[]    @relation("AppSettingModifiedBy")
+  tagsCreated                Tag[]               @relation("TagCreatedBy")
+  tagsModified               Tag[]               @relation("TagModifiedBy")
+  projectsCreated            Project[]           @relation("ProjectCreatedBy")
+  projectsModified           Project[]           @relation("ProjectModifiedBy")
+  recipesCreated             Recipe[]            @relation("RecipeCreatedBy")
+  recipesModified            Recipe[]            @relation("RecipeModifiedBy")
+  recipeVersionsCreated      RecipeVersion[]     @relation("RecipeVersionCreatedBy")
+  recipeVersionsModified     RecipeVersion[]     @relation("RecipeVersionModifiedBy")
+  recipeQueuesCreated        RecipeQueue[]       @relation("RecipeQueueCreatedBy")
+  recipeQueuesModified       RecipeQueue[]       @relation("RecipeQueueModifiedBy")
+  vecDocumentsCreated        VecDocument[]       @relation("VecDocumentCreatedBy")
+  vecDocumentsModified       VecDocument[]       @relation("VecDocumentModifiedBy")
+  promptsCreated             Prompt[]            @relation("PromptCreatedBy")
+  promptsModified            Prompt[]            @relation("PromptModifiedBy")
+  appSettingsCreated         AppSetting[]        @relation("AppSettingCreatedBy")
+  appSettingsModified        AppSetting[]        @relation("AppSettingModifiedBy")
+  dataSourcesCreated         DataSource[]        @relation("DataSourceCreatedBy")
+  dataSourcesModified        DataSource[]        @relation("DataSourceModifiedBy")
+  dataSourceProjectsCreated  DataSourceProject[] @relation("DataSourceProjectCreatedBy")
+  dataSourceProjectsModified DataSourceProject[] @relation("DataSourceProjectModifiedBy")
+  dataSourceSyncJobsCreated  DataSourceSyncJob[] @relation("DataSourceSyncJobCreatedBy")
+  dataSourceSyncJobsModified DataSourceSyncJob[] @relation("DataSourceSyncJobModifiedBy")
 
   @@unique([email])
   @@map("user")
@@ -231,4 +237,77 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+model DataSource {
+  id                  String    @id @default(cuid())
+  name                String
+  type                String // "git", "confluence", etc
+  config              Json // Flexible config for different source types
+  isActive            Boolean   @default(true)
+  syncIntervalMinutes Int       @default(60) // How often to sync in minutes
+  lastSyncAt          DateTime?
+  lastError           String?
+
+  // SSH Key fields (stored directly on data source)
+  // TODO: Add encryption at rest for enhanced security
+  sshPrivateKey String? // Base64 encoded private key
+  sshPublicKey  String? // Base64 encoded public key
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  createdBy      String?
+  modifiedBy     String?
+  createdByUser  User?    @relation("DataSourceCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?    @relation("DataSourceModifiedBy", fields: [modifiedBy], references: [id])
+
+  // Relationships
+  projects DataSourceProject[]
+  syncJobs DataSourceSyncJob[]
+
+  @@map("data_sources")
+}
+
+model DataSourceProject {
+  id           String  @id @default(cuid())
+  dataSourceId String
+  projectId    String
+  includeGlobs String // Comma/newline separated
+  excludeGlobs String // Comma/newline separated
+  isActive     Boolean @default(true)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  createdBy      String?
+  modifiedBy     String?
+  createdByUser  User?    @relation("DataSourceProjectCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?    @relation("DataSourceProjectModifiedBy", fields: [modifiedBy], references: [id])
+
+  dataSource DataSource @relation(fields: [dataSourceId], references: [id], onDelete: Cascade)
+  project    Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([dataSourceId, projectId])
+  @@map("data_source_projects")
+}
+
+model DataSourceSyncJob {
+  id            String    @id @default(cuid())
+  dataSourceId  String
+  status        String // "pending", "running", "completed", "failed"
+  startedAt     DateTime  @default(now())
+  completedAt   DateTime?
+  error         String?
+  filesFound    Int?
+  filesImported Int?
+  filesUpdated  Int?
+  filesSkipped  Int?
+
+  createdBy      String?
+  modifiedBy     String?
+  createdByUser  User?   @relation("DataSourceSyncJobCreatedBy", fields: [createdBy], references: [id])
+  modifiedByUser User?   @relation("DataSourceSyncJobModifiedBy", fields: [modifiedBy], references: [id])
+
+  dataSource DataSource @relation(fields: [dataSourceId], references: [id], onDelete: Cascade)
+
+  @@map("data_source_sync_jobs")
 }
