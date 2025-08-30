@@ -195,6 +195,24 @@ function ProjectDetail() {
                   <p className="text-sm text-muted-foreground">Add a custom connector and set the server URL to:</p>
                   <div className="text-sm font-mono break-all">{mcpEndpoint}</div>
                 </div>
+
+                <div className="space-y-2">
+                  <div className="text-sm font-medium">Zed Editor</div>
+                  <p className="text-sm text-muted-foreground">
+                    Add to your <code>.zed/settings.json</code> file:
+                  </p>
+                  <pre className="bg-muted rounded p-3 overflow-auto text-sm">
+                    <code>{`{
+  "context_servers": {
+    "NeuralKitchen": {
+      "source": "custom",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "${mcpEndpoint}"]
+    }
+  }
+}`}</code>
+                  </pre>
+                </div>
               </CardContent>
             </Card>
           )}

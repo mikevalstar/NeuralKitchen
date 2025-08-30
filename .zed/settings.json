@@ -5,8 +5,9 @@
 {
   "context_servers": {
     "neuralkitchen": {
-      "type": "http",
-      "url": "http://localhost:3000/mcp?projects=neuralkitchen"
+      "source": "custom",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:3000/mcp?projects=neuralkitchen"]
     }
   }
 }
