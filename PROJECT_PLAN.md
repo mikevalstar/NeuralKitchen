@@ -54,7 +54,22 @@ Neural Kitchen is expanding to include automated document synchronization from e
   
   // Plugin-specific configs extend this base
   const GitSyncConfigSchema = BaseSyncConfigSchema.extend({
-    repositoryUrl: z.string().url(),
+    repositoryUrl: z.string().refine((url) => {
+      // Allow HTTP/HTTPS URLs
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        try {
+          new URL(url);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      // Allow SSH URLs (git@host:user/repo.git format)
+      const sshPattern = /^git@[^:]+:[^/]+\/[^/]+\.git$/;
+      return sshPattern.test(url);
+    }, {
+      message: "Must be a valid HTTP/HTTPS URL or SSH URL in format git@host:user/repo.git"
+    }),
     branch: z.string().default("main"),
     authToken: z.string().optional(),
     clonePath: z.string().optional() // local clone directory

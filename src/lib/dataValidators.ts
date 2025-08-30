@@ -167,7 +167,29 @@ export const dataSourceInputSchema = z.object({
   config: z
     .object({
       // Git specific config
-      repositoryUrl: z.string().url("Invalid repository URL").optional(),
+      repositoryUrl: z.string().refine((url) => {
+        // Allow HTTP/HTTPS URLs
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+          try {
+            new URL(url);
+            return true;
+          } catch {
+            return false;
+          }
+        }
+        // Allow SSH URLs in various formats:
+        // - git@host:user/repo.git
+        // - git@host:user/repo
+        // - ssh://git@host/user/repo.git
+        // - ssh://git@host:port/user/repo.git
+        const sshPatterns = [
+          /^git@[^:]+:[^/]+\/[^/]+(\.git)?$/,  // git@host:user/repo(.git)
+          /^ssh:\/\/git@[^\/]+(:\d+)?\/[^\/]+\/[^\/]+(\.git)?$/  // ssh://git@host(:port)/user/repo(.git)
+        ];
+        return sshPatterns.some(pattern => pattern.test(url));
+      }, {
+        message: "Must be a valid HTTP/HTTPS URL or SSH URL (e.g., git@host:user/repo.git or ssh://git@host/user/repo.git)"
+      }).optional(),
       branch: z.string().min(1, "Branch name is required").default("main").optional(),
       // Extensible for other types
     })

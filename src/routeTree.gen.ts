@@ -22,15 +22,18 @@ import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as RecipesIndexRouteImport } from './routes/recipes/index'
 import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
 import { Route as HelpIndexRouteImport } from './routes/help/index'
+import { Route as DataSourcesIndexRouteImport } from './routes/data-sources/index'
 import { Route as RecipesCreateRouteImport } from './routes/recipes/create'
 import { Route as HelpHelpFileRouteImport } from './routes/help/$helpFile'
 import { Route as UsersUserIdIndexRouteImport } from './routes/users/$userId/index'
 import { Route as RecipesRecipeIdIndexRouteImport } from './routes/recipes/$recipeId/index'
 import { Route as ProjectsProjectIdIndexRouteImport } from './routes/projects/$projectId/index'
+import { Route as DataSourcesIdIndexRouteImport } from './routes/data-sources/$id/index'
 import { Route as UsersUserIdEditRouteImport } from './routes/users/$userId/edit'
 import { Route as SettingsPromptsPromptKeyRouteImport } from './routes/settings/prompts/$promptKey'
 import { Route as RecipesRecipeIdEditRouteImport } from './routes/recipes/$recipeId/edit'
 import { Route as ProjectsProjectIdEditRouteImport } from './routes/projects/$projectId/edit'
+import { Route as DataSourcesIdEditRouteImport } from './routes/data-sources/$id/edit'
 import { Route as RecipesRecipeIdVersionsIndexRouteImport } from './routes/recipes/$recipeId/versions/index'
 import { ServerRoute as ApiLogoutServerRouteImport } from './routes/api/logout'
 import { ServerRoute as ApiAuthSplatServerRouteImport } from './routes/api/auth/$'
@@ -92,6 +95,11 @@ const HelpIndexRoute = HelpIndexRouteImport.update({
   path: '/help/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DataSourcesIndexRoute = DataSourcesIndexRouteImport.update({
+  id: '/data-sources/',
+  path: '/data-sources/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RecipesCreateRoute = RecipesCreateRouteImport.update({
   id: '/recipes/create',
   path: '/recipes/create',
@@ -117,6 +125,11 @@ const ProjectsProjectIdIndexRoute = ProjectsProjectIdIndexRouteImport.update({
   path: '/projects/$projectId/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DataSourcesIdIndexRoute = DataSourcesIdIndexRouteImport.update({
+  id: '/data-sources/$id/',
+  path: '/data-sources/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const UsersUserIdEditRoute = UsersUserIdEditRouteImport.update({
   id: '/users/$userId/edit',
   path: '/users/$userId/edit',
@@ -136,6 +149,11 @@ const RecipesRecipeIdEditRoute = RecipesRecipeIdEditRouteImport.update({
 const ProjectsProjectIdEditRoute = ProjectsProjectIdEditRouteImport.update({
   id: '/projects/$projectId/edit',
   path: '/projects/$projectId/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DataSourcesIdEditRoute = DataSourcesIdEditRouteImport.update({
+  id: '/data-sources/$id/edit',
+  path: '/data-sources/$id/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RecipesRecipeIdVersionsIndexRoute =
@@ -164,15 +182,18 @@ export interface FileRoutesByFullPath {
   '/tags': typeof TagsRoute
   '/help/$helpFile': typeof HelpHelpFileRoute
   '/recipes/create': typeof RecipesCreateRoute
+  '/data-sources': typeof DataSourcesIndexRoute
   '/help': typeof HelpIndexRoute
   '/projects': typeof ProjectsIndexRoute
   '/recipes': typeof RecipesIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/users': typeof UsersIndexRoute
+  '/data-sources/$id/edit': typeof DataSourcesIdEditRoute
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
   '/users/$userId/edit': typeof UsersUserIdEditRoute
+  '/data-sources/$id': typeof DataSourcesIdIndexRoute
   '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
   '/recipes/$recipeId': typeof RecipesRecipeIdIndexRoute
   '/users/$userId': typeof UsersUserIdIndexRoute
@@ -187,15 +208,18 @@ export interface FileRoutesByTo {
   '/tags': typeof TagsRoute
   '/help/$helpFile': typeof HelpHelpFileRoute
   '/recipes/create': typeof RecipesCreateRoute
+  '/data-sources': typeof DataSourcesIndexRoute
   '/help': typeof HelpIndexRoute
   '/projects': typeof ProjectsIndexRoute
   '/recipes': typeof RecipesIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/users': typeof UsersIndexRoute
+  '/data-sources/$id/edit': typeof DataSourcesIdEditRoute
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
   '/users/$userId/edit': typeof UsersUserIdEditRoute
+  '/data-sources/$id': typeof DataSourcesIdIndexRoute
   '/projects/$projectId': typeof ProjectsProjectIdIndexRoute
   '/recipes/$recipeId': typeof RecipesRecipeIdIndexRoute
   '/users/$userId': typeof UsersUserIdIndexRoute
@@ -211,15 +235,18 @@ export interface FileRoutesById {
   '/tags': typeof TagsRoute
   '/help/$helpFile': typeof HelpHelpFileRoute
   '/recipes/create': typeof RecipesCreateRoute
+  '/data-sources/': typeof DataSourcesIndexRoute
   '/help/': typeof HelpIndexRoute
   '/projects/': typeof ProjectsIndexRoute
   '/recipes/': typeof RecipesIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/users/': typeof UsersIndexRoute
+  '/data-sources/$id/edit': typeof DataSourcesIdEditRoute
   '/projects/$projectId/edit': typeof ProjectsProjectIdEditRoute
   '/recipes/$recipeId/edit': typeof RecipesRecipeIdEditRoute
   '/settings/prompts/$promptKey': typeof SettingsPromptsPromptKeyRoute
   '/users/$userId/edit': typeof UsersUserIdEditRoute
+  '/data-sources/$id/': typeof DataSourcesIdIndexRoute
   '/projects/$projectId/': typeof ProjectsProjectIdIndexRoute
   '/recipes/$recipeId/': typeof RecipesRecipeIdIndexRoute
   '/users/$userId/': typeof UsersUserIdIndexRoute
@@ -236,15 +263,18 @@ export interface FileRouteTypes {
     | '/tags'
     | '/help/$helpFile'
     | '/recipes/create'
+    | '/data-sources'
     | '/help'
     | '/projects'
     | '/recipes'
     | '/settings'
     | '/users'
+    | '/data-sources/$id/edit'
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
     | '/users/$userId/edit'
+    | '/data-sources/$id'
     | '/projects/$projectId'
     | '/recipes/$recipeId'
     | '/users/$userId'
@@ -259,15 +289,18 @@ export interface FileRouteTypes {
     | '/tags'
     | '/help/$helpFile'
     | '/recipes/create'
+    | '/data-sources'
     | '/help'
     | '/projects'
     | '/recipes'
     | '/settings'
     | '/users'
+    | '/data-sources/$id/edit'
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
     | '/users/$userId/edit'
+    | '/data-sources/$id'
     | '/projects/$projectId'
     | '/recipes/$recipeId'
     | '/users/$userId'
@@ -282,15 +315,18 @@ export interface FileRouteTypes {
     | '/tags'
     | '/help/$helpFile'
     | '/recipes/create'
+    | '/data-sources/'
     | '/help/'
     | '/projects/'
     | '/recipes/'
     | '/settings/'
     | '/users/'
+    | '/data-sources/$id/edit'
     | '/projects/$projectId/edit'
     | '/recipes/$recipeId/edit'
     | '/settings/prompts/$promptKey'
     | '/users/$userId/edit'
+    | '/data-sources/$id/'
     | '/projects/$projectId/'
     | '/recipes/$recipeId/'
     | '/users/$userId/'
@@ -306,15 +342,18 @@ export interface RootRouteChildren {
   TagsRoute: typeof TagsRoute
   HelpHelpFileRoute: typeof HelpHelpFileRoute
   RecipesCreateRoute: typeof RecipesCreateRoute
+  DataSourcesIndexRoute: typeof DataSourcesIndexRoute
   HelpIndexRoute: typeof HelpIndexRoute
   ProjectsIndexRoute: typeof ProjectsIndexRoute
   RecipesIndexRoute: typeof RecipesIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
+  DataSourcesIdEditRoute: typeof DataSourcesIdEditRoute
   ProjectsProjectIdEditRoute: typeof ProjectsProjectIdEditRoute
   RecipesRecipeIdEditRoute: typeof RecipesRecipeIdEditRoute
   SettingsPromptsPromptKeyRoute: typeof SettingsPromptsPromptKeyRoute
   UsersUserIdEditRoute: typeof UsersUserIdEditRoute
+  DataSourcesIdIndexRoute: typeof DataSourcesIdIndexRoute
   ProjectsProjectIdIndexRoute: typeof ProjectsProjectIdIndexRoute
   RecipesRecipeIdIndexRoute: typeof RecipesRecipeIdIndexRoute
   UsersUserIdIndexRoute: typeof UsersUserIdIndexRoute
@@ -425,6 +464,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HelpIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/data-sources/': {
+      id: '/data-sources/'
+      path: '/data-sources'
+      fullPath: '/data-sources'
+      preLoaderRoute: typeof DataSourcesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/recipes/create': {
       id: '/recipes/create'
       path: '/recipes/create'
@@ -460,6 +506,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProjectsProjectIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/data-sources/$id/': {
+      id: '/data-sources/$id/'
+      path: '/data-sources/$id'
+      fullPath: '/data-sources/$id'
+      preLoaderRoute: typeof DataSourcesIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/users/$userId/edit': {
       id: '/users/$userId/edit'
       path: '/users/$userId/edit'
@@ -486,6 +539,13 @@ declare module '@tanstack/react-router' {
       path: '/projects/$projectId/edit'
       fullPath: '/projects/$projectId/edit'
       preLoaderRoute: typeof ProjectsProjectIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/data-sources/$id/edit': {
+      id: '/data-sources/$id/edit'
+      path: '/data-sources/$id/edit'
+      fullPath: '/data-sources/$id/edit'
+      preLoaderRoute: typeof DataSourcesIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/recipes/$recipeId/versions/': {
@@ -525,15 +585,18 @@ const rootRouteChildren: RootRouteChildren = {
   TagsRoute: TagsRoute,
   HelpHelpFileRoute: HelpHelpFileRoute,
   RecipesCreateRoute: RecipesCreateRoute,
+  DataSourcesIndexRoute: DataSourcesIndexRoute,
   HelpIndexRoute: HelpIndexRoute,
   ProjectsIndexRoute: ProjectsIndexRoute,
   RecipesIndexRoute: RecipesIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
   UsersIndexRoute: UsersIndexRoute,
+  DataSourcesIdEditRoute: DataSourcesIdEditRoute,
   ProjectsProjectIdEditRoute: ProjectsProjectIdEditRoute,
   RecipesRecipeIdEditRoute: RecipesRecipeIdEditRoute,
   SettingsPromptsPromptKeyRoute: SettingsPromptsPromptKeyRoute,
   UsersUserIdEditRoute: UsersUserIdEditRoute,
+  DataSourcesIdIndexRoute: DataSourcesIdIndexRoute,
   ProjectsProjectIdIndexRoute: ProjectsProjectIdIndexRoute,
   RecipesRecipeIdIndexRoute: RecipesRecipeIdIndexRoute,
   UsersUserIdIndexRoute: UsersUserIdIndexRoute,

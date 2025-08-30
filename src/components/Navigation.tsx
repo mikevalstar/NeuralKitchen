@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useAtom } from "jotai";
-import { Activity, BookOpen, FolderOpen, HelpCircle, Search, Settings, Tags, Users2 } from "lucide-react";
+import { Activity, BookOpen, Database, FolderOpen, HelpCircle, Search, Settings, Tags, Users2 } from "lucide-react";
 import { isWideLayoutAtom } from "~/lib/atoms/ui";
 import { UserAvatar } from "./UserAvatar";
 import { Button } from "./ui/button";
@@ -12,6 +12,7 @@ export function Navigation() {
     { href: "/recipes", label: "Recipes", icon: BookOpen },
     { href: "/search", label: "Search", icon: Search },
     { href: "/projects", label: "Projects", icon: FolderOpen },
+    { href: "/data-sources", label: "Data Sources", icon: Database },
     { href: "/tags", label: "Tags", icon: Tags },
     { href: "/users", label: "Users", icon: Users2 },
     { href: "/queue", label: "Queue", icon: Activity },

@@ -119,7 +119,22 @@ export const DataSourceInputSchema = z.object({
   syncIntervalMinutes: z.number().min(5).max(1440).default(60), // 5 min to 24 hours
   config: z.object({
     // Git specific
-    repositoryUrl: z.string().url().optional(),
+    repositoryUrl: z.string().refine((url) => {
+      // Allow HTTP/HTTPS URLs
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        try {
+          new URL(url);
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      // Allow SSH URLs (git@host:user/repo.git format)
+      const sshPattern = /^git@[^:]+:[^/]+\/[^/]+\.git$/;
+      return sshPattern.test(url);
+    }, {
+      message: "Must be a valid HTTP/HTTPS URL or SSH URL in format git@host:user/repo.git"
+    }).optional(),
     branch: z.string().default("main").optional(),
     // Extensible for other types
   }),

@@ -78,7 +78,7 @@ Neural Kitchen provides:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/mikevalstar/NeuralKitchen.git
+   git clone git@github.com:mikevalstar/NeuralKitchen.git
    cd NeuralKitchen
    ```
 
@@ -115,7 +115,7 @@ The application will be available at:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/mikevalstar/NeuralKitchen.git
+   git clone git@github.com:mikevalstar/NeuralKitchen.git
    cd NeuralKitchen
    ```
 
