@@ -171,6 +171,43 @@ The application will be available at:
 - `pnpm check` - Run linting and formatting
 - `pnpm db:studio` - Open database GUI
 
+### Logging System
+
+Neural Kitchen includes comprehensive structured logging using Pino:
+
+**Server-Side Logging** (Node.js environments):
+- **Component-specific logs**: Separate log files for different services
+  - `logs/combined.log` - All system logs
+  - `logs/app.log` - Web application logs  
+  - `logs/mcp.log` - MCP server operations
+  - `logs/background-tasks.log` - Queue processing and AI operations
+  - `logs/auth.log` - Authentication events
+  - `logs/database.log` - Database queries and performance
+
+**Client-Side Logging** (Browser):
+- Simple console logging with component prefixes (`[WEB]`, `[AUTH]`)
+- Structured error tracking for debugging
+
+**Environment Configuration**:
+```bash
+# In your .env file
+LOG_LEVEL=info                    # debug, info, warn, error
+LOG_DIR=./logs                   # Directory for log files
+LOG_TO_FILE=true                 # Enable file logging
+LOG_TO_CONSOLE=true              # Enable console output
+LOG_PRETTY_CONSOLE=true          # Pretty formatting in development
+```
+
+**Key Features**:
+- **Request correlation**: Track requests across components with unique IDs
+- **Performance timing**: Measure and log operation duration
+- **Error tracking**: Comprehensive error logging with stack traces
+- **Authentication events**: Login attempts, failures, and user actions
+- **AI operations**: Track summarization and embedding generation
+- **Database monitoring**: Slow query detection and connection logging
+
+Logs are structured as JSON for easy parsing and analysis in production environments.
+
 ### User Management
 - `pnpm user:add <email> <password> [name]` - Create a new admin user
 - `pnpm user:list` - List all users

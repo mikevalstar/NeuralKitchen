@@ -6,3 +6,5 @@ app/generated
 .claude
 .output
 .nitro
+logs/*.log
+logs/*.log.*

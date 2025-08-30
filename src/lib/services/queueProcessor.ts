@@ -1,6 +1,7 @@
 import { Queue } from "../data/queue";
 import { Recipes } from "../data/recipes";
 import { Settings } from "../data/settings";
+import { logger } from "../logger.js";
 
 export class QueueProcessor {
   private intervalId: NodeJS.Timeout | null = null;
@@ -14,23 +15,30 @@ export class QueueProcessor {
    */
   start() {
     if (this.intervalId) {
-      console.log("Queue processor is already running");
+      logger.tasks.warn("Queue processor start requested but already running", {
+        intervalMs: this.intervalMs,
+      });
       return;
     }
 
     // Check for required OpenAI API key setting
     if (!Settings.get("OPENAI_API_KEY")) {
-      console.error("OPENAI_API_KEY setting is not configured. Queue processor will not start.");
+      logger.tasks.error("OPENAI_API_KEY setting not configured, queue processor cannot start");
       return;
     }
 
-    console.log("Starting queue processor...");
+    logger.tasks.info("Queue processor starting", {
+      intervalMs: this.intervalMs,
+      intervalSeconds: this.intervalMs / 1000,
+    });
+
     this.intervalId = setInterval(() => {
       this.processNext();
     }, this.intervalMs);
 
     // Process immediately on start
     this.processNext();
+    logger.tasks.info("Queue processor started and processing first batch");
   }
 
   /**
@@ -38,9 +46,12 @@ export class QueueProcessor {
    */
   stop() {
     if (this.intervalId) {
+      logger.tasks.info("Stopping queue processor");
       clearInterval(this.intervalId);
       this.intervalId = null;
-      console.log("Queue processor stopped");
+      logger.tasks.info("Queue processor stopped successfully");
+    } else {
+      logger.tasks.debug("Queue processor stop requested but not running");
     }
   }
 
@@ -64,7 +75,12 @@ export class QueueProcessor {
         return;
       }
 
-      console.log(`Processing queue item: ${item.title} (${item.versionId})`);
+      logger.tasks.info("Processing queue item", {
+        queueItemId: item.id,
+        title: item.title,
+        versionId: item.versionId,
+        type: "recipe_processing",
+      });
 
       try {
         // Process the recipe version (generate AI summary and embedding)
@@ -72,15 +88,32 @@ export class QueueProcessor {
 
         // Mark the queue item as completed
         await Queue.markCompleted(item.id);
-        console.log(`Completed processing: ${item.title}`);
+        logger.tasks.info("Queue item processing completed", {
+          queueItemId: item.id,
+          title: item.title,
+          versionId: item.versionId,
+        });
       } catch (processError) {
-        console.error(`Failed to process queue item ${item.id}:`, processError);
         const errorMessage = processError instanceof Error ? processError.message : String(processError);
+
+        logger.tasks.error("Queue item processing failed", {
+          queueItemId: item.id,
+          title: item.title,
+          versionId: item.versionId,
+          error: errorMessage,
+          errorType: processError instanceof Error ? processError.constructor.name : "Unknown",
+        });
+
         await Queue.markFailed(item.id, errorMessage);
         throw processError;
       }
     } catch (error) {
-      console.error("Error processing queue item:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      logger.tasks.error("Unexpected error in queue processing cycle", {
+        error: errorMessage,
+        errorType: error instanceof Error ? error.constructor.name : "Unknown",
+      });
 
       // If we have an item reference, mark it as failed
       // This is a simplified error handling - in practice we'd want more robust retry logic
