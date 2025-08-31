@@ -138,7 +138,6 @@ export const userCreateSchema = z.object({
 
 export type UserCreateInput = z.infer<typeof userCreateSchema>;
 
-// User update validation schema
 // User validation schema
 export const userSchema = z.object({
   name: z.string().min(1, "User name is required").max(100, "User name must be less than 100 characters"),
@@ -147,6 +146,14 @@ export const userSchema = z.object({
 });
 
 export type UserInput = z.infer<typeof userSchema>;
+
+// User update validation schema (for updating existing users - no email field)
+export const userUpdateSchema = z.object({
+  name: z.string().min(1, "User name is required").max(100, "User name must be less than 100 characters"),
+  role: z.enum(["", "admin"]).optional(),
+});
+
+export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
 
 // User ID validation schema for server routes
 export const userIdSchema = z.object({

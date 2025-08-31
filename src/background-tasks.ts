@@ -23,10 +23,10 @@ async function main() {
     startupTimer.end({ success: true });
     logger.tasks.info("Background tasks processor started successfully");
   } catch (error) {
-    logger.tasks.error("Failed to start background tasks", {
+    logger.tasks.error({
       error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
-    });
+    }, "Failed to start background tasks");
     startupTimer.end({ success: false, error: error instanceof Error ? error.message : "Unknown error" });
     process.exit(1);
   }
