@@ -491,7 +491,7 @@ function EditDataSourcePage() {
                     </label>
                     <Select
                       value={field.state.value.toString()}
-                      onValueChange={(value) => field.handleChange(parseInt(value))}>
+                      onValueChange={(value) => field.handleChange(parseInt(value, 10))}>
                       <SelectTrigger className="w-full md:w-48">
                         <SelectValue />
                       </SelectTrigger>

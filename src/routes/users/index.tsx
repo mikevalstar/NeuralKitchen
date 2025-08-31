@@ -2,7 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Edit, Eye, EyeOff, Plus, Search, Users as UsersIcon } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { LazyUserAvatar } from "~/components/LazyUserAvatar";
 import { Button } from "~/components/ui/button";
@@ -52,6 +52,9 @@ function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const emailId = useId();
+  const passwordId = useId();
+  const nameId = useId();
 
   const form = useForm({
     defaultValues: {
@@ -141,11 +144,11 @@ function UsersPage() {
 
                     return (
                       <div className="space-y-2">
-                        <label htmlFor="email" className="text-sm font-medium">
+                        <label htmlFor={emailId} className="text-sm font-medium">
                           Email Address *
                         </label>
                         <Input
-                          id="email"
+                          id={emailId}
                           type="email"
                           placeholder="Enter email address..."
                           value={field.state.value}
@@ -186,12 +189,12 @@ function UsersPage() {
 
                     return (
                       <div className="space-y-2">
-                        <label htmlFor="password" className="text-sm font-medium">
+                        <label htmlFor={passwordId} className="text-sm font-medium">
                           Password *
                         </label>
                         <div className="relative">
                           <Input
-                            id="password"
+                            id={passwordId}
                             type={showPassword ? "text" : "password"}
                             placeholder="Enter password..."
                             value={field.state.value}
@@ -243,11 +246,11 @@ function UsersPage() {
 
                     return (
                       <div className="space-y-2">
-                        <label htmlFor="name" className="text-sm font-medium">
+                        <label htmlFor={nameId} className="text-sm font-medium">
                           Display Name (optional)
                         </label>
                         <Input
-                          id="name"
+                          id={nameId}
                           type="text"
                           placeholder="Enter display name..."
                           value={field.state.value || ""}

@@ -2,7 +2,7 @@ import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { Eye, EyeOff, Key, Save } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { toast } from "sonner";
 import {
   Breadcrumb,
@@ -82,6 +82,8 @@ function UserEdit() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const newPasswordId = useId();
+  const confirmPasswordId = useId();
 
   const form = useForm({
     defaultValues: {
@@ -317,13 +319,13 @@ function UserEdit() {
             }}>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
+                <Label htmlFor={newPasswordId}>New Password</Label>
                 <passwordForm.Field name="newPassword">
                   {(field) => (
                     <>
                       <div className="relative">
                         <Input
-                          id="newPassword"
+                          id={newPasswordId}
                           name={field.name}
                           type={showNewPassword ? "text" : "password"}
                           value={field.state.value}
@@ -351,13 +353,13 @@ function UserEdit() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Label htmlFor={confirmPasswordId}>Confirm New Password</Label>
                 <passwordForm.Field name="confirmPassword">
                   {(field) => (
                     <>
                       <div className="relative">
                         <Input
-                          id="confirmPassword"
+                          id={confirmPasswordId}
                           name={field.name}
                           type={showConfirmPassword ? "text" : "password"}
                           value={field.state.value}

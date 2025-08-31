@@ -9,7 +9,7 @@ export class QueueProcessor {
   private intervalId: NodeJS.Timeout | null = null;
   private isProcessing = false;
   private readonly intervalMs = process.env.QUEUE_PROCESSOR_INTERVAL_MS
-    ? parseInt(process.env.QUEUE_PROCESSOR_INTERVAL_MS)
+    ? parseInt(process.env.QUEUE_PROCESSOR_INTERVAL_MS, 10)
     : 5000; // 5 seconds default (fixed from 500000)
 
   /**
