@@ -27,7 +27,7 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "~/components/ui/tooltip";
-import type { Project, RecipeVersion, Tag } from "~/generated/prisma";
+import type { Project, RecipeVersion, Tag } from "~/generated/prisma/client";
 import { authMiddlewareEnsure } from "~/lib/auth-middleware";
 import { getUserDetails } from "~/lib/auth-server-user";
 import { Recipes } from "~/lib/data/recipes";
@@ -383,7 +383,7 @@ function SingleVersionView({
             <div>
               <h5 className="font-medium text-sm mb-2">Tags</h5>
               <div className="flex flex-wrap gap-1">
-                {version.tags.map((tag) => (
+                {version.tags.map((tag: Tag) => (
                   <span key={tag.id} className="px-2 py-1 bg-secondary text-secondary-foreground rounded text-xs">
                     {tag.name}
                   </span>
@@ -395,7 +395,7 @@ function SingleVersionView({
             <div>
               <h5 className="font-medium text-sm mb-2">Projects</h5>
               <div className="space-y-1">
-                {version.projects.map((project) => (
+                {version.projects.map((project: Project) => (
                   <div key={project.id} className="text-sm text-primary">
                     {project.title}
                   </div>

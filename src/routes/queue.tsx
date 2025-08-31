@@ -163,13 +163,19 @@ function QueuePage() {
                   className="flex items-center justify-between p-3 border border-destructive/20 rounded-lg bg-destructive/5">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <Link
-                        to="/recipes/$recipeId"
-                        params={{ recipeId: item.recipeVersion.recipe.id }}
-                        className="font-medium text-primary hover:underline">
-                        {item.recipeVersion.title}
-                      </Link>
-                      <span className="text-sm text-muted-foreground">(v{item.recipeVersion.versionNumber})</span>
+                      {item.recipeVersion ? (
+                        <>
+                          <Link
+                            to="/recipes/$recipeId"
+                            params={{ recipeId: item.recipeVersion.recipe.id }}
+                            className="font-medium text-primary hover:underline">
+                            {item.recipeVersion.title}
+                          </Link>
+                          <span className="text-sm text-muted-foreground">(v{item.recipeVersion.versionNumber})</span>
+                        </>
+                      ) : (
+                        <span className="font-medium text-muted-foreground">Unknown Recipe</span>
+                      )}
                     </div>
                     <div className="text-sm text-muted-foreground mt-1">Failed: {formatDateTime(item.updatedAt)}</div>
                     {item.error && (
@@ -212,13 +218,19 @@ function QueuePage() {
                   className="flex items-center justify-between p-3 border border-orange-200 rounded-lg bg-orange-50 dark:bg-orange-950/20 dark:border-orange-800">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <Link
-                        to="/recipes/$recipeId"
-                        params={{ recipeId: item.recipeVersion.recipe.id }}
-                        className="font-medium text-primary hover:underline">
-                        {item.recipeVersion.title}
-                      </Link>
-                      <span className="text-sm text-muted-foreground">(v{item.recipeVersion.versionNumber})</span>
+                      {item.recipeVersion ? (
+                        <>
+                          <Link
+                            to="/recipes/$recipeId"
+                            params={{ recipeId: item.recipeVersion.recipe.id }}
+                            className="font-medium text-primary hover:underline">
+                            {item.recipeVersion.title}
+                          </Link>
+                          <span className="text-sm text-muted-foreground">(v{item.recipeVersion.versionNumber})</span>
+                        </>
+                      ) : (
+                        <span className="font-medium text-muted-foreground">Unknown Recipe</span>
+                      )}
                     </div>
                     <div className="text-sm text-muted-foreground mt-1">Queued: {formatDateTime(item.createdAt)}</div>
                   </div>
@@ -251,13 +263,19 @@ function QueuePage() {
                   className="flex items-center justify-between p-3 border border-green-200 rounded-lg bg-green-50 dark:bg-green-950/20 dark:border-green-800">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2">
-                      <Link
-                        to="/recipes/$recipeId"
-                        params={{ recipeId: item.recipeVersion.recipe.id }}
-                        className="font-medium text-primary hover:underline">
-                        {item.recipeVersion.title}
-                      </Link>
-                      <span className="text-sm text-muted-foreground">(v{item.recipeVersion.versionNumber})</span>
+                      {item.recipeVersion ? (
+                        <>
+                          <Link
+                            to="/recipes/$recipeId"
+                            params={{ recipeId: item.recipeVersion.recipe.id }}
+                            className="font-medium text-primary hover:underline">
+                            {item.recipeVersion.title}
+                          </Link>
+                          <span className="text-sm text-muted-foreground">(v{item.recipeVersion.versionNumber})</span>
+                        </>
+                      ) : (
+                        <span className="font-medium text-muted-foreground">Unknown Recipe</span>
+                      )}
                     </div>
                     <div className="text-sm text-muted-foreground mt-1">
                       Completed: {formatDateTime(item.updatedAt)}
