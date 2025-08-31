@@ -208,6 +208,17 @@ export const dataSourceInputSchema = z.object({
 
 export type DataSourceInput = z.infer<typeof dataSourceInputSchema>;
 
+// Data source config types
+export interface GitDataSourceConfig {
+  repositoryUrl?: string;
+  branch?: string;
+}
+
+export interface DataSourceConfig extends GitDataSourceConfig {
+  // Extensible for other data source types
+  [key: string]: unknown;
+}
+
 // Data Source Project validation schema
 export const dataSourceProjectInputSchema = z.object({
   dataSourceId: z.string().min(1, "Data source ID is required"),

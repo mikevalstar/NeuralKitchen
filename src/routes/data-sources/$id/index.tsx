@@ -37,9 +37,11 @@ import {
   DialogTitle,
 } from "~/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "~/components/ui/table";
+import type { DataSourceProject, DataSourceSyncJob, Project } from "~/generated/prisma/client";
 import { authMiddlewareEnsure } from "~/lib/auth-middleware";
 import { getUserDetails } from "~/lib/auth-server-user";
 import { DataSourceSyncJobs, DataSources } from "~/lib/data/dataSources";
+import type { DataSourceConfig } from "~/lib/dataValidators";
 import { formatDateTime } from "~/lib/dateUtils";
 
 const dataSourceIdSchema = z.object({
@@ -56,7 +58,7 @@ const getDataSource = createServerFn({ method: "GET" })
     }
     return {
       ...dataSource,
-      config: dataSource.config as any,
+      config: dataSource.config as DataSourceConfig,
     };
   });
 
@@ -64,7 +66,7 @@ const deleteDataSource = createServerFn({ method: "POST" })
   .middleware([authMiddlewareEnsure])
   .validator((data: unknown) => dataSourceIdSchema.parse(data))
   .handler(async (ctx) => {
-    const result = await DataSources.deleteDataSource(ctx.data.id);
+    const _result = await DataSources.deleteDataSource(ctx.data.id);
     return { success: true };
   });
 
@@ -78,7 +80,7 @@ const triggerSync = createServerFn({ method: "POST" })
       ...result,
       dataSource: {
         ...result.dataSource,
-        config: result.dataSource.config as any,
+        config: result.dataSource.config as DataSourceConfig,
       },
     };
   });
@@ -158,7 +160,7 @@ function DataSourceDetailPage() {
 
   const syncStatus = getSyncStatus();
   const StatusIcon = syncStatus.icon;
-  const config = dataSource.config as Record<string, any>;
+  const config = dataSource.config as DataSourceConfig;
 
   return (
     <div className="space-y-6">
@@ -230,7 +232,7 @@ function DataSourceDetailPage() {
             )}
           </Button>
           <Button variant="outline" asChild>
-            <Link to={`/data-sources/${dataSource.id}/edit` as any}>
+            <Link to="/data-sources/$id/edit" params={{ id: dataSource.id }}>
               <Edit className="h-4 w-4 mr-2" />
               Edit
             </Link>
@@ -318,7 +320,7 @@ function DataSourceDetailPage() {
             <div className="flex items-center justify-between">
               <CardTitle>Linked Projects</CardTitle>
               <Button variant="outline" size="sm" asChild>
-                <Link to={`/data-sources/${dataSource.id}/projects` as any}>
+                <Link to="/data-sources/$id/projects" params={{ id: dataSource.id }}>
                   <Settings className="h-4 w-4 mr-2" />
                   Manage
                 </Link>
@@ -329,7 +331,7 @@ function DataSourceDetailPage() {
           <CardContent>
             {dataSource.projects && dataSource.projects.length > 0 ? (
               <div className="space-y-3">
-                {dataSource.projects.map((dsProject: any) => (
+                {dataSource.projects.map((dsProject: DataSourceProject & { project: Project }) => (
                   <div key={dsProject.id} className="flex items-center justify-between p-3 border rounded-lg">
                     <div>
                       <p className="font-medium">{dsProject.project.title}</p>
@@ -347,7 +349,7 @@ function DataSourceDetailPage() {
                         </Badge>
                       )}
                       <Button variant="ghost" size="sm" asChild>
-                        <Link to={`/projects/${dsProject.project.id}` as any}>
+                        <Link to="/projects/$projectId" params={{ projectId: dsProject.project.id }}>
                           <ExternalLink className="h-3 w-3" />
                         </Link>
                       </Button>
@@ -359,7 +361,9 @@ function DataSourceDetailPage() {
               <div className="text-center py-6">
                 <p className="text-muted-foreground mb-4">No projects linked yet</p>
                 <Button variant="outline" size="sm" asChild>
-                  <Link to={`/data-sources/${dataSource.id}/projects` as any}>Link Projects</Link>
+                  <Link to="/data-sources/$id/projects" params={{ id: dataSource.id }}>
+                    Link Projects
+                  </Link>
                 </Button>
               </div>
             )}
@@ -376,7 +380,9 @@ function DataSourceDetailPage() {
               <CardDescription>Recent synchronization jobs and their results</CardDescription>
             </div>
             <Button variant="outline" size="sm" asChild>
-              <Link to={`/data-sources/${dataSource.id}/history` as any}>View All History</Link>
+              <Link to="/data-sources/$id/history" params={{ id: dataSource.id }}>
+                View All History
+              </Link>
             </Button>
           </div>
         </CardHeader>
@@ -394,7 +400,7 @@ function DataSourceDetailPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {dataSource.syncJobs.map((job: any) => {
+                {dataSource.syncJobs.map((job: DataSourceSyncJob) => {
                   const duration = job.completedAt
                     ? Math.round((new Date(job.completedAt).getTime() - new Date(job.startedAt).getTime()) / 1000)
                     : null;

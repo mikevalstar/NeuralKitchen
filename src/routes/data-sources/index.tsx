@@ -10,16 +10,17 @@ import { Input } from "~/components/ui/input";
 import { authMiddlewareEnsure } from "~/lib/auth-middleware";
 import { getUserDetails } from "~/lib/auth-server-user";
 import { DataSources } from "~/lib/data/dataSources";
+import type { DataSourceConfig } from "~/lib/dataValidators";
 import { formatDateTime } from "~/lib/dateUtils";
 
 const getDataSources = createServerFn({ method: "GET" })
   .middleware([authMiddlewareEnsure])
   .handler(async () => {
     const dataSources = await DataSources.list();
-    // Cast config to any to avoid JSON serialization issues in TanStack
+    // Ensure config is properly typed for serialization
     return dataSources.map((ds) => ({
       ...ds,
-      config: ds.config as any,
+      config: ds.config as DataSourceConfig,
     }));
   });
 
@@ -52,7 +53,7 @@ function DataSourcesPage() {
       (ds) =>
         ds.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         ds.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (ds.config as Record<string, any>)?.repositoryUrl?.toLowerCase().includes(searchQuery.toLowerCase()),
+        (ds.config as DataSourceConfig)?.repositoryUrl?.toLowerCase().includes(searchQuery.toLowerCase()),
     );
   }, [dataSources, searchQuery]);
 
@@ -161,11 +162,11 @@ function DataSourcesPage() {
                 <CardContent className="pt-0">
                   <div className="space-y-4">
                     {/* Repository Info */}
-                    {dataSource.type === "git" && (dataSource.config as Record<string, any>)?.repositoryUrl && (
+                    {dataSource.type === "git" && (dataSource.config as DataSourceConfig)?.repositoryUrl && (
                       <div className="space-y-1">
                         <p className="text-sm font-medium">Repository</p>
                         <p className="text-xs text-muted-foreground font-mono break-all">
-                          {(dataSource.config as Record<string, any>).repositoryUrl}
+                          {(dataSource.config as DataSourceConfig).repositoryUrl}
                         </p>
                       </div>
                     )}
@@ -226,10 +227,14 @@ function DataSourcesPage() {
                     {/* Actions */}
                     <div className="flex gap-2 pt-2">
                       <Button variant="outline" size="sm" className="flex-1">
-                        <Link to={`/data-sources/${dataSource.id}` as any}>View Details</Link>
+                        <Link to="/data-sources/$id" params={{ id: dataSource.id }}>
+                          View Details
+                        </Link>
                       </Button>
                       <Button variant="outline" size="sm" className="flex-1">
-                        <Link to={`/data-sources/${dataSource.id}/edit` as any}>Edit</Link>
+                        <Link to="/data-sources/$id/edit" params={{ id: dataSource.id }}>
+                          Edit
+                        </Link>
                       </Button>
                     </div>
                   </div>

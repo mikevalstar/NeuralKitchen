@@ -222,9 +222,9 @@ function EditDataSourcePage() {
           toast.success("Data source created successfully!");
           router.navigate({ to: `/data-sources/${result.id}` });
         } else {
-          const updateResult = await updateDataSource({
+          const _updateResult = await updateDataSource({
             data: {
-              id: dataSource!.id,
+              id: dataSource?.id,
               dataSourceData: {
                 name: value.name,
                 type: value.type,
@@ -236,9 +236,9 @@ function EditDataSourcePage() {
               },
             },
           });
-          result = { id: dataSource!.id };
+          result = { id: dataSource?.id };
           toast.success("Data source updated successfully!");
-          router.navigate({ to: `/data-sources/${dataSource!.id}` });
+          router.navigate({ to: `/data-sources/${dataSource?.id}` });
         }
       } catch (error) {
         console.error(`Failed to ${isNew ? "create" : "update"} data source:`, error);

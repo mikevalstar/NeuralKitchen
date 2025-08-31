@@ -32,8 +32,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { authMiddlewareEnsure } from "~/lib/auth-middleware";
 import { getUserDetails } from "~/lib/auth-server-user";
 import { DataSourceProjects, DataSources } from "~/lib/data/dataSources";
-import { Projects } from "~/lib/data/projects";
-import { type DataSourceProjectInput, dataSourceProjectInputSchema } from "~/lib/dataValidators";
+import { type DataSourceConfig, type DataSourceProjectInput, dataSourceProjectInputSchema } from "~/lib/dataValidators";
 
 const dataSourceIdSchema = z.object({
   id: z.string().min(1, "Data source ID is required"),
@@ -54,7 +53,7 @@ const getDataSourceProjects = createServerFn({ method: "GET" })
     return {
       dataSource: {
         ...dataSource,
-        config: dataSource.config as Record<string, unknown>,
+        config: dataSource.config as DataSourceConfig,
       },
       linkedProjects,
       availableProjects,
@@ -92,7 +91,7 @@ const updateDataSourceProject = createServerFn({ method: "POST" })
         dataSource: result.dataSource
           ? {
               ...result.dataSource,
-              config: result.dataSource.config as Record<string, unknown>,
+              config: result.dataSource.config as DataSourceConfig,
             }
           : null,
       };
