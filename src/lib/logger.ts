@@ -86,7 +86,7 @@ class Logger {
   constructor() {
     this.config = getConfig();
 
-    const streams: pino.DestinationStream[] = [];
+    const streams: pino.StreamEntry[] = [];
 
     // Console transport
     if (this.config.toConsole) {
@@ -146,7 +146,7 @@ class Logger {
       if (logger) return logger;
     }
 
-    const streams: pino.DestinationStream[] = [];
+    const streams: pino.StreamEntry[] = [];
 
     // Console transport
     if (this.config.toConsole) {
