@@ -170,27 +170,27 @@ function EditDataSourcePage() {
   const router = useRouter();
   const { dataSource, availableProjects, isNew } = Route.useLoaderData();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [linkedProjects, setLinkedProjects] = useState((dataSource as any)?.projects || []);
+  const [linkedProjects, setLinkedProjects] = useState(dataSource?.projects || []);
   const [newProjectForm, setNewProjectForm] = useState<{
     projectId: string;
     includeGlobs: string;
     excludeGlobs: string;
   } | null>(null);
 
-  const config = (dataSource as any)?.config as DataSourceConfig | undefined;
+  const config = dataSource?.config as DataSourceConfig | undefined;
 
   const form = useForm({
     defaultValues: {
-      name: (dataSource as any)?.name || "",
-      type: ((dataSource as any)?.type as "git" | "confluence") || "git",
-      syncIntervalMinutes: (dataSource as any)?.syncIntervalMinutes || 60,
+      name: dataSource?.name || "",
+      type: (dataSource?.type as "git" | "confluence") || "git",
+      syncIntervalMinutes: dataSource?.syncIntervalMinutes || 60,
       config: {
         repositoryUrl: config?.repositoryUrl || "",
         branch: config?.branch || "main",
       },
-      sshPrivateKey: (dataSource as any)?.sshPrivateKey || "",
-      sshPublicKey: (dataSource as any)?.sshPublicKey || "",
-      isActive: (dataSource as any)?.isActive ?? true,
+      sshPrivateKey: dataSource?.sshPrivateKey || "",
+      sshPublicKey: dataSource?.sshPublicKey || "",
+      isActive: dataSource?.isActive ?? true,
     },
     validators: {
       onChange: ({ value }) => {
@@ -236,7 +236,7 @@ function EditDataSourcePage() {
               },
             },
           });
-          result = { id: dataSource?.id! };
+          result = { id: dataSource?.id || "" };
           toast.success("Data source updated successfully!");
           router.navigate({ to: `/data-sources/${dataSource?.id}` });
         }
@@ -263,7 +263,7 @@ function EditDataSourcePage() {
         },
       });
 
-      setLinkedProjects((prev: any[]) => [...prev, result]);
+      setLinkedProjects((prev) => [...prev, result]);
       setNewProjectForm(null);
       toast.success("Project linked successfully!");
     } catch (error) {
@@ -288,7 +288,7 @@ function EditDataSourcePage() {
         },
       });
 
-      setLinkedProjects((prev: any[]) => prev.map((p: any) => (p.id === projectLinkId ? result : p)));
+      setLinkedProjects((prev) => prev.map((p) => (p.id === projectLinkId ? result : p)));
       toast.success("Project settings updated!");
     } catch (error) {
       console.error("Failed to update project:", error);
@@ -299,7 +299,7 @@ function EditDataSourcePage() {
   const handleRemoveProject = async (projectLinkId: string) => {
     try {
       await deleteDataSourceProject({ data: { id: projectLinkId } });
-      setLinkedProjects((prev: any[]) => prev.filter((p: any) => p.id !== projectLinkId));
+      setLinkedProjects((prev) => prev.filter((p) => p.id !== projectLinkId));
       toast.success("Project unlinked successfully!");
     } catch (error) {
       console.error("Failed to unlink project:", error);
@@ -611,7 +611,7 @@ function EditDataSourcePage() {
               {linkedProjects.length > 0 && (
                 <div className="space-y-3">
                   <h4 className="font-medium">Linked Projects</h4>
-                  {linkedProjects.map((projectLink: any) => (
+                  {linkedProjects.map((projectLink) => (
                     <div key={projectLink.id} className="border rounded-lg p-4 space-y-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
