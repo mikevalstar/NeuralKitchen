@@ -4,25 +4,26 @@ import { getSession } from "./auth-client";
 import { logger } from "./logger.js";
 
 export const authMiddleware = createMiddleware({ type: "function" }).server(async ({ next }) => {
-  const headers = getHeaders();
-  const { data: session } = await getSession({ fetchOptions: { headers: headers as HeadersInit } });
+  const rawHeaders = getHeaders();
+  const headers = new Headers(rawHeaders as HeadersInit);
+  const { data: session } = await getSession({ fetchOptions: { headers: rawHeaders as HeadersInit } });
 
   // Log authentication context with safe header access
-  const userAgent = headers && typeof headers.get === "function" ? headers.get("user-agent") : "unknown";
-  const requestUrl = headers && typeof headers.get === "function" ? headers.get("request-url") : "unknown";
+  const userAgent = headers.get("user-agent") || "unknown";
+  const requestUrl = headers.get("request-url") || "unknown";
 
   if (session?.user?.id) {
-    logger.auth.debug("User authenticated", {
+    logger.auth.debug({
       userId: session.user.id,
       email: session.user.email,
       role: session.user.role,
       userAgent,
-    });
+    }, "User authenticated");
   } else {
-    logger.auth.debug("Anonymous request", {
+    logger.auth.debug({
       userAgent,
       url: requestUrl,
-    });
+    }, "Anonymous request");
   }
 
   return await next({
@@ -38,31 +39,32 @@ export const authMiddleware = createMiddleware({ type: "function" }).server(asyn
 });
 
 export const authMiddlewareEnsure = createMiddleware({ type: "function" }).server(async ({ next }) => {
-  const headers = getHeaders();
-  const { data: session } = await getSession({ fetchOptions: { headers: headers as HeadersInit } });
+  const rawHeaders = getHeaders();
+  const headers = new Headers(rawHeaders as HeadersInit);
+  const { data: session } = await getSession({ fetchOptions: { headers: rawHeaders as HeadersInit } });
 
   // Safe header access
-  const userAgent = headers && typeof headers.get === "function" ? headers.get("user-agent") : "unknown";
-  const requestUrl = headers && typeof headers.get === "function" ? headers.get("request-url") : "unknown";
-  const forwardedFor = headers && typeof headers.get === "function" ? headers.get("x-forwarded-for") : null;
-  const realIp = headers && typeof headers.get === "function" ? headers.get("x-real-ip") : null;
+  const userAgent = headers.get("user-agent") || "unknown";
+  const requestUrl = headers.get("request-url") || "unknown";
+  const forwardedFor = headers.get("x-forwarded-for");
+  const realIp = headers.get("x-real-ip");
   const ip = forwardedFor || realIp || "unknown";
 
   if (!session?.user?.id) {
-    logger.auth.warn("Authentication required but user not authenticated", {
+    logger.auth.warn({
       userAgent,
       url: requestUrl,
       ip,
-    });
+    }, "Authentication required but user not authenticated");
     throw new Error("User not authenticated");
   }
 
-  logger.auth.debug("User authentication enforced", {
+  logger.auth.debug({
     userId: session.user.id,
     email: session.user.email,
     role: session.user.role,
     userAgent,
-  });
+  }, "User authentication enforced");
 
   return await next({
     context: {
