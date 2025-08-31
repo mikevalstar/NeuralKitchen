@@ -13,17 +13,23 @@ export const authMiddleware = createMiddleware({ type: "function" }).server(asyn
   const requestUrl = headers.get("request-url") || "unknown";
 
   if (session?.user?.id) {
-    logger.auth.debug({
-      userId: session.user.id,
-      email: session.user.email,
-      role: session.user.role,
-      userAgent,
-    }, "User authenticated");
+    logger.auth.debug(
+      {
+        userId: session.user.id,
+        email: session.user.email,
+        role: session.user.role,
+        userAgent,
+      },
+      "User authenticated",
+    );
   } else {
-    logger.auth.debug({
-      userAgent,
-      url: requestUrl,
-    }, "Anonymous request");
+    logger.auth.debug(
+      {
+        userAgent,
+        url: requestUrl,
+      },
+      "Anonymous request",
+    );
   }
 
   return await next({
@@ -51,20 +57,26 @@ export const authMiddlewareEnsure = createMiddleware({ type: "function" }).serve
   const ip = forwardedFor || realIp || "unknown";
 
   if (!session?.user?.id) {
-    logger.auth.warn({
-      userAgent,
-      url: requestUrl,
-      ip,
-    }, "Authentication required but user not authenticated");
+    logger.auth.warn(
+      {
+        userAgent,
+        url: requestUrl,
+        ip,
+      },
+      "Authentication required but user not authenticated",
+    );
     throw new Error("User not authenticated");
   }
 
-  logger.auth.debug({
-    userId: session.user.id,
-    email: session.user.email,
-    role: session.user.role,
-    userAgent,
-  }, "User authentication enforced");
+  logger.auth.debug(
+    {
+      userId: session.user.id,
+      email: session.user.email,
+      role: session.user.role,
+      userAgent,
+    },
+    "User authentication enforced",
+  );
 
   return await next({
     context: {

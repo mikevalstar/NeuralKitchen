@@ -53,7 +53,7 @@ const getDataSourceProjects = createServerFn({ method: "GET" })
     return {
       dataSource: {
         ...dataSource,
-        config: dataSource.config as DataSourceConfig,
+        config: dataSource.config as { [x: string]: {}; repositoryUrl?: string; branch?: string; },
       },
       linkedProjects,
       availableProjects,
@@ -91,7 +91,7 @@ const updateDataSourceProject = createServerFn({ method: "POST" })
         dataSource: result.dataSource
           ? {
               ...result.dataSource,
-              config: result.dataSource.config as DataSourceConfig,
+              config: result.dataSource.config as { [x: string]: {}; repositoryUrl?: string; branch?: string; },
             }
           : null,
       };
@@ -237,11 +237,15 @@ function DataSourceProjectsPage() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <Link to="/data-sources" className="transition-colors hover:text-foreground">Data Sources</Link>
+            <Link to="/data-sources" className="transition-colors hover:text-foreground">
+              Data Sources
+            </Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <Link to={`/data-sources/${dataSource.id}`} className="transition-colors hover:text-foreground">{dataSource.name}</Link>
+            <Link to={`/data-sources/${dataSource.id}`} className="transition-colors hover:text-foreground">
+              {dataSource.name}
+            </Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
@@ -400,7 +404,7 @@ function DataSourceProjectsPage() {
                       </SelectContent>
                     </Select>
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]}</p>
+                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
                     )}
                   </div>
                 )}
@@ -424,7 +428,7 @@ function DataSourceProjectsPage() {
                       rows={3}
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]}</p>
+                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-1">
                       Glob patterns for files to include. One pattern per line.
@@ -447,7 +451,7 @@ function DataSourceProjectsPage() {
                       rows={3}
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]}</p>
+                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-1">
                       Glob patterns for files to exclude. One pattern per line.
@@ -510,7 +514,7 @@ function DataSourceProjectsPage() {
                       rows={3}
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]}</p>
+                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
                     )}
                   </div>
                 )}
@@ -530,7 +534,7 @@ function DataSourceProjectsPage() {
                       rows={3}
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]}</p>
+                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
                     )}
                   </div>
                 )}

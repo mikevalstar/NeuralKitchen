@@ -60,11 +60,14 @@ export namespace AIService {
     const timer = logger.createTimer("tasks", "ai_generate_embedding");
     const requestId = logger.generateRequestId();
 
-    logger.tasks.info({
-      requestId,
-      textLength: text.length,
-      model: "text-embedding-3-small",
-    }, "Starting embedding generation");
+    logger.tasks.info(
+      {
+        requestId,
+        textLength: text.length,
+        model: "text-embedding-3-small",
+      },
+      "Starting embedding generation",
+    );
 
     try {
       const client = getOpenAIClient();
@@ -74,12 +77,15 @@ export namespace AIService {
       const wasTruncated = truncatedText.length !== text.length;
 
       if (wasTruncated) {
-        logger.tasks.warn({
-          requestId,
-          originalLength: text.length,
-          truncatedLength: truncatedText.length,
-          estimatedTokens: estimateTokens(truncatedText),
-        }, "Text truncated for embedding");
+        logger.tasks.warn(
+          {
+            requestId,
+            originalLength: text.length,
+            truncatedLength: truncatedText.length,
+            estimatedTokens: estimateTokens(truncatedText),
+          },
+          "Text truncated for embedding",
+        );
       }
 
       const { embedding } = await embed({
@@ -93,24 +99,30 @@ export namespace AIService {
       }
 
       const duration = timer.end();
-      logger.tasks.info({
-        requestId,
-        embeddingDimensions: embedding.length,
-        duration,
-        wasTruncated,
-      }, "Embedding generation completed");
+      logger.tasks.info(
+        {
+          requestId,
+          embeddingDimensions: embedding.length,
+          duration,
+          wasTruncated,
+        },
+        "Embedding generation completed",
+      );
 
       return embedding;
     } catch (error) {
       const duration = timer.end();
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
-      logger.tasks.error({
-        requestId,
-        error: errorMessage,
-        duration,
-        textLength: text.length,
-      }, "Embedding generation failed");
+      logger.tasks.error(
+        {
+          requestId,
+          error: errorMessage,
+          duration,
+          textLength: text.length,
+        },
+        "Embedding generation failed",
+      );
 
       throw new Error(`Failed to generate embedding: ${errorMessage}`);
     }
@@ -123,12 +135,15 @@ export namespace AIService {
     const timer = logger.createTimer("tasks", "ai_summarize_recipe");
     const requestId = logger.generateRequestId();
 
-    logger.tasks.info({
-      requestId,
-      title,
-      contentLength: content.length,
-      model: "gpt-4o-mini",
-    }, "Starting recipe summarization");
+    logger.tasks.info(
+      {
+        requestId,
+        title,
+        contentLength: content.length,
+        model: "gpt-4o-mini",
+      },
+      "Starting recipe summarization",
+    );
 
     try {
       const client = getOpenAIClient();
@@ -143,11 +158,14 @@ export namespace AIService {
       // Replace placeholders in user prompt
       const userPrompt = userPromptTemplate.replace("{title}", title).replace("{content}", content);
 
-      logger.tasks.debug({
-        requestId,
-        systemPromptLength: systemPrompt.length,
-        userPromptLength: userPrompt.length,
-      }, "Prompts prepared");
+      logger.tasks.debug(
+        {
+          requestId,
+          systemPromptLength: systemPrompt.length,
+          userPromptLength: userPrompt.length,
+        },
+        "Prompts prepared",
+      );
 
       const { text } = await generateText({
         model: client("gpt-4o-mini"),
@@ -165,25 +183,31 @@ export namespace AIService {
       const summary = text.trim();
       const duration = timer.end();
 
-      logger.tasks.info({
-        requestId,
-        title,
-        summaryLength: summary.length,
-        duration,
-      }, "Recipe summarization completed");
+      logger.tasks.info(
+        {
+          requestId,
+          title,
+          summaryLength: summary.length,
+          duration,
+        },
+        "Recipe summarization completed",
+      );
 
       return summary;
     } catch (error) {
       const duration = timer.end();
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
 
-      logger.tasks.error({
-        requestId,
-        title,
-        error: errorMessage,
-        duration,
-        contentLength: content.length,
-      }, "Recipe summarization failed");
+      logger.tasks.error(
+        {
+          requestId,
+          title,
+          error: errorMessage,
+          duration,
+          contentLength: content.length,
+        },
+        "Recipe summarization failed",
+      );
 
       throw new Error(`Failed to summarize recipe: ${errorMessage}`);
     }

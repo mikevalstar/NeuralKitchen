@@ -143,7 +143,9 @@ function RecipeCreate() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <Link to="/recipes" className="transition-colors hover:text-foreground">Recipes</Link>
+              <Link to="/recipes" className="transition-colors hover:text-foreground">
+                Recipes
+              </Link>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
