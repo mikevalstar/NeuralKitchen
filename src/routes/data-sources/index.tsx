@@ -162,15 +162,14 @@ function DataSourcesPage() {
                 <CardContent className="pt-0">
                   <div className="space-y-4">
                     {/* Repository Info */}
-                    {dataSource.type === "git" &&
-                      (dataSource.config as DataSourceConfig)?.repositoryUrl && (
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium">Repository</p>
-                          <p className="text-xs text-muted-foreground font-mono break-all">
-                            {(dataSource.config as DataSourceConfig).repositoryUrl}
-                          </p>
-                        </div>
-                      )}
+                    {dataSource.type === "git" && (dataSource.config as DataSourceConfig)?.repositoryUrl && (
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium">Repository</p>
+                        <p className="text-xs text-muted-foreground font-mono break-all">
+                          {(dataSource.config as DataSourceConfig).repositoryUrl}
+                        </p>
+                      </div>
+                    )}
 
                     {/* Project Count */}
                     <div className="space-y-1">
