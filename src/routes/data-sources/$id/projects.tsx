@@ -1,7 +1,6 @@
 import { useForm } from "@tanstack/react-form";
 import { createFileRoute, Link, redirect, useRouter } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { zodValidator } from "@tanstack/zod-form-adapter";
 import { Check, ExternalLink, Loader2, Plus, Settings, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -11,7 +10,6 @@ import { Badge } from "~/components/ui/badge";
 import {
   Breadcrumb,
   BreadcrumbItem,
-  BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
