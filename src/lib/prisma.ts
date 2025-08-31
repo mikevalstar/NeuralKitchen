@@ -28,52 +28,52 @@ prisma.$on("query", (e) => {
   const isSlowQuery = duration > 1000; // Log queries slower than 1 second as warnings
 
   if (isSlowQuery) {
-    logger.db.warn("Slow database query detected", {
+    logger.db.warn({
       query: e.query,
       params: e.params,
       duration,
       target: e.target,
       timestamp: e.timestamp,
-    });
+    }, "Slow database query detected");
   } else {
-    logger.db.debug("Database query executed", {
+    logger.db.debug({
       query: e.query,
       params: e.params,
       duration,
       target: e.target,
       timestamp: e.timestamp,
-    });
+    }, "Database query executed");
   }
 });
 
 prisma.$on("error", (e) => {
-  logger.db.error("Database error", {
+  logger.db.error({
     message: e.message,
     target: e.target,
     timestamp: e.timestamp,
-  });
+  }, "Database error");
 });
 
 prisma.$on("info", (e) => {
-  logger.db.info("Database info", {
+  logger.db.info({
     message: e.message,
     target: e.target,
     timestamp: e.timestamp,
-  });
+  }, "Database info");
 });
 
 prisma.$on("warn", (e) => {
-  logger.db.warn("Database warning", {
+  logger.db.warn({
     message: e.message,
     target: e.target,
     timestamp: e.timestamp,
-  });
+  }, "Database warning");
 });
 
 // Add connection monitoring
-logger.db.info("Prisma client initialized", {
+logger.db.info({
   accelerateEnabled: true,
   logLevels: ["query", "error", "info", "warn"],
-});
+}, "Prisma client initialized");
 
 export default prisma;
