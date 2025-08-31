@@ -168,9 +168,7 @@ function DataSourceDetailPage() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/data-sources">Data Sources</Link>
-            </BreadcrumbLink>
+            <Link to="/data-sources" className="transition-colors hover:text-foreground">Data Sources</Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

@@ -237,15 +237,11 @@ function DataSourceProjectsPage() {
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to="/data-sources">Data Sources</Link>
-            </BreadcrumbLink>
+            <Link to="/data-sources" className="transition-colors hover:text-foreground">Data Sources</Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <BreadcrumbLink asChild>
-              <Link to={`/data-sources/${dataSource.id}`}>{dataSource.name}</Link>
-            </BreadcrumbLink>
+            <Link to={`/data-sources/${dataSource.id}`} className="transition-colors hover:text-foreground">{dataSource.name}</Link>
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>

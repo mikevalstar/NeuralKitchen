@@ -166,7 +166,7 @@ function PromptEditPage() {
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center space-x-4">
-        <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/settings/" })}>
+        <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/settings" })}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Settings
         </Button>
@@ -280,7 +280,7 @@ function PromptEditPage() {
                   )}
                 </div>
                 <div className="flex space-x-2">
-                  <Button type="button" variant="outline" onClick={() => navigate({ to: "/settings/" })}>
+                  <Button type="button" variant="outline" onClick={() => navigate({ to: "/settings" })}>
                     Cancel
                   </Button>
                   <Button type="submit" disabled={form.state.isSubmitting}>

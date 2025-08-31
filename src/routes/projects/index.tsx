@@ -57,8 +57,8 @@ function ProjectsPage() {
     defaultValues: {
       title: "",
       shortId: "",
-      description: undefined as string | undefined,
-    },
+      description: undefined,
+    } as { title: string; shortId: string; description?: string },
     validators: {
       onChange: projectSchema,
     },

@@ -15,7 +15,7 @@ export const projectSchema = z.object({
     .min(1, "Project ID is required")
     .max(50, "Project ID must be less than 50 characters")
     .regex(/^[a-zA-Z0-9_-]+$/, "Project ID can only contain letters, numbers, hyphens, and underscores"),
-  description: z.union([z.string().max(300, "Project description must be less than 300 characters"), z.undefined()]),
+  description: z.string().max(300, "Project description must be less than 300 characters").optional(),
 });
 
 export type ProjectInput = z.infer<typeof projectSchema>;
