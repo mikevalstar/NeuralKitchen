@@ -20,6 +20,7 @@
     "format:fix": "biome format --write .",
     "check": "biome check .",
     "check:fix": "biome check --write .",
+    "type-check": "tsc --noEmit",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:pull": "prisma db pull",

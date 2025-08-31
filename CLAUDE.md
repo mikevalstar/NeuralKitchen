@@ -17,7 +17,7 @@ The developer is always running the project with `pnpm dev` so you don't have to
 If you feel like we are making a mistake in design or how something is being implemented, stop and ask the user to confirm. Be cautious.
 
 ## Current Plan
-The file `PROJECT_PLAN.md` hs the current project plan, and is useful to reference. 
+The file `PROJECT_PLAN.md` has the current project plan, and is useful to reference.
 
 ## Development Commands
 
@@ -38,6 +38,7 @@ The file `PROJECT_PLAN.md` hs the current project plan, and is useful to referen
 - `pnpm format:fix` - Format code with Biome
 - `pnpm check` - Run all Biome checks (lint + format)
 - `pnpm check:fix` - Run all Biome checks with auto-fix
+- `pnpm type-check` - Run TypeScript type checking (run after code changes)
 
 ### Database Operations
 - `pnpm db:generate` - Generate Prisma client
@@ -51,6 +52,8 @@ The file `PROJECT_PLAN.md` hs the current project plan, and is useful to referen
 = `pnpx prisma db pull` - Pull the latest db from the server
 
 When modifying the database, please use `pnpx prisma migrate dev --name {name_here}` to generate a new migration, so we keep the migrations in sync with the server.
+
+IMPORTANT: After making changes to the project, before you are done, run `pnpm check` to ensure code quality and formatting are up to standard and `pnpm type-check` to ensure type safety.
 
 ## Architecture
 
@@ -236,8 +239,8 @@ import { useSession, getSession } from "~/lib/auth-client";
 const { data: session, isPending } = useSession();
 
 // Server-side session retrieval
-const { data: session } = await getSession({ 
-  fetchOptions: { headers: getHeaders() as HeadersInit } 
+const { data: session } = await getSession({
+  fetchOptions: { headers: getHeaders() as HeadersInit }
 });
 
 // Session data structure
@@ -292,12 +295,12 @@ await admin.updateUser({
 // Component with authentication state
 function MyComponent() {
   const { data: session, isPending } = useSession();
-  
+
   if (isPending) return <LoadingSpinner />;
   if (!session) return <LoginPrompt />;
-  
+
   const isAdmin = session.user?.role === "admin";
-  
+
   return (
     <div>
       <p>Welcome, {session.user.name}!</p>
