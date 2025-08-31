@@ -7,11 +7,11 @@ export const ServerRoute = createServerFileRoute("/api/logout").methods({
     const userAgent = request.headers.get("user-agent") || "unknown";
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
 
-    logger.auth.info("Logout request initiated (GET)", {
+    logger.auth.info({
       userAgent,
       ip,
       method: "GET",
-    });
+    }, "Logout request initiated (GET)");
 
     try {
       // Call better-auth signOut API
@@ -19,11 +19,11 @@ export const ServerRoute = createServerFileRoute("/api/logout").methods({
         headers: request.headers,
       });
 
-      logger.auth.info("Logout successful (GET)", {
+      logger.auth.info({
         userAgent,
         ip,
         redirectTo: "/login",
-      });
+      }, "Logout successful (GET)");
 
       // Redirect to login page after successful logout
       return new Response(null, {
@@ -34,11 +34,11 @@ export const ServerRoute = createServerFileRoute("/api/logout").methods({
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      logger.auth.error("Logout error (GET)", {
+      logger.auth.error({
         userAgent,
         ip,
         error: errorMessage,
-      });
+      }, "Logout error (GET)");
       console.error("Logout error:", error);
       // Even if there's an error, redirect to login page
       return new Response(null, {
@@ -53,11 +53,11 @@ export const ServerRoute = createServerFileRoute("/api/logout").methods({
     const userAgent = request.headers.get("user-agent") || "unknown";
     const ip = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
 
-    logger.auth.info("Logout request initiated (POST)", {
+    logger.auth.info({
       userAgent,
       ip,
       method: "POST",
-    });
+    }, "Logout request initiated (POST)");
 
     try {
       // Call better-auth signOut API
@@ -65,10 +65,10 @@ export const ServerRoute = createServerFileRoute("/api/logout").methods({
         headers: request.headers,
       });
 
-      logger.auth.info("Logout successful (POST)", {
+      logger.auth.info({
         userAgent,
         ip,
-      });
+      }, "Logout successful (POST)");
 
       // Return JSON response for POST requests
       return new Response(JSON.stringify({ success: true }), {
@@ -79,11 +79,11 @@ export const ServerRoute = createServerFileRoute("/api/logout").methods({
       });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      logger.auth.error("Logout error (POST)", {
+      logger.auth.error({
         userAgent,
         ip,
         error: errorMessage,
-      });
+      }, "Logout error (POST)");
       console.error("Logout error:", error);
       return new Response(JSON.stringify({ success: false, error: "Logout failed" }), {
         status: 500,
