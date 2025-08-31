@@ -163,15 +163,11 @@ function DataSourcesPage() {
                   <div className="space-y-4">
                     {/* Repository Info */}
                     {dataSource.type === "git" &&
-                      (dataSource.config as { [x: string]: {}; repositoryUrl?: string; branch?: string })
-                        ?.repositoryUrl && (
+                      (dataSource.config as DataSourceConfig)?.repositoryUrl && (
                         <div className="space-y-1">
                           <p className="text-sm font-medium">Repository</p>
                           <p className="text-xs text-muted-foreground font-mono break-all">
-                            {
-                              (dataSource.config as { [x: string]: {}; repositoryUrl?: string; branch?: string })
-                                .repositoryUrl
-                            }
+                            {(dataSource.config as DataSourceConfig).repositoryUrl}
                           </p>
                         </div>
                       )}

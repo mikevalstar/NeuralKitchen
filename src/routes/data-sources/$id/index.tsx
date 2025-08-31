@@ -379,10 +379,8 @@ function DataSourceDetailPage() {
               <CardTitle>Sync History</CardTitle>
               <CardDescription>Recent synchronization jobs and their results</CardDescription>
             </div>
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/data-sources/$id/history" params={{ id: dataSource.id }}>
-                View All History
-              </Link>
+            <Button variant="outline" size="sm" disabled>
+              View All History
             </Button>
           </div>
         </CardHeader>

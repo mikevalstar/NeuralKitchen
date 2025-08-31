@@ -66,7 +66,15 @@ const createDataSourceProject = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     try {
       const result = await DataSourceProjects.create(data, context.user.id);
-      return result;
+      return {
+        ...result,
+        dataSource: result.dataSource
+          ? {
+              ...result.dataSource,
+              config: result.dataSource.config as DataSourceConfig,
+            }
+          : null,
+      };
     } catch (error) {
       console.error("DataSourceProject creation error:", error);
       throw error;
