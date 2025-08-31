@@ -53,7 +53,7 @@ const getDataSourceProjects = createServerFn({ method: "GET" })
     return {
       dataSource: {
         ...dataSource,
-        config: dataSource.config as { [x: string]: {}; repositoryUrl?: string; branch?: string; },
+        config: dataSource.config as DataSourceConfig,
       },
       linkedProjects,
       availableProjects,
@@ -91,7 +91,7 @@ const updateDataSourceProject = createServerFn({ method: "POST" })
         dataSource: result.dataSource
           ? {
               ...result.dataSource,
-              config: result.dataSource.config as { [x: string]: {}; repositoryUrl?: string; branch?: string; },
+              config: result.dataSource.config as DataSourceConfig,
             }
           : null,
       };
@@ -145,7 +145,6 @@ function DataSourceProjectsPage() {
       excludeGlobs: "",
       isActive: true,
     } as Omit<DataSourceProjectInput, "dataSourceId">,
-    validatorAdapter: zodValidator(),
     onSubmit: async ({ value }) => {
       try {
         await createDataSourceProject({
@@ -173,7 +172,6 @@ function DataSourceProjectsPage() {
       excludeGlobs: "",
       isActive: true,
     } as Partial<DataSourceProjectInput>,
-    validatorAdapter: zodValidator(),
     validators: {
       onChange: dataSourceProjectInputSchema.partial(),
     },
@@ -243,7 +241,10 @@ function DataSourceProjectsPage() {
           </BreadcrumbItem>
           <BreadcrumbSeparator />
           <BreadcrumbItem>
-            <Link to={`/data-sources/${dataSource.id}`} className="transition-colors hover:text-foreground">
+            <Link
+              to="/data-sources/$id"
+              params={{ id: dataSource.id }}
+              className="transition-colors hover:text-foreground">
               {dataSource.name}
             </Link>
           </BreadcrumbItem>
@@ -312,7 +313,7 @@ function DataSourceProjectsPage() {
                   </div>
                   <div className="flex items-center gap-2 ml-4">
                     <Button variant="ghost" size="sm" asChild>
-                      <Link to={`/projects/${dsProject.project.id}`}>
+                      <Link to="/projects/$projectId" params={{ projectId: dsProject.project.id }}>
                         <ExternalLink className="h-4 w-4" />
                       </Link>
                     </Button>
@@ -404,7 +405,7 @@ function DataSourceProjectsPage() {
                       </SelectContent>
                     </Select>
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
+                      <p className="text-sm text-destructive mt-1">{String(field.state.meta.errors[0])}</p>
                     )}
                   </div>
                 )}
@@ -428,7 +429,7 @@ function DataSourceProjectsPage() {
                       rows={3}
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
+                      <p className="text-sm text-destructive mt-1">{String(field.state.meta.errors[0])}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-1">
                       Glob patterns for files to include. One pattern per line.
@@ -451,7 +452,7 @@ function DataSourceProjectsPage() {
                       rows={3}
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
+                      <p className="text-sm text-destructive mt-1">{String(field.state.meta.errors[0])}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-1">
                       Glob patterns for files to exclude. One pattern per line.
@@ -514,7 +515,7 @@ function DataSourceProjectsPage() {
                       rows={3}
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
+                      <p className="text-sm text-destructive mt-1">{String(field.state.meta.errors[0])}</p>
                     )}
                   </div>
                 )}
@@ -534,7 +535,7 @@ function DataSourceProjectsPage() {
                       rows={3}
                     />
                     {field.state.meta.errors.length > 0 && (
-                      <p className="text-sm text-destructive mt-1">{field.state.meta.errors[0]?.message || String(field.state.meta.errors[0])}</p>
+                      <p className="text-sm text-destructive mt-1">{String(field.state.meta.errors[0])}</p>
                     )}
                   </div>
                 )}

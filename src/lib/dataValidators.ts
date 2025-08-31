@@ -221,9 +221,10 @@ export interface GitDataSourceConfig {
   branch?: string;
 }
 
-export interface DataSourceConfig extends GitDataSourceConfig {
-  // Extensible for other data source types
-  [key: string]: unknown;
+export interface DataSourceConfig {
+  repositoryUrl?: string;
+  branch?: string;
+  [x: string]: string | number | boolean | object | undefined;
 }
 
 // Data Source Project validation schema
