@@ -12,6 +12,16 @@
 
 Neural Kitchen helps developers create and organize structured guidance for AI agents working on software projects. Think of it as a knowledge base that captures institutional knowledge, coding patterns, and step-by-step workflows that AI agents can follow.
 
+## Project Status
+
+Development on Neural Kitchen has stopped.
+
+In practice, the emerging **skills** model has delivered most of what this project was originally intended to do: package structured guidance, workflows, and project-specific context for AI agents in a more portable and usable format.
+
+This project will likely restart in a different form, focused more directly on distributing skills. That next step is coming soon.
+
+If you want background on what skills are and why they matter, see [agentskills.io](https://agentskills.io/home).
+
 ## Screenshots
 
 <div align="center">
@@ -47,9 +57,9 @@ Neural Kitchen provides:
 
 ## Current Status
 
-🚧 **Early Development** - This project is just getting started!
+This project is no longer under active development.
 
-**Implemented:**
+**What it proved out:**
 - Basic recipe/version management system
 - Tag organization
 - Project grouping
@@ -57,12 +67,10 @@ Neural Kitchen provides:
 - MCP server integration for AI agent access
 - Project specific MCP endpoints
 
-**Planned:**
-- Rich recipe templates and examples
-- Advanced search and filtering
-- Recipe validation
-- Recipe auto generation
-- Recipe review tools
+**What changed:**
+- Skills now cover most of the original goal more effectively
+- Future work is expected to focus on skill distribution rather than continuing this codebase directly
+- More details on that direction are coming soon
 
 ## Tech Stack
 
